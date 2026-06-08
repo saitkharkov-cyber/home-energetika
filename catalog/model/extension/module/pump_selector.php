@@ -74,9 +74,14 @@ class ModelExtensionModulePumpSelector extends Model {
 
 		$total_well_depth_m = $this->toFloat($this->getValue($input, 'total_well_depth_m', 0));
 		$water_level_mode = $this->getValue($input, 'water_level_mode', 'unknown');
+		$user_water_level = null;
+		$dynamic_level_safety_margin = 0;
 
 		if ($water_level_mode == 'known') {
-			$water_level = $this->toFloat($this->getValue($input, 'water_level_m', 0));
+			$user_water_level = $this->toFloat($this->getValue($input, 'water_level_m', 0));
+			$dynamic_level_safety_margin = min(5, max(0, ($total_well_depth_m - $user_water_level) / 2));
+			$water_level = $user_water_level + $dynamic_level_safety_margin;
+			$warnings[] = 'Указанный уровень воды используется как ориентировочный. В расчет добавлен запас на возможное снижение уровня воды при работе насоса. Точный подбор требует данных по динамическому уровню и дебиту скважины.';
 		} else {
 			$water_level = $total_well_depth_m * 0.7;
 			$warnings[] = 'Уровень воды неизвестен, поэтому расчет выполнен в оценочном режиме: рабочий уровень принят как 70% от общей глубины скважины. Результат является предварительным и требует подтверждения специалистом.';
@@ -137,6 +142,9 @@ class ModelExtensionModulePumpSelector extends Model {
 			'debug'                 => array(
 				'calculation_summary' => array(
 					'water_level'            => round($water_level, 2),
+					'user_water_level'       => ($user_water_level !== null) ? round($user_water_level, 2) : null,
+					'dynamic_level_safety_margin' => round($dynamic_level_safety_margin, 2),
+					'effective_water_level'  => round($water_level, 2),
 					'required_pressure'      => $required_pressure,
 					'vertical_lift'          => round($vertical_lift, 2),
 					'pipe_losses'            => round($pipe_losses, 2),
@@ -151,10 +159,19 @@ class ModelExtensionModulePumpSelector extends Model {
 
 	public function getRecommendedProducts($requirements) {
 		$products = array();
+		$best_price_product = $this->getBestPriceProduct($requirements);
+		$best_price_product_id = 0;
+
+		if ($best_price_product && isset($best_price_product['product_id'])) {
+			$best_price_product_id = (int)$best_price_product['product_id'];
+		}
+
+		$optimal_product = $this->getOptimalProduct($requirements, $best_price_product_id);
+
 		$candidates = array(
-			$this->getBestPriceProduct($requirements),
-			$this->getOptimalProduct($requirements),
-			$this->getPremiumProduct($requirements)
+			$best_price_product,
+			$optimal_product,
+			$this->getPremiumProduct($requirements, $optimal_product, $best_price_product_id)
 		);
 
 		foreach ($candidates as $candidate) {
@@ -196,10 +213,11 @@ class ModelExtensionModulePumpSelector extends Model {
 		return $this->fetchProduct($sql);
 	}
 
-	public function getOptimalProduct($requirements) {
+	public function getOptimalProduct($requirements, $excluded_product_id = 0) {
 		$where = $this->buildProductWhere($requirements, false);
 		$required_head_m = (float)$requirements['required_head_m'];
 		$required_flow_l_min = (float)$requirements['required_flow_l_min'];
+		$head_reserve_expression = "(psp.max_head_m - " . $required_head_m . ")";
 		$total_reserve_expression = "((psp.max_head_m - " . $required_head_m . ") + (psp.max_flow_l_min - " . $required_flow_l_min . "))";
 
 		$sql = "SELECT 'optimal_choice' AS result_type, psp.product_id, pd.name, psp.max_head_m, psp.max_flow_l_min, psp.pump_diameter_mm, psp.voltage, psp.brand_priority,";
@@ -211,6 +229,54 @@ class ModelExtensionModulePumpSelector extends Model {
 		$sql .= " INNER JOIN " . DB_PREFIX . "product p ON p.product_id = psp.product_id";
 		$sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON pd.product_id = p.product_id AND pd.language_id = " . (int)$this->config->get('config_language_id');
 		$sql .= " WHERE " . implode(" AND ", $where);
+		$sql .= " AND " . $head_reserve_expression . " >= 5";
+		$sql .= " AND " . $head_reserve_expression . " <= 15";
+		$sql .= " AND " . $total_reserve_expression . " <= 30";
+		if ((int)$excluded_product_id > 0) {
+			$sql .= " AND psp.product_id <> " . (int)$excluded_product_id;
+		}
+		$sql .= " ORDER BY p.price ASC, " . $head_reserve_expression . " ASC, " . $total_reserve_expression . " ASC, psp.product_id ASC";
+		$sql .= " LIMIT 1";
+
+		$product = $this->fetchProduct($sql);
+
+		if ($product) {
+			return $product;
+		}
+
+		$sql = "SELECT 'optimal_choice' AS result_type, psp.product_id, pd.name, psp.max_head_m, psp.max_flow_l_min, psp.pump_diameter_mm, psp.voltage, psp.brand_priority,";
+		$sql .= " (psp.max_head_m - " . $required_head_m . ") AS head_reserve,";
+		$sql .= " (psp.max_flow_l_min - " . $required_flow_l_min . ") AS flow_reserve,";
+		$sql .= " " . $total_reserve_expression . " AS total_reserve,";
+		$sql .= " p.price";
+		$sql .= " FROM " . DB_PREFIX . "pump_selector_product psp";
+		$sql .= " INNER JOIN " . DB_PREFIX . "product p ON p.product_id = psp.product_id";
+		$sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON pd.product_id = p.product_id AND pd.language_id = " . (int)$this->config->get('config_language_id');
+		$sql .= " WHERE " . implode(" AND ", $where);
+		$sql .= " AND " . $total_reserve_expression . " >= 10";
+		$sql .= " AND " . $total_reserve_expression . " <= 30";
+		if ((int)$excluded_product_id > 0) {
+			$sql .= " AND psp.product_id <> " . (int)$excluded_product_id;
+		}
+		$sql .= " ORDER BY p.price ASC, " . $total_reserve_expression . " ASC, psp.product_id ASC";
+		$sql .= " LIMIT 1";
+
+		$product = $this->fetchProduct($sql);
+
+		if ($product) {
+			return $product;
+		}
+
+		$sql = "SELECT 'optimal_choice' AS result_type, psp.product_id, pd.name, psp.max_head_m, psp.max_flow_l_min, psp.pump_diameter_mm, psp.voltage, psp.brand_priority,";
+		$sql .= " (psp.max_head_m - " . $required_head_m . ") AS head_reserve,";
+		$sql .= " (psp.max_flow_l_min - " . $required_flow_l_min . ") AS flow_reserve,";
+		$sql .= " " . $total_reserve_expression . " AS total_reserve,";
+		$sql .= " p.price";
+		$sql .= " FROM " . DB_PREFIX . "pump_selector_product psp";
+		$sql .= " INNER JOIN " . DB_PREFIX . "product p ON p.product_id = psp.product_id";
+		$sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON pd.product_id = p.product_id AND pd.language_id = " . (int)$this->config->get('config_language_id');
+		$sql .= " WHERE " . implode(" AND ", $where);
+		$sql .= " AND " . $total_reserve_expression . " >= 10";
 		$sql .= " AND " . $total_reserve_expression . " <= 30";
 		$sql .= " ORDER BY p.price ASC, " . $total_reserve_expression . " ASC, psp.product_id ASC";
 		$sql .= " LIMIT 1";
@@ -236,19 +302,66 @@ class ModelExtensionModulePumpSelector extends Model {
 		return $this->fetchProduct($sql);
 	}
 
-	public function getPremiumProduct($requirements) {
+	public function getPremiumProduct($requirements, $optimal_product = null, $best_price_product_id = 0) {
+		if (!$optimal_product || !isset($optimal_product['product_id'])) {
+			return null;
+		}
+
 		$where = $this->buildProductWhere($requirements, true);
+		$required_head_m = (float)$requirements['required_head_m'];
+		$required_flow_l_min = (float)$requirements['required_flow_l_min'];
+		$head_reserve_expression = "(psp.max_head_m - " . $required_head_m . ")";
+		$flow_reserve_expression = "(psp.max_flow_l_min - " . $required_flow_l_min . ")";
+		$total_reserve_expression = "(" . $head_reserve_expression . " + " . $flow_reserve_expression . ")";
+		$optimal_product_id = (int)$optimal_product['product_id'];
+		$optimal_max_head_m = (float)$optimal_product['max_head_m'];
+		$optimal_max_flow_l_min = (float)$optimal_product['max_flow_l_min'];
 
 		$sql = "SELECT 'premium' AS result_type, psp.product_id, pd.name, psp.max_head_m, psp.max_flow_l_min, psp.pump_diameter_mm, psp.voltage, psp.brand_priority,";
-		$sql .= " (psp.max_head_m - " . (float)$requirements['required_head_m'] . ") AS head_reserve,";
-		$sql .= " (psp.max_flow_l_min - " . (float)$requirements['required_flow_l_min'] . ") AS flow_reserve,";
-		$sql .= " ((psp.max_head_m - " . (float)$requirements['required_head_m'] . ") + (psp.max_flow_l_min - " . (float)$requirements['required_flow_l_min'] . ")) AS total_reserve,";
+		$sql .= " " . $head_reserve_expression . " AS head_reserve,";
+		$sql .= " " . $flow_reserve_expression . " AS flow_reserve,";
+		$sql .= " " . $total_reserve_expression . " AS total_reserve,";
 		$sql .= " p.price";
 		$sql .= " FROM " . DB_PREFIX . "pump_selector_product psp";
 		$sql .= " INNER JOIN " . DB_PREFIX . "product p ON p.product_id = psp.product_id";
 		$sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON pd.product_id = p.product_id AND pd.language_id = " . (int)$this->config->get('config_language_id');
 		$sql .= " WHERE " . implode(" AND ", $where);
-		$sql .= " ORDER BY psp.brand_priority DESC, ((psp.max_head_m - " . (float)$requirements['required_head_m'] . ") + (psp.max_flow_l_min - " . (float)$requirements['required_flow_l_min'] . ")) ASC, p.price ASC, psp.product_id ASC";
+		$sql .= " AND " . $head_reserve_expression . " >= 10";
+		$sql .= " AND " . $head_reserve_expression . " <= 25";
+		$sql .= " AND " . $total_reserve_expression . " <= 50";
+		$sql .= " AND psp.max_head_m >= " . $optimal_max_head_m;
+		$sql .= " AND psp.max_flow_l_min >= " . $optimal_max_flow_l_min;
+		$sql .= " AND (psp.max_head_m > " . $optimal_max_head_m . " OR psp.max_flow_l_min > " . $optimal_max_flow_l_min . ")";
+		$sql .= " AND psp.product_id <> " . $optimal_product_id;
+		if ((int)$best_price_product_id > 0) {
+			$sql .= " AND psp.product_id <> " . (int)$best_price_product_id;
+		}
+		$sql .= " ORDER BY psp.brand_priority DESC, " . $head_reserve_expression . " ASC, " . $total_reserve_expression . " ASC, p.price ASC, psp.product_id ASC";
+		$sql .= " LIMIT 1";
+
+		$product = $this->fetchProduct($sql);
+
+		if ($product) {
+			return $product;
+		}
+
+		$sql = "SELECT 'premium' AS result_type, psp.product_id, pd.name, psp.max_head_m, psp.max_flow_l_min, psp.pump_diameter_mm, psp.voltage, psp.brand_priority,";
+		$sql .= " " . $head_reserve_expression . " AS head_reserve,";
+		$sql .= " " . $flow_reserve_expression . " AS flow_reserve,";
+		$sql .= " " . $total_reserve_expression . " AS total_reserve,";
+		$sql .= " p.price";
+		$sql .= " FROM " . DB_PREFIX . "pump_selector_product psp";
+		$sql .= " INNER JOIN " . DB_PREFIX . "product p ON p.product_id = psp.product_id";
+		$sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON pd.product_id = p.product_id AND pd.language_id = " . (int)$this->config->get('config_language_id');
+		$sql .= " WHERE " . implode(" AND ", $where);
+		$sql .= " AND " . $head_reserve_expression . " >= 10";
+		$sql .= " AND " . $head_reserve_expression . " <= 25";
+		$sql .= " AND " . $total_reserve_expression . " <= 50";
+		$sql .= " AND psp.max_head_m >= " . $optimal_max_head_m;
+		$sql .= " AND psp.max_flow_l_min >= " . $optimal_max_flow_l_min;
+		$sql .= " AND (psp.max_head_m > " . $optimal_max_head_m . " OR psp.max_flow_l_min > " . $optimal_max_flow_l_min . ")";
+		$sql .= " AND psp.product_id <> " . $optimal_product_id;
+		$sql .= " ORDER BY psp.brand_priority DESC, " . $head_reserve_expression . " ASC, " . $total_reserve_expression . " ASC, p.price ASC, psp.product_id ASC";
 		$sql .= " LIMIT 1";
 
 		return $this->fetchProduct($sql);
