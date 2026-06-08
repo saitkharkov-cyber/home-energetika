@@ -1,0 +1,6 @@
+/system/storage/cache/
+/system/storage/logs/
+/image/cache/
+/config.php
+/admin/config.php
+*.log
