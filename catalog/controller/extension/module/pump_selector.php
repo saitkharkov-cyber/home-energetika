@@ -17,6 +17,11 @@ class ControllerExtensionModulePumpSelector extends Controller {
 		$data['input'] = $this->getDefaultInput();
 
 		if (isset($this->request->server['REQUEST_METHOD']) && $this->request->server['REQUEST_METHOD'] == 'POST') {
+			if (!empty($this->request->post['website'])) {
+				$this->response->redirect($this->url->link('extension/module/pump_selector'));
+				return;
+			}
+			
 			$data['submitted'] = true;
 			$input = $this->buildInputFromPost();
 			$data['input'] = $input;

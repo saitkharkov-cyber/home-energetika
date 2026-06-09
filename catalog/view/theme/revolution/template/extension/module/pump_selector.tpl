@@ -176,7 +176,8 @@
 					font-size: 18px;
 					border-radius: 6px;
 				}
-				.btn-primary.btn-pump-selector-submit .fa.fa-search{
+				.btn-primary.btn-pump-selector-submit .fa.fa-search,
+				.btn-primary.btn-pump-selector-submit .fa.fa-spinner.fa-spin{
 					position: relative;
 					left: -15px 
 				}
@@ -334,9 +335,34 @@
 .pump-selector-submit[disabled] {
     pointer-events: none;
 }
+.pump-selector-hp {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+}
+.pump-selector-js-errors {
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    border: 1px solid #f0c2c2;
+    border-radius: 6px;
+    background: #fff5f5;
+    color: #9f1c1c;
+    font-size: 14px;
+}
 
-
-
+.pump-selector-js-errors ul {
+    margin: 0;
+    padding-left: 18px;
+}
+.pump-selector-page .form-control.is-disabled,
+.pump-selector-page input[disabled] {
+    background: #f3f4f6;
+    color: #98a2b3;
+    cursor: not-allowed;
+}
 
 				.pump-selector-consultation {
 				margin-top: 24px;
@@ -441,13 +467,18 @@
 					<?php } ?>
 					
 					<form action="<?php echo $action; ?>" method="post">
+						<div class="pump-selector-js-errors" id="pump-selector-js-errors" style="display: none;"></div>
+						<div class="pump-selector-hp">
+						  <label>Не заполняйте это поле</label>
+						  <input type="text" name="website" value="" autocomplete="off" tabindex="-1" />
+						</div>
 						<div class="pump-selector-form-grid">
 							<div class="pump-selector-form-section">
 								<h3><span class="title-icon"><img class="title-icon-image" src="/catalog/view/theme/revolution/image/pump.webp" alt="title icon"></span><span class="title-text">Данные скважины</span></h3>
 								
 								<div class="form-group">
-									<label class="control-label" for="input-total-well-depth">Глубина скважины, м</label>
-									<input type="text" name="total_well_depth_m" value="<?php echo htmlspecialchars($input['total_well_depth_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-total-well-depth" class="form-control" />
+									<label class="control-label " for="input-total-well-depth">Глубина скважины, м</label>
+									<input type="text" name="total_well_depth_m" value="<?php echo htmlspecialchars($input['total_well_depth_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-total-well-depth" class="form-control  pump-selector-number" />
 								</div>
 								
 								<div class="form-group">
@@ -462,12 +493,12 @@
 								
 								<div class="form-group">
 									<label class="control-label" for="input-water-level">Уровень воды, м</label>
-									<input type="text" name="water_level_m" value="<?php echo htmlspecialchars($input['water_level_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-water-level" class="form-control" />
+									<input type="text" name="water_level_m" value="<?php echo htmlspecialchars($input['water_level_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-water-level" class="form-control  pump-selector-number" />
 								</div>
 								
 								<div class="form-group">
 									<label class="control-label" for="input-distance">Расстояние до дома, м</label>
-									<input type="text" name="distance_to_house_m" value="<?php echo htmlspecialchars($input['distance_to_house_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-distance" class="form-control" />
+									<input type="text" name="distance_to_house_m" value="<?php echo htmlspecialchars($input['distance_to_house_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-distance" class="form-control  pump-selector-number" />
 								</div>
 							</div>
 							
@@ -486,7 +517,7 @@
 								
 								<div class="form-group">
 									<label class="control-label" for="input-custom-lift">Высота, м</label>
-									<input type="text" name="custom_vertical_lift_m" value="<?php echo htmlspecialchars($input['custom_vertical_lift_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-custom-lift" class="form-control" />
+									<input type="text" name="custom_vertical_lift_m" value="<?php echo htmlspecialchars($input['custom_vertical_lift_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-custom-lift" class="form-control pump-selector-number" />
 								</div>
 								
 								<div class="form-group">
@@ -541,7 +572,7 @@
 								
 								<div class="form-group">
 									<label class="control-label" for="input-casing-diameter">Диаметр, мм</label>
-									<input type="text" name="casing_diameter_mm" value="<?php echo htmlspecialchars($input['casing_diameter_mm'], ENT_QUOTES, 'UTF-8'); ?>" id="input-casing-diameter" class="form-control" />
+									<input type="text" name="casing_diameter_mm" value="<?php echo htmlspecialchars($input['casing_diameter_mm'], ENT_QUOTES, 'UTF-8'); ?>" id="input-casing-diameter" class="form-control pump-selector-number" />
 								</div>
 								
 								<div class="form-group">
@@ -759,14 +790,84 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function () {
-    var form = document.querySelector('.pump-selector-page form');
-    var submit = document.getElementById('pump-selector-submit');
+    var form = document.getElementById('pump-selector-form');
 
-    if (!form || !submit) {
+    if (!form) {
+        form = document.querySelector('.pump-selector-page form');
+    }
+
+    var submit = document.getElementById('pump-selector-submit');
+    var errorsBox = document.getElementById('pump-selector-js-errors');
+
+    if (!form) {
         return;
     }
 
-    form.addEventListener('submit', function () {
+    function getField(name) {
+        return form.querySelector('[name="' + name + '"]');
+    }
+
+    function getCheckedValue(name) {
+        var checked = form.querySelector('[name="' + name + '"]:checked');
+        return checked ? checked.value : '';
+    }
+
+    function getCheckedCount(name) {
+        return form.querySelectorAll('[name="' + name + '"]:checked').length;
+    }
+
+    function isEmpty(field) {
+        return !field || !field.value || field.value.replace(/\s+/g, '') === '';
+    }
+
+    function isPositiveNumber(field) {
+        if (isEmpty(field)) {
+            return false;
+        }
+
+        var value = field.value.replace(',', '.');
+        var number = parseFloat(value);
+
+        return !isNaN(number) && number > 0;
+    }
+
+    function showErrors(errors) {
+        if (!errorsBox) {
+            alert(errors.join("\n"));
+            return;
+        }
+
+        var html = '<ul>';
+
+        for (var i = 0; i < errors.length; i++) {
+            html += '<li>' + errors[i] + '</li>';
+        }
+
+        html += '</ul>';
+
+        errorsBox.innerHTML = html;
+        errorsBox.style.display = 'block';
+
+        if (errorsBox.scrollIntoView) {
+            errorsBox.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+    }
+
+    function clearErrors() {
+        if (errorsBox) {
+            errorsBox.innerHTML = '';
+            errorsBox.style.display = 'none';
+        }
+    }
+
+    function startLoading() {
+        if (!submit) {
+            return;
+        }
+
         var text = submit.querySelector('.pump-selector-submit-text');
         var loading = submit.querySelector('.pump-selector-submit-loading');
 
@@ -780,7 +881,111 @@ document.addEventListener('DOMContentLoaded', function () {
         if (loading) {
             loading.style.display = 'inline-block';
         }
+    }
+
+    form.addEventListener('submit', function (event) {
+        var errors = [];
+
+        clearErrors();
+
+        var totalWellDepth = getField('total_well_depth_m');
+        var distanceToHouse = getField('distance_to_house_m');
+        var waterLevelMode = getCheckedValue('water_level_mode');
+        var waterLevel = getField('water_level_m');
+        var casingDiameterMode = getCheckedValue('casing_diameter_mode');
+        var casingDiameter = getField('casing_diameter_mm');
+
+        if (!isPositiveNumber(totalWellDepth)) {
+            errors.push('Укажите глубину скважины.');
+        }
+
+        if (waterLevelMode === 'known' && !isPositiveNumber(waterLevel)) {
+            errors.push('Укажите уровень воды или выберите “Не знаю”.');
+        }
+
+        if (!isPositiveNumber(distanceToHouse)) {
+            errors.push('Укажите расстояние до дома.');
+        }
+
+        if (getCheckedCount('water_points[]') === 0) {
+            errors.push('Выберите хотя бы одну точку расхода воды.');
+        }
+
+        if (casingDiameterMode === 'known' && !isPositiveNumber(casingDiameter)) {
+            errors.push('Укажите диаметр обсадной трубы или выберите “Не знаю”.');
+        }
+
+        if (errors.length > 0) {
+            event.preventDefault();
+            showErrors(errors);
+            return false;
+        }
+
+        startLoading();
     });
+});
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function () {
+    function toggleKnownField(radioName, knownValue, inputName) {
+        var radios = document.querySelectorAll('input[name="' + radioName + '"]');
+        var input = document.querySelector('input[name="' + inputName + '"]');
+
+        if (!radios.length || !input) {
+            return;
+        }
+
+        function update() {
+            var checked = document.querySelector('input[name="' + radioName + '"]:checked');
+
+            if (!checked) {
+                return;
+            }
+
+            if (checked.value === knownValue) {
+                input.disabled = false;
+                input.classList.remove('is-disabled');
+            } else {
+                input.value = '';
+                input.disabled = true;
+                input.classList.add('is-disabled');
+            }
+        }
+
+        for (var i = 0; i < radios.length; i++) {
+            radios[i].addEventListener('change', update);
+        }
+
+        update();
+    }
+
+    toggleKnownField('water_level_mode', 'known', 'water_level_m');
+    toggleKnownField('casing_diameter_mode', 'known', 'casing_diameter_mm');
+});
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function () {
+    var numberFields = document.querySelectorAll('.pump-selector-number');
+
+    for (var i = 0; i < numberFields.length; i++) {
+        numberFields[i].addEventListener('input', function () {
+            var value = this.value;
+
+            // Оставляем только цифры, точку и запятую
+            value = value.replace(/[^0-9.,]/g, '');
+
+            // Оставляем только один десятичный разделитель
+            var firstSeparator = value.search(/[.,]/);
+
+            if (firstSeparator !== -1) {
+                var before = value.substring(0, firstSeparator + 1);
+                var after = value.substring(firstSeparator + 1).replace(/[.,]/g, '');
+                value = before + after;
+            }
+
+            this.value = value;
+        });
+    }
 });
 </script>
 			<?php echo $content_bottom; ?>
