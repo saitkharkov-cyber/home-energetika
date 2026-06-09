@@ -1,0 +1,790 @@
+<?php echo $header; ?>
+<div class="container">
+	<ul class="breadcrumb">
+		<?php foreach ($breadcrumbs as $breadcrumb) { ?>
+			<li><a href="<?php echo $breadcrumb['href']; ?>"><?php echo $breadcrumb['text']; ?></a></li>
+		<?php } ?>
+	</ul>
+	<div class="row">
+		<div id="content" class="col-sm-12">
+			<?php echo $content_top; ?>
+			
+			<style>
+				:root{
+					--accent-color: #0157c0;
+				}
+				.pump-selector-page {
+				/* max-width: 1180px; */
+				margin: 0 auto;
+				}
+				.pump-selector-intro {
+				margin-bottom: 18px;
+				}
+				.pump-selector-form-panel {
+				margin-bottom: 28px;
+				padding: 15px;
+				background: #f6f8fb;
+				border-radius: 4px;
+				}
+				.pump-selector-form-panel.collapsed {
+				display: none;
+				}
+				.pump-selector-summary {
+				margin-bottom: 24px;
+				padding: 16px 18px;
+				background: #f7f7f7;
+				border: 1px solid #e5e5e5;
+				border-radius: 4px;
+				}
+				.pump-selector-summary h3 {
+				margin-top: 0;
+				margin-bottom: 12px;
+				}
+				.pump-selector-summary-list {
+				margin: 0 0 12px 0;
+				padding: 0;
+				list-style: none;
+				color: #555;
+				}
+				.pump-selector-summary-list li {
+				display: inline-block;
+				margin: 0 18px 8px 0;
+				}
+				.pump-selector-page h1{
+				font-size: 24px;
+				font-weight: 600;
+				margin-top: 0;
+				}
+				.pump-selector-summary-list strong {
+				color: #333;
+				}
+				.pump-selector-form-grid {
+				display: flex;
+				flex-wrap: nowrap;
+				gap: 20px;
+				}
+				.pump-selector-form-section {
+					padding-left: 25px;
+					padding-right: 25px;
+					border: 1px solid #e7e7e7;
+					border-radius: 15px;
+					flex: 1 0 32%;
+					max-width: 32.5%;
+					background: #fff;
+				}
+				.pump-selector-form-section h3 {
+				margin-top: 0;
+				margin-bottom: 14px;
+				font-size: 18px;
+				display: flex;
+				align-items: center;
+				justify-content: flex-start;
+				}
+				.pump-selector-form-section h3 .title-text{
+					font-size: 17px!important;
+					color: #000;
+					font-weight: 600;
+				}
+				.pump-selector-form-section h3 .title-icon{
+				padding-right: 15px;
+				}
+				.pump-selector-form-section .form-group {
+				margin-left: 0;
+				margin-right: 0;
+				margin-bottom: 14px;
+				}
+				.pump-selector-form-section .control-label {
+				display: block;
+				margin-bottom: 5px;
+				padding-top: 0;
+				text-align: left;
+				font-weight: 600;
+				}
+				.pump-selector-form-section input[type="text"],
+				.pump-selector-form-section select.form-control{					
+					border-color: #cfd7e2;
+					height: 38px;
+					border-radius: 6px;
+				}
+				.pump-selector-form-section .checkbox,
+				.pump-selector-form-section .radio-inline {
+				margin-top: 0;
+				}
+				.pump-selector-actions {
+				margin-top: 0;
+				padding-top: 14px;
+				text-align: right;
+				}
+				.pump-selector-empty-result {
+				margin-top: 20px;
+				padding: 20px;
+				background: #f7f7f7;
+				border: 1px solid #e5e5e5;
+				border-radius: 4px;
+				color: #555;
+				}
+				.pump-selector-results {
+				margin-top: 20px;
+				}
+				.pump-selector-results .product-thumb {
+				position: relative;
+				min-height: 100%;
+				}
+				.pump-selector-badges {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				z-index: 2;
+				}
+				.pump-selector-badges .label {
+				display: inline-block;
+				margin: 0 4px 4px 0;
+				padding: 6px 8px;
+				font-size: 12px;
+				}
+				.pump-selector-specs {
+				margin: 10px 15px;
+				padding: 10px;
+				color: #fff;
+				background: #17384d;
+				border-radius: 4px;
+				overflow: hidden;
+				}
+				.pump-selector-specs .spec-item {
+				float: left;
+				width: 50%;
+				font-size: 12px;
+				line-height: 1.3;
+				}
+				.pump-selector-specs .spec-value {
+				display: block;
+				font-size: 14px;
+				font-weight: bold;
+				}
+				.pump-selector-debug {
+				margin-top: 10px;
+				color: #777;
+				font-size: 12px;
+				line-height: 1.5;
+				}
+				.pump-selector-after-results {
+				margin-top: 24px;
+				}
+				.btn-primary.btn-pump-selector-submit{
+					background: #0157c0;
+					padding: 10px 25px 10px 45px;
+					font-size: 18px;
+					border-radius: 6px;
+				}
+				.btn-primary.btn-pump-selector-submit .fa.fa-search{
+					position: relative;
+					left: -15px 
+				}
+				.pump-selector-form-section input[type="radio"]:checked::after, 
+				.pump-selector-form-section .radio-inline input[type="radio"]:checked::after {
+					background: var(--accent-color);
+				}
+				.pump-selector-form-section input[type="radio"]:checked,
+				.pump-selector-form-section .radio-inline input[type="radio"]:checked{
+					border-color: var(--accent-color);
+				}
+				.pump-selector-form-section input[type="checkbox"]:checked::after,
+				.pump-selector-form-section .checkbox input[type="checkbox"]:checked::after,
+				.pump-selector-form-section .checkbox-inline input[type="checkbox"]:checked::after {
+					border-right: 2px solid;
+					border-top: 2px solid;
+					border-color: var(--accent-color);
+				}
+				.pump-selector-help-box {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #e1e7ef;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.pump-selector-help-box strong {
+    display: inline;
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.pump-selector-help-box div {
+    display: inline;
+    color: #475467;
+}
+
+.pump-selector-help-link {
+    display: block;
+    margin-top: 5px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+.pump-selector-empty-result {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: #fff;
+    border: 1px dashed #cfd7e2;
+    border-radius: 8px;
+    color: #667085;
+}
+
+.pump-selector-scheme {
+    margin: 18px 0 22px;
+    border: 1px solid #dce6f2;
+    border-radius: 8px;
+    background: #f8fbff;
+    overflow: hidden;
+}
+
+.pump-selector-scheme-toggle {
+    width: 100%;
+    padding: 14px 18px;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.pump-selector-scheme-toggle:before {
+    content: "?";
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent-color, #0157c0);
+    color: #fff;
+    font-weight: 700;
+    line-height: 30px;
+    text-align: center;
+}
+
+.pump-selector-scheme-title {
+    font-weight: 700;
+    color: #111827;
+    margin-right: auto;
+}
+
+.pump-selector-scheme-text {
+    color: var(--accent-color, #0157c0);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pump-selector-scheme-body {
+    padding: 0 18px 18px;
+}
+
+.pump-selector-scheme-image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    border: 1px solid #e1e7ef;
+    background: #fff;
+}
+
+@media (max-width: 767px) {
+    .pump-selector-scheme-toggle {
+        align-items: flex-start;
+        flex-direction: column;
+        padding-left: 54px;
+        position: relative;
+    }
+
+    .pump-selector-scheme-toggle:before {
+        position: absolute;
+        left: 16px;
+        top: 14px;
+    }
+
+    .pump-selector-scheme-text {
+        white-space: normal;
+    }
+}
+.pump-selector-scheme-close-wrap {
+    margin-top: 12px;
+    text-align: right;
+}
+
+.pump-selector-scheme-close {
+    border: 1px solid #cfd7e2;
+    background: #fff;
+    color: var(--accent-color, #0157c0);
+    border-radius: 4px;
+    padding: 7px 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.pump-selector-scheme-close:hover {
+    background: #f1f6fd;
+}
+.pump-selector-submit.is-loading {
+    opacity: 0.85;
+    cursor: wait;
+}
+
+.pump-selector-submit[disabled] {
+    pointer-events: none;
+}
+
+
+
+
+				.pump-selector-consultation {
+				margin-top: 24px;
+				padding: 20px;
+				background: #f7f7f7;
+				border: 1px solid #e5e5e5;
+				border-radius: 4px;
+				}
+				.pump-selector-consultation h3 {
+				margin-top: 0;
+				}
+				.pump-selector-consultation p {
+				margin-bottom: 14px;
+				}
+				@media (max-width: 991px) {
+				.pump-selector-form-section {
+				width: 50%;
+				}
+				}
+				@media (max-width: 767px) {
+				.pump-selector-form-section {
+				width: 100%;
+				}
+				.pump-selector-actions {
+				text-align: left;
+				}
+				}
+			</style>
+			
+			<div class="pump-selector-page">
+				<h1><?php echo $heading_title; ?></h1>
+				
+				<p class="pump-selector-intro">Это предварительный подбор. Окончательный выбор насоса требует подтверждения специалистом.</p>
+				
+				
+				
+				<?php if ($requirements) { ?>
+					<div class="pump-selector-summary">
+						<h3>Ваши параметры</h3>
+						<ul class="pump-selector-summary-list">
+							<li><strong>Глубина:</strong> <?php echo htmlspecialchars($input['total_well_depth_m'], ENT_QUOTES, 'UTF-8'); ?> м</li>
+							<li><strong>Уровень воды:</strong>
+								<?php if ($input['water_level_mode'] == 'known') { ?>
+									<?php echo htmlspecialchars($input['water_level_m'], ENT_QUOTES, 'UTF-8'); ?> м
+									<?php } else { ?>
+									не указан
+								<?php } ?>
+							</li>
+							<li><strong>До дома:</strong> <?php echo htmlspecialchars($input['distance_to_house_m'], ENT_QUOTES, 'UTF-8'); ?> м</li>
+							<li><strong>Точка:</strong>
+								<?php if ($input['highest_water_point_floor'] == 'custom') { ?>
+									<?php echo htmlspecialchars($input['custom_vertical_lift_m'], ENT_QUOTES, 'UTF-8'); ?> м
+									<?php } else { ?>
+									<?php echo htmlspecialchars($input['highest_water_point_floor'], ENT_QUOTES, 'UTF-8'); ?> этаж
+								<?php } ?>
+							</li>
+							<li><strong>Расход:</strong> <?php echo $requirements['required_flow_l_min']; ?> л/мин</li>
+							<li><strong>Напор:</strong> <?php echo $requirements['required_head_m']; ?> м</li>
+							<li><strong>Напряжение:</strong> <?php echo $requirements['selected_voltage']; ?>В</li>
+							<li><strong>Диаметр:</strong> <?php echo ($requirements['casing_diameter_mm'] !== null) ? $requirements['casing_diameter_mm'] . ' мм' : 'не указан'; ?></li>
+						</ul>
+						<button type="button" class="btn btn-default" id="pump-selector-toggle-form">Изменить параметры</button>
+					</div>
+				<?php } ?>
+				
+				<noscript>
+					<style>
+						.pump-selector-form-panel.collapsed {
+						display: block;
+						}
+					</style>
+				</noscript>
+				
+				<div class="pump-selector-form-panel<?php if ($requirements) { ?> collapsed<?php } ?>" id="pump-selector-form-panel">
+					<div class="pump-selector-scheme">
+				  <button type="button" class="pump-selector-scheme-toggle" id="pump-selector-scheme-toggle">
+					<span class="pump-selector-scheme-title">Не знаете, что означают параметры скважины?</span>
+					<span class="pump-selector-scheme-text">Показать схему: глубина, уровень воды, расстояние до дома</span>
+				  </button>
+
+				  <div class="pump-selector-scheme-body" id="pump-selector-scheme-body" style="display: none;">
+					<img
+					  src="catalog/view/theme/revolution/image/pump-selector/well-scheme.png"
+					  alt="Схема скважины: глубина, уровень воды, расстояние до дома"
+					  class="img-responsive pump-selector-scheme-image"
+					/>
+					<div class="pump-selector-scheme-close-wrap">
+						<button type="button" class="pump-selector-scheme-close" id="pump-selector-scheme-close">
+						  Скрыть схему
+						</button>
+					</div>
+				  </div>
+				</div>
+					<?php if ($errors) { ?>
+						<div class="alert alert-danger">
+							<ul>
+								<?php foreach ($errors as $error) { ?>
+									<li><?php echo $error; ?></li>
+								<?php } ?>
+							</ul>
+						</div>
+					<?php } ?>
+					
+					<form action="<?php echo $action; ?>" method="post">
+						<div class="pump-selector-form-grid">
+							<div class="pump-selector-form-section">
+								<h3><span class="title-icon"><img class="title-icon-image" src="/catalog/view/theme/revolution/image/pump.webp" alt="title icon"></span><span class="title-text">Данные скважины</span></h3>
+								
+								<div class="form-group">
+									<label class="control-label" for="input-total-well-depth">Глубина скважины, м</label>
+									<input type="text" name="total_well_depth_m" value="<?php echo htmlspecialchars($input['total_well_depth_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-total-well-depth" class="form-control" />
+								</div>
+								
+								<div class="form-group">
+									<label class="control-label">Уровень воды</label>
+									<label class="radio-inline">
+										<input type="radio" name="water_level_mode" value="known"<?php if ($input['water_level_mode'] == 'known') { ?> checked="checked"<?php } ?> /> Известен
+									</label>
+									<label class="radio-inline">
+										<input type="radio" name="water_level_mode" value="unknown"<?php if ($input['water_level_mode'] == 'unknown') { ?> checked="checked"<?php } ?> /> Не знаю
+									</label>
+								</div>
+								
+								<div class="form-group">
+									<label class="control-label" for="input-water-level">Уровень воды, м</label>
+									<input type="text" name="water_level_m" value="<?php echo htmlspecialchars($input['water_level_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-water-level" class="form-control" />
+								</div>
+								
+								<div class="form-group">
+									<label class="control-label" for="input-distance">Расстояние до дома, м</label>
+									<input type="text" name="distance_to_house_m" value="<?php echo htmlspecialchars($input['distance_to_house_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-distance" class="form-control" />
+								</div>
+							</div>
+							
+							<div class="pump-selector-form-section">
+								<h3><span class="title-icon"><img class="title-icon-image" src="/catalog/view/theme/revolution/image/home-water.webp" alt="title icon"></span><span class="title-text">Дом и расход воды</span></h3>
+								
+								<div class="form-group">
+									<label class="control-label" for="input-floor">Самая высокая точка</label>
+									<select name="highest_water_point_floor" id="input-floor" class="form-control">
+										<option value="1"<?php if ($input['highest_water_point_floor'] == '1') { ?> selected="selected"<?php } ?>>1 этаж</option>
+										<option value="2"<?php if ($input['highest_water_point_floor'] == '2') { ?> selected="selected"<?php } ?>>2 этаж</option>
+										<option value="3"<?php if ($input['highest_water_point_floor'] == '3') { ?> selected="selected"<?php } ?>>3 этаж</option>
+										<option value="custom"<?php if ($input['highest_water_point_floor'] == 'custom') { ?> selected="selected"<?php } ?>>Другое значение</option>
+									</select>
+								</div>
+								
+								<div class="form-group">
+									<label class="control-label" for="input-custom-lift">Высота, м</label>
+									<input type="text" name="custom_vertical_lift_m" value="<?php echo htmlspecialchars($input['custom_vertical_lift_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-custom-lift" class="form-control" />
+								</div>
+								
+								<div class="form-group">
+									<label class="control-label">Точки разбора воды (выберите все, что есть)</label>
+									
+									<div class="row">
+										<div class="col-xs-5">
+											<?php $i = 0; ?>
+											<?php foreach ($water_point_labels as $key => $label) { ?>
+												<?php if ($i < 3) { ?>
+													<div class="checkbox">
+														<label>
+															<input type="checkbox" name="water_points[]" value="<?php echo $key; ?>"<?php if (is_array($input['water_points']) && in_array($key, $input['water_points'])) { ?> checked="checked"<?php } ?> />
+															<?php echo $label; ?>
+														</label>
+													</div>
+												<?php } ?>
+												<?php $i++; ?>
+											<?php } ?>
+										</div>
+										
+										<div class="col-xs-7">
+											<?php $i = 0; ?>
+											<?php foreach ($water_point_labels as $key => $label) { ?>
+												<?php if ($i >= 3) { ?>
+													<div class="checkbox">
+														<label>
+															<input type="checkbox" name="water_points[]" value="<?php echo $key; ?>"<?php if (is_array($input['water_points']) && in_array($key, $input['water_points'])) { ?> checked="checked"<?php } ?> />
+															<?php echo $label; ?>
+														</label>
+													</div>
+												<?php } ?>
+												<?php $i++; ?>
+											<?php } ?>
+										</div>
+									</div>
+								</div>
+							</div>
+							
+							<div class="pump-selector-form-section">
+								<h3><span class="title-icon"><img class="title-icon-image" src="/catalog/view/theme/revolution/image/plig-ins.webp" alt="title icon"></span><span class="title-text">Совместимость</span></h3>
+								
+								<div class="form-group">
+									<label class="control-label">Диаметр обсадной трубы</label>
+									<label class="radio-inline">
+										<input type="radio" name="casing_diameter_mode" value="known"<?php if ($input['casing_diameter_mode'] == 'known') { ?> checked="checked"<?php } ?> /> Известен
+									</label>
+									<label class="radio-inline">
+										<input type="radio" name="casing_diameter_mode" value="unknown"<?php if ($input['casing_diameter_mode'] == 'unknown') { ?> checked="checked"<?php } ?> /> Не знаю
+									</label>
+								</div>
+								
+								<div class="form-group">
+									<label class="control-label" for="input-casing-diameter">Диаметр, мм</label>
+									<input type="text" name="casing_diameter_mm" value="<?php echo htmlspecialchars($input['casing_diameter_mm'], ENT_QUOTES, 'UTF-8'); ?>" id="input-casing-diameter" class="form-control" />
+								</div>
+								
+								<div class="form-group">
+									<label class="control-label">Напряжение</label>
+									<label class="radio-inline">
+										<input type="radio" name="voltage_mode" value="220"<?php if ($input['voltage_mode'] == '220') { ?> checked="checked"<?php } ?> /> 220В
+									</label>
+									<label class="radio-inline">
+										<input type="radio" name="voltage_mode" value="380"<?php if ($input['voltage_mode'] == '380') { ?> checked="checked"<?php } ?> /> 380В
+									</label>
+									<label class="radio-inline">
+										<input type="radio" name="voltage_mode" value="unknown"<?php if ($input['voltage_mode'] == 'unknown') { ?> checked="checked"<?php } ?> /> Не знаю
+									</label>
+								</div>
+<div class="pump-selector-help-box">
+  <strong>Не знаете параметры?</strong>
+  <div>Поможем уточнить диаметр, напряжение и подходящий насос.</div>
+  <a class="pump-selector-help-link" href="index.php?route=information/contact">Получить консультацию</a>
+</div>
+							</div>
+						</div>
+						
+						<div class="pump-selector-actions">
+							<button type="submit" class="btn btn-primary btn-pump-selector-submit" id="pump-selector-submit">
+							  <span class="pump-selector-submit-text">
+								<i class="fa fa-search"></i> Подобрать насос
+							  </span>
+							  <span class="pump-selector-submit-loading" style="display: none;">
+								<i class="fa fa-spinner fa-spin"></i> Подбираем...
+							  </span>
+							</button>
+						</div>
+						
+					</form>
+				</div>
+				
+				<?php if ($requirements) { ?>
+					<?php if ($products) { ?>
+						<div class="pump-selector-results">
+							<h2>Подходящие варианты</h2>
+							<div class="row">
+								<?php foreach ($products as $product) { ?>
+									<div class="product-layout product-grid col-lg-4 col-md-4 col-sm-6 col-xs-12 pump-selector-results-item">
+										<div class="product-thumb transition">
+											<div class="pump-selector-badges">
+												<?php foreach ($product['result_types'] as $result_type) { ?>
+													<?php if ($result_type == 'best_price') { ?>
+														<?php $label_class = 'label-success'; ?>
+														<?php } elseif ($result_type == 'optimal_choice') { ?>
+														<?php $label_class = 'label-warning'; ?>
+														<?php } elseif ($result_type == 'premium') { ?>
+														<?php $label_class = 'label-primary'; ?>
+														<?php } else { ?>
+														<?php $label_class = 'label-info'; ?>
+													<?php } ?>
+													<span class="label <?php echo $label_class; ?>"><?php echo isset($result_type_labels[$result_type]) ? $result_type_labels[$result_type] : $result_type; ?></span>
+												<?php } ?>
+											</div>
+											<div class="image">
+												<a href="<?php echo $product['href']; ?>">
+													<img src="<?php echo $product['thumb']; ?>" alt="<?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?>" class="img-responsive" />
+												</a>
+											</div>
+											<div class="pump-selector-specs clearfix">
+												<div class="spec-item">
+													Напор
+													<span class="spec-value">до <?php echo $product['max_head_m']; ?> м</span>
+												</div>
+												<div class="spec-item">
+													Подача
+													<span class="spec-value"><?php echo $product['max_flow_l_min']; ?> л/мин</span>
+												</div>
+											</div>
+											<div class="caption">
+												<h4><a href="<?php echo $product['href']; ?>"><?php echo $product['name'] ? $product['name'] : 'Товар #' . $product['product_id']; ?></a></h4>
+												<?php if ($product['manufacturer']) { ?>
+													<p>Производитель: <?php echo $product['manufacturer']; ?></p>
+												<?php } ?>
+												<?php if ($product['price']) { ?>
+													<p class="price">
+														<?php if (!$product['special']) { ?>
+															<?php echo $product['price']; ?>
+															<?php } else { ?>
+															<span class="price-new"><?php echo $product['special']; ?></span> <span class="price-old"><?php echo $product['price']; ?></span>
+														<?php } ?>
+														<?php if ($product['tax']) { ?>
+															<span class="price-tax">с НДС: <?php echo $product['tax']; ?></span>
+														<?php } ?>
+													</p>
+												<?php } ?>
+												<div class="pump-selector-debug">
+													<div>Запас напора: <?php echo $product['head_reserve']; ?> м</div>
+													<div>Запас подачи: <?php echo $product['flow_reserve']; ?> л/мин</div>
+													<div>Напряжение: <?php echo $product['voltage']; ?>В</div>
+													<div>Диаметр насоса: <?php echo $product['pump_diameter_mm']; ?> мм</div>
+													<?php if ($product['stock_status']) { ?>
+														<div>Наличие: <?php echo $product['stock_status']; ?></div>
+													<?php } ?>
+												</div>
+											</div>
+											<div class="button-group">
+												<button type="button" onclick="cart.add('<?php echo $product['product_id']; ?>', '<?php echo $product['minimum']; ?>');"><i class="fa fa-shopping-cart"></i> <span>Купить</span></button>
+											</div>
+										</div>
+									</div>
+								<?php } ?>
+							</div>
+						</div>
+						<div class="pump-selector-consultation">
+							<h3>Не уверены в выборе?</h3>
+							<p>Специалист проверит параметры скважины, уровень воды, диаметр обсадной трубы и условия установки перед покупкой.</p>
+							<a href="/index.php?route=information/contact" class="btn btn-primary">Получить консультацию специалиста</a>
+						</div>
+						<?php } else { ?>
+						<div class="alert alert-info">По введенным условиям не найдено подходящих насосов для предварительного подбора. Проверьте введенные данные или обратитесь к специалисту.</div>
+					<?php } ?>
+					
+					<div class="pump-selector-after-results">
+						<?php if ($warnings) { ?>
+							<h3>Важно перед покупкой</h3>
+							<div class="alert alert-warning">
+								<ul>
+									<?php foreach ($warnings as $warning) { ?>
+										<li><?php echo $warning; ?></li>
+									<?php } ?>
+								</ul>
+							</div>
+						<?php } ?>
+						
+						<h3>Расчетные параметры</h3>
+						<table class="table table-bordered">
+							<tbody>
+								<tr>
+									<td>Требуемый напор</td>
+									<td><?php echo $requirements['required_head_m']; ?> м</td>
+								</tr>
+								<tr>
+									<td>Требуемая подача</td>
+									<td><?php echo $requirements['required_flow_l_min']; ?> л/мин</td>
+								</tr>
+								<tr>
+									<td>Напряжение</td>
+									<td><?php echo $requirements['selected_voltage']; ?>В<?php if ($requirements['voltage_was_assumed']) { ?>, принято по умолчанию<?php } ?></td>
+								</tr>
+								<tr>
+									<td>Диаметр обсадной трубы</td>
+									<td><?php echo ($requirements['casing_diameter_mm'] !== null) ? $requirements['casing_diameter_mm'] . ' мм' : 'не указан'; ?></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<?php } else { ?>
+					<div class="pump-selector-empty-result">Заполните данные скважины, чтобы получить предварительный подбор насоса.</div>
+				<?php } ?>
+			</div>
+			
+			<script type="text/javascript">
+				(function() {
+					var button = document.getElementById('pump-selector-toggle-form');
+					var panel = document.getElementById('pump-selector-form-panel');
+					
+					if (button && panel) {
+						button.onclick = function() {
+							if (panel.className.indexOf('collapsed') !== -1) {
+								panel.className = panel.className.replace(/\s*collapsed/g, '');
+								button.innerHTML = 'Скрыть параметры';
+								} else {
+								panel.className += ' collapsed';
+								button.innerHTML = 'Изменить параметры';
+							}
+						};
+					}
+				})();
+			</script>
+			
+			<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function () {
+    var toggle = document.getElementById('pump-selector-scheme-toggle');
+    var closeBtn = document.getElementById('pump-selector-scheme-close');
+    var body = document.getElementById('pump-selector-scheme-body');
+
+    if (!toggle || !body) {
+        return;
+    }
+
+    function openScheme() {
+        body.style.display = 'block';
+    }
+
+    function closeScheme() {
+        body.style.display = 'none';
+    }
+
+    toggle.addEventListener('click', function () {
+        if (body.style.display === 'none' || body.style.display === '') {
+            openScheme();
+        } else {
+            closeScheme();
+        }
+    });
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+            closeScheme();
+
+            if (toggle.scrollIntoView) {
+                toggle.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        });
+    }
+});
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function () {
+    var form = document.querySelector('.pump-selector-page form');
+    var submit = document.getElementById('pump-selector-submit');
+
+    if (!form || !submit) {
+        return;
+    }
+
+    form.addEventListener('submit', function () {
+        var text = submit.querySelector('.pump-selector-submit-text');
+        var loading = submit.querySelector('.pump-selector-submit-loading');
+
+        submit.disabled = true;
+        submit.classList.add('is-loading');
+
+        if (text) {
+            text.style.display = 'none';
+        }
+
+        if (loading) {
+            loading.style.display = 'inline-block';
+        }
+    });
+});
+</script>
+			<?php echo $content_bottom; ?>
+		</div>
+	</div>
+</div>
+<?php echo $footer; ?>

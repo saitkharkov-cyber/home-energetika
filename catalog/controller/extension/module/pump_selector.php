@@ -6,7 +6,7 @@ class ControllerExtensionModulePumpSelector extends Controller {
 		$this->document->setTitle('Подбор скважинного насоса');
 
 		$data = array();
-		$data['heading_title'] = 'Подбор скважинного насоса';
+		$data['heading_title'] = 'SMART - подбор скважинного насоса';
 		$data['action'] = $this->url->link('extension/module/pump_selector', '', true);
 		$data['errors'] = array();
 		$data['requirements'] = null;
