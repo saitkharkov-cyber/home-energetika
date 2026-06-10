@@ -7,13 +7,17 @@ CREATE TABLE IF NOT EXISTS `oc_pump_selector_product` (
   `voltage` VARCHAR(20) NULL,
   `brand_priority` TINYINT DEFAULT 0,
   `is_eligible` TINYINT DEFAULT 1,
+  `name` VARCHAR(255) NOT NULL DEFAULT '',
+  `manufacturer` VARCHAR(255) NOT NULL DEFAULT '',
+  `image` VARCHAR(255) NOT NULL DEFAULT '',
+  `product_price` DECIMAL(15,4) NOT NULL DEFAULT 0,
+  `quantity` INT(11) NOT NULL DEFAULT 0,
+  `status` TINYINT(1) NOT NULL DEFAULT 1,
   `date_added` DATETIME,
   `date_modified` DATETIME,
   PRIMARY KEY (`selector_product_id`),
   UNIQUE KEY `uniq_product_id` (`product_id`),
-  KEY `idx_max_head_m` (`max_head_m`),
-  KEY `idx_max_flow_l_min` (`max_flow_l_min`),
-  KEY `idx_pump_diameter_mm` (`pump_diameter_mm`),
-  KEY `idx_voltage` (`voltage`),
-  KEY `idx_is_eligible` (`is_eligible`)
+  KEY `idx_selector_filter` (`status`, `voltage`, `pump_diameter_mm`, `max_head_m`, `max_flow_l_min`),
+  KEY `idx_selector_price` (`product_price`),
+  KEY `idx_selector_brand` (`brand_priority`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

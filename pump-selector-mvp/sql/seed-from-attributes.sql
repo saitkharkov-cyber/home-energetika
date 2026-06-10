@@ -6,6 +6,12 @@ INSERT INTO `oc_pump_selector_product` (
   `voltage`,
   `brand_priority`,
   `is_eligible`,
+  `name`,
+  `manufacturer`,
+  `image`,
+  `product_price`,
+  `quantity`,
+  `status`,
   `date_added`,
   `date_modified`
 )
@@ -25,6 +31,12 @@ SELECT
     ELSE 0
   END AS `brand_priority`,
   1 AS `is_eligible`,
+  COALESCE(pd.`name`, '') AS `name`,
+  COALESCE(m.`name`, '') AS `manufacturer`,
+  COALESCE(p.`image`, '') AS `image`,
+  p.`price` AS `product_price`,
+  p.`quantity` AS `quantity`,
+  p.`status` AS `status`,
   NOW() AS `date_added`,
   NOW() AS `date_modified`
 FROM `oc_product` p
@@ -76,6 +88,12 @@ LEFT JOIN (
   ON voltage_attr.`product_id` = p.`product_id`
 LEFT JOIN `oc_manufacturer` m
   ON m.`manufacturer_id` = p.`manufacturer_id`
+LEFT JOIN (
+  SELECT `product_id`, MAX(`name`) AS `name`
+  FROM `oc_product_description`
+  GROUP BY `product_id`
+) pd
+  ON pd.`product_id` = p.`product_id`
 WHERE p.`price` > 0
   AND p.`quantity` > 0
   AND p.`status` = 1
@@ -87,4 +105,10 @@ ON DUPLICATE KEY UPDATE
   `voltage` = VALUES(`voltage`),
   `brand_priority` = VALUES(`brand_priority`),
   `is_eligible` = VALUES(`is_eligible`),
+  `name` = VALUES(`name`),
+  `manufacturer` = VALUES(`manufacturer`),
+  `image` = VALUES(`image`),
+  `product_price` = VALUES(`product_price`),
+  `quantity` = VALUES(`quantity`),
+  `status` = VALUES(`status`),
   `date_modified` = VALUES(`date_modified`);
