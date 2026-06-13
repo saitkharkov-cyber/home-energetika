@@ -9,571 +9,871 @@
 		<div id="content" class="col-sm-12">
 			<?php echo $content_top; ?>
 			
-<style>
-	:root {
-		--accent-color: #0157c0;
-		--site-color: #008fc3;
-	}
-
-	.pump-selector-page {
-		margin: 0 auto;
-	}
-
-	.pump-selector-page h1 {
-		margin-top: 0;
-		font-size: 24px;
-		font-weight: 600;
-	}
-
-	.pump-selector-intro {
-		margin-bottom: 18px;
-	}
-
-	/* Summary */
-	.pump-selector-summary {
-		margin-bottom: 24px;
-		padding: 16px 18px;
-		background: #f6f8fb;
-		border: 1px solid #e5e5e5;
-		border-radius: 4px;
-	}
-
-	.pump-selector-summary-main {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 6px 0;
-		align-items: center;
-		font-size: 14px;
-		line-height: 1.5;
-	}
-
-	.pump-selector-summary-main strong {
-		margin-right: 6px;
-		color: #111827;
-	}
-
-	.pump-selector-summary-main span {
-		color: #111827;
-	}
-
-	.pump-selector-summary-main span:not(:last-child)::after {
-		content: "·";
-		margin: 0 8px;
-		color: #98a2b3;
-	}
-
-	.pump-selector-summary-extra {
-		margin-top: 4px;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 6px 0;
-		font-size: 13px;
-		line-height: 1.45;
-		color: #667085;
-	}
-
-	.pump-selector-summary-extra span:not(:last-child)::after {
-		content: "·";
-		margin: 0 8px;
-		color: #b0b7c3;
-	}
-
-	.pump-selector-summary-edit,
-	#pump-selector-toggle-form {
-		margin-top: 10px;
-		padding: 7px 14px;
-		border: 1px solid #cfd7e2;
-		background: #fff;
-		color: var(--accent-color);
-		font-weight: 600;
-		border-radius: 4px;
-	}
-
-	/* Form */
-	.pump-selector-form-panel {
-		margin-bottom: 28px;
-		padding: 15px;
-		background: #f6f8fb;
-		border-radius: 4px;
-	}
-
-	.pump-selector-form-panel.collapsed {
-		display: none;
-	}
-
-	.pump-selector-form-grid {
-		display: flex;
-		flex-wrap: nowrap;
-		gap: 20px;
-	}
-
-	.pump-selector-form-section {
-		flex: 1 0 32%;
-		max-width: 32.5%;
-		padding-left: 25px;
-		padding-right: 25px;
-		background: #fff;
-		border: 1px solid #e7e7e7;
-		border-radius: 15px;
-	}
-
-	.pump-selector-form-section h3 {
-		margin-top: 0;
-		margin-bottom: 14px;
-		display: flex;
-		align-items: center;
-		justify-content: flex-start;
-		font-size: 18px;
-	}
-
-	.pump-selector-form-section h3 .title-text {
-		font-size: 17px !important;
-		color: #000;
-		font-weight: 600;
-	}
-
-	.pump-selector-form-section h3 .title-icon {
-		padding-right: 15px;
-	}
-
-	.pump-selector-form-section .form-group {
-		margin-left: 0;
-		margin-right: 0;
-		margin-bottom: 14px;
-	}
-
-	.pump-selector-form-section .control-label {
-		display: block;
-		margin-bottom: 5px;
-		padding-top: 0;
-		text-align: left;
-		font-weight: 600;
-	}
-
-	.pump-selector-form-section input[type="text"],
-	.pump-selector-form-section select.form-control {
-		height: 38px;
-		border-color: #cfd7e2;
-		border-radius: 6px;
-	}
-
-	.pump-selector-form-section .checkbox,
-	.pump-selector-form-section .radio-inline {
-		margin-top: 0;
-	}
-
-	.pump-selector-form-section input[type="radio"]:checked,
-	.pump-selector-form-section .radio-inline input[type="radio"]:checked {
-		border-color: var(--accent-color);
-	}
-
-	.pump-selector-form-section input[type="radio"]:checked::after,
-	.pump-selector-form-section .radio-inline input[type="radio"]:checked::after {
-		background: var(--accent-color);
-	}
-
-	.pump-selector-form-section input[type="checkbox"]:checked::after,
-	.pump-selector-form-section .checkbox input[type="checkbox"]:checked::after,
-	.pump-selector-form-section .checkbox-inline input[type="checkbox"]:checked::after {
-		border-right: 2px solid var(--accent-color);
-		border-top: 2px solid var(--accent-color);
-	}
-
-	.pump-selector-page .form-control.is-disabled,
-	.pump-selector-page input[disabled] {
-		background: #f3f4f6;
-		color: #98a2b3;
-		cursor: not-allowed;
-	}
-
-	.pump-selector-help-box {
-		margin-top: 12px;
-		padding-top: 10px;
-		border-top: 1px solid #e1e7ef;
-		font-size: 13px;
-		line-height: 1.35;
-	}
-
-	.pump-selector-help-box strong {
-		display: inline;
-		font-size: 13px;
-		font-weight: 700;
-		color: #111827;
-	}
-
-	.pump-selector-help-box div {
-		display: inline;
-		color: #475467;
-	}
-
-	.pump-selector-help-link {
-		display: block;
-		margin-top: 5px;
-		font-size: 13px;
-		font-weight: 700;
-		color: var(--accent-color);
-	}
-
-	.pump-selector-actions {
-		margin-top: 0;
-		padding-top: 14px;
-		text-align: right;
-	}
-
-	.btn-primary.btn-pump-selector-submit {
-		padding: 10px 25px 10px 45px;
-		background: var(--accent-color);
-		border-radius: 6px;
-		font-size: 18px;
-	}
-
-	.btn-primary.btn-pump-selector-submit .fa.fa-search,
-	.btn-primary.btn-pump-selector-submit .fa.fa-spinner.fa-spin {
-		position: relative;
-		left: -15px;
-	}
-
-	.btn-pump-selector-submit.is-loading {
-		opacity: 0.85;
-		cursor: wait;
-	}
-
-	.btn-pump-selector-submit[disabled] {
-		pointer-events: none;
-	}
-
-	.pump-selector-hp {
-		position: absolute;
-		left: -9999px;
-		top: -9999px;
-		opacity: 0;
-		height: 0;
-		overflow: hidden;
-	}
-
-	.pump-selector-js-errors {
-		margin-bottom: 16px;
-		padding: 12px 14px;
-		border: 1px solid #f0c2c2;
-		border-radius: 6px;
-		background: #fff5f5;
-		color: #9f1c1c;
-		font-size: 14px;
-	}
-
-	.pump-selector-js-errors ul {
-		margin: 0;
-		padding-left: 18px;
-	}
-
-	/* Scheme */
-	.pump-selector-scheme {
-		margin: 18px 0 22px;
-		border: 1px solid #dce6f2;
-		border-radius: 8px;
-		background: #f8fbff;
-		overflow: hidden;
-	}
-
-	.pump-selector-scheme-toggle {
-		width: 100%;
-		padding: 14px 18px;
-		border: 0;
-		background: transparent;
-		text-align: left;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 16px;
-	}
-
-	.pump-selector-scheme-toggle:before {
-		content: "?";
-		flex: 0 0 30px;
-		width: 30px;
-		height: 30px;
-		border-radius: 50%;
-		background: var(--site-color);
-		color: #fff;
-		font-weight: 700;
-		line-height: 30px;
-		text-align: center;
-	}
-
-	.pump-selector-scheme-title {
-		margin-right: auto;
-		font-weight: 700;
-		color: #111827;
-	}
-
-	.pump-selector-scheme-text {
-		color: var(--site-color);
-		font-weight: 600;
-		white-space: nowrap;
-	}
-
-	.pump-selector-scheme-body {
-		padding: 0 18px 18px;
-	}
-
-	.pump-selector-scheme-image {
-		display: block;
-		max-width: 100%;
-		height: auto;
-		border: 1px solid #e1e7ef;
-		border-radius: 6px;
-		background: #fff;
-	}
-
-	.pump-selector-scheme-close-wrap {
-		margin-top: 12px;
-		text-align: right;
-	}
-
-	.pump-selector-scheme-close {
-		padding: 7px 14px;
-		border: 1px solid #cfd7e2;
-		background: #fff;
-		color: var(--accent-color);
-		border-radius: 4px;
-		font-weight: 600;
-		cursor: pointer;
-	}
-
-	.pump-selector-scheme-close:hover {
-		background: #f1f6fd;
-	}
-
-	/* Results */
-	.pump-selector-empty-result {
-		margin-top: 24px;
-		padding: 16px 20px;
-		background: #fff;
-		border: 1px dashed #cfd7e2;
-		border-radius: 8px;
-		color: #667085;
-	}
-
-	.pump-selector-results {
-		margin-top: 20px;
-	}
-
-	.pump-selector-results-layout {
-		position: relative;
-		margin-top: 18px;
-	}
-
-	.pump-selector-results-layout > .col-lg-3 {
-		padding-right: 18px;
-	}
-
-	.pump-selector-results-layout > .col-lg-9 {
-		padding-left: 34px;
-		border-left: 0;
-	}
-
-	.pump-selector-results-item {
-		margin-bottom: 30px;
-	}
-
-	.pump-selector-results .product-thumb {
-		position: relative;
-		min-height: 100%;
-	}
-
-	.pump-selector-badges {
-		position: absolute;
-		top: 10px;
-		left: 10px;
-		z-index: 2;
-	}
-
-	.pump-selector-badges .label {
-		display: inline-block;
-		margin: 0 4px 4px 0;
-		padding: 6px 8px;
-		font-size: 12px;
-	}
-
-	.pump-selector-specs {
-		margin: 10px auto;
-		padding: 10px;
-		max-width: 260px;
-		color: #fff;
-		background: #17384d;
-		border-radius: 4px;
-		overflow: hidden;
-	}
-
-	.pump-selector-specs .spec-item {
-		float: left;
-		width: 50%;
-		font-size: 12px;
-		line-height: 1.3;
-	}
-
-	.pump-selector-specs .spec-value {
-		display: block;
-		font-size: 14px;
-		font-weight: 700;
-	}
-
-	.pump-selector-debug {
-		margin-top: 10px;
-		color: #777;
-		font-size: 12px;
-		line-height: 1.5;
-	}
-
-	/* Result sidebar */
-	.pump-selector-result-info {
-		position: sticky;
-		top: 15px;
-		padding: 18px 16px;
-		background: #f8fbff;
-		border: 1px solid #dce6f2;
-		border-radius: 10px;
-		box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
-		font-size: 14px;
-		line-height: 1.45;
-	}
-
-	.pump-selector-result-info h3 {
-		margin: 0 0 16px;
-		padding-bottom: 10px;
-		border-bottom: 1px solid #e1e7ef;
-		font-size: 20px;
-		line-height: 1.25;
-		font-weight: 700;
-		color: #111827;
-	}
-
-	.pump-selector-result-info-item {
-		margin-bottom: 20px;
-	}
-
-	.pump-selector-result-info-item .label {
-		display: inline-block;
-		margin-bottom: 8px;
-		padding: 5px 9px;
-		font-size: 12px;
-		font-weight: 700;
-		border-radius: 4px;
-	}
-
-	.result-info-title {
-		margin-bottom: 4px;
-		font-size: 15px;
-		line-height: 1.35;
-		font-weight: 700;
-		color: #1f2937;
-	}
-
-	.pump-selector-result-info-item p {
-		margin: 0;
-		font-size: 14px;
-		line-height: 1.45;
-		font-weight: 400;
-		color: #475467;
-	}
-
-	.pump-selector-result-info-note {
-		margin-top: 16px;
-		padding: 12px;
-		background: #fff;
-		border: 1px solid #e1e7ef;
-		border-radius: 6px;
-		color: #475467;
-		font-size: 13px;
-		line-height: 1.45;
-	}
-
-	.pump-selector-result-info-note:before {
-		content: "Важно";
-		display: block;
-		margin-bottom: 4px;
-		font-weight: 700;
-		color: #111827;
-	}
-
-	.pump-selector-after-results {
-		margin-top: 24px;
-	}
-
-	.pump-selector-consultation {
-		margin-top: 24px;
-		padding: 20px;
-		background: #f7f7f7;
-		border: 1px solid #e5e5e5;
-		border-radius: 4px;
-	}
-
-	.pump-selector-consultation h3 {
-		margin-top: 0;
-	}
-
-	.pump-selector-consultation p {
-		margin-bottom: 14px;
-	}
-
-	@media (max-width: 991px) {
-		.pump-selector-form-grid {
-			flex-wrap: wrap;
-		}
-
-		.pump-selector-form-section {
-			flex: 1 0 48%;
-			max-width: 48%;
-		}
-
-		.pump-selector-results-layout > .col-lg-3 {
-			padding-right: 15px;
-		}
-
-		.pump-selector-results-layout > .col-lg-9 {
-			padding-left: 15px;
-		}
-
-		.pump-selector-result-info {
-			position: static;
-			margin-bottom: 20px;
-		}
-	}
-
-	@media (max-width: 767px) {
-		.pump-selector-form-grid {
-			display: block;
-		}
-
-		.pump-selector-form-section {
-			width: 100%;
-			max-width: none;
-			margin-bottom: 16px;
-		}
-
-		.pump-selector-actions {
-			text-align: left;
-		}
-
-		.pump-selector-scheme-toggle {
-			align-items: flex-start;
-			flex-direction: column;
-			padding-left: 54px;
-			position: relative;
-		}
-
-		.pump-selector-scheme-toggle:before {
-			position: absolute;
-			left: 16px;
-			top: 14px;
-		}
-
-		.pump-selector-scheme-text {
-			white-space: normal;
-		}
-	}
-</style>
+			<style>
+				:root {
+				--accent-color: #0157c0;
+				--site-color: #008fc3;
+				}
+				
+				.pump-selector-page {
+				margin: 0 auto;
+				}
+				
+				.pump-selector-page h1 {
+				margin-top: 0;
+				font-size: 24px;
+				font-weight: 600;
+				}
+				
+				.pump-selector-intro {
+				margin-bottom: 18px;
+				}
+				
+				/* Summary */
+				.pump-selector-summary,
+				.pump-selector-consult-box,
+				.pump-selector-consultation {
+				margin-bottom: 24px;
+				padding: 16px 18px;				
+				/*background: #f6f8fb;
+				border: 1px solid #e5e5e5;
+				border-radius: 4px;*/
+				background: #f6f8fb;
+				border: 1px solid #dce6f2;
+				border-radius: 10px;
+				box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+				}
+				.pump-selector-consult-box {
+				margin-top: 28px;
+				padding: 22px 24px;
+				max-width: 880px
+				/* border: 1px solid #dbe4ef;
+				border-radius: 6px;
+				background: #f8fbff; */
+				}
+				.pump-selector-after-results .alert.alert-warning ul{
+				list-style: none;
+				padding-left: 15px;
+				}
+				.pump-selector-summary-main {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 6px 0;
+				align-items: center;
+				font-size: 14px;
+				line-height: 1.5;
+				}
+				
+				.pump-selector-summary-main strong {
+				margin-right: 6px;
+				color: #111827;
+				}
+				
+				.pump-selector-summary-main span {
+				color: #111827;
+				}
+				
+				.pump-selector-summary-main span:not(:last-child)::after {
+				content: "·";
+				margin: 0 8px;
+				color: #98a2b3;
+				}
+				
+				.pump-selector-summary-extra {
+				margin-top: 4px;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 6px 0;
+				font-size: 13px;
+				line-height: 1.45;
+				color: #667085;
+				}
+				
+				.pump-selector-summary-extra span:not(:last-child)::after {
+				content: "·";
+				margin: 0 8px;
+				color: #b0b7c3;
+				}
+				
+				.pump-selector-summary-edit,
+				#pump-selector-toggle-form {
+				margin-top: 10px;
+				padding: 7px 14px;
+				border: 1px solid #cfd7e2;
+				background: #fff;
+				color: var(--accent-color);
+				font-weight: 600;
+				border-radius: 4px;
+				}
+				
+				/* Form */
+				.pump-selector-form-panel {
+				margin-bottom: 28px;
+				padding: 15px;
+				background: #f6f8fb;
+				border-radius: 4px;
+				}
+				
+				.pump-selector-form-panel.collapsed {
+				display: none;
+				}
+				
+				.pump-selector-form-grid {
+				display: flex;
+				flex-wrap: nowrap;
+				gap: 20px;
+				}
+				
+				.pump-selector-form-section {
+				flex: 1 0 32%;
+				max-width: 32.5%;
+				padding-left: 25px;
+				padding-right: 25px;
+				background: #fff;
+				border: 1px solid #e7e7e7;
+				border-radius: 15px;
+				}
+				
+				.pump-selector-form-section h3 {
+				margin-top: 0;
+				margin-bottom: 14px;
+				display: flex;
+				align-items: center;
+				justify-content: flex-start;
+				font-size: 18px;
+				}
+				
+				.pump-selector-form-section h3 .title-text {
+				font-size: 17px !important;
+				color: #000;
+				font-weight: 600;
+				}
+				
+				.pump-selector-form-section h3 .title-icon {
+				padding-right: 15px;
+				}
+				
+				.pump-selector-form-section .form-group {
+				margin-left: 0;
+				margin-right: 0;
+				margin-bottom: 14px;
+				}
+				
+				.pump-selector-form-section .control-label {
+				display: block;
+				margin-bottom: 5px;
+				padding-top: 0;
+				text-align: left;
+				font-weight: 600;
+				}
+				
+				.pump-selector-form-section input[type="text"],
+				.pump-selector-form-section select.form-control {
+				height: 38px;
+				border-color: #cfd7e2;
+				border-radius: 6px;
+				}
+				
+				.pump-selector-form-section .checkbox,
+				.pump-selector-form-section .radio-inline {
+				margin-top: 0;
+				}
+				
+				.pump-selector-form-section input[type="radio"]:checked,
+				.pump-selector-form-section .radio-inline input[type="radio"]:checked {
+				border-color: var(--accent-color);
+				}
+				
+				.pump-selector-form-section input[type="radio"]:checked::after,
+				.pump-selector-form-section .radio-inline input[type="radio"]:checked::after {
+				background: var(--accent-color);
+				}
+				
+				.pump-selector-form-section input[type="checkbox"]:checked::after,
+				.pump-selector-form-section .checkbox input[type="checkbox"]:checked::after,
+				.pump-selector-form-section .checkbox-inline input[type="checkbox"]:checked::after {
+				border-right: 2px solid var(--accent-color);
+				border-top: 2px solid var(--accent-color);
+				}
+				
+				.pump-selector-page .form-control.is-disabled,
+				.pump-selector-page input[disabled] {
+				background: #f3f4f6;
+				color: #98a2b3;
+				cursor: not-allowed;
+				}
+				
+				.pump-selector-help-box {
+				margin-top: 12px;
+				padding-top: 10px;
+				border-top: 1px solid #e1e7ef;
+				font-size: 13px;
+				line-height: 1.35;
+				}
+				
+				.pump-selector-help-box strong {
+				display: inline;
+				font-size: 13px;
+				font-weight: 700;
+				color: #111827;
+				}
+				
+				.pump-selector-help-box div {
+				display: inline;
+				color: #475467;
+				}
+				
+				.pump-selector-help-link {
+				display: block;
+				margin-top: 5px;
+				font-size: 13px;
+				font-weight: 700;
+				color: var(--accent-color);
+				}
+				
+				.pump-selector-actions {
+				margin-top: 0;
+				padding-top: 14px;
+				text-align: right;
+				}
+				
+				.btn-primary.btn-pump-selector-submit {
+				padding: 10px 25px 10px 45px;
+				background: var(--accent-color);
+				border-radius: 6px;
+				font-size: 18px;
+				}
+				
+				.btn-primary.btn-pump-selector-submit .fa.fa-search,
+				.btn-primary.btn-pump-selector-submit .fa.fa-spinner.fa-spin {
+				position: relative;
+				left: -15px;
+				}
+				
+				/* Loading state: do not remove cursor: wait; user must see that calculation is running */
+				.btn-pump-selector-submit.is-loading {
+				opacity: 0.85;
+				cursor: not-allowed;
+				}
+				
+				/* .btn-pump-selector-submit[disabled] {
+				pointer-events: none;
+				} */
+				
+				.pump-selector-hp {
+				position: absolute;
+				left: -9999px;
+				top: -9999px;
+				opacity: 0;
+				height: 0;
+				overflow: hidden;
+				}
+				
+				.pump-selector-js-errors {
+				margin-bottom: 16px;
+				padding: 12px 14px;
+				border: 1px solid #f0c2c2;
+				border-radius: 6px;
+				background: #fff5f5;
+				color: #9f1c1c;
+				font-size: 14px;
+				}
+				
+				.pump-selector-js-errors ul {
+				margin: 0;
+				padding-left: 18px;
+				}
+				
+				/* Scheme */
+				.pump-selector-scheme {
+				margin: 18px 0 22px;
+				border: 1px solid #dce6f2;
+				border-radius: 8px;
+				background: #f8fbff;
+				overflow: hidden;
+				}
+				
+				.pump-selector-scheme-toggle {
+				width: 100%;
+				padding: 14px 18px;
+				border: 0;
+				background: transparent;
+				text-align: left;
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 16px;
+				}
+				
+				.pump-selector-scheme-toggle:before {
+				content: "?";
+				flex: 0 0 30px;
+				width: 30px;
+				height: 30px;
+				border-radius: 50%;
+				background: var(--site-color);
+				color: #fff;
+				font-weight: 700;
+				line-height: 30px;
+				text-align: center;
+				}
+				
+				.pump-selector-scheme-title {
+				margin-right: auto;
+				font-weight: 700;
+				color: #111827;
+				}
+				
+				.pump-selector-scheme-text {
+				color: var(--site-color);
+				font-weight: 600;
+				white-space: nowrap;
+				}
+				
+				.pump-selector-scheme-body {
+				padding: 0 18px 18px;
+				}
+				
+				.pump-selector-scheme-image {
+				display: block;
+				max-width: 100%;
+				height: auto;
+				border: 1px solid #e1e7ef;
+				border-radius: 6px;
+				background: #fff;
+				}
+				
+				.pump-selector-scheme-close-wrap {
+				margin-top: 12px;
+				text-align: right;
+				}
+				
+				.pump-selector-scheme-close {
+				padding: 7px 14px;
+				border: 1px solid #cfd7e2;
+				background: #fff;
+				color: var(--accent-color);
+				border-radius: 4px;
+				font-weight: 600;
+				cursor: pointer;
+				}
+				
+				.pump-selector-scheme-close:hover {
+				background: #f1f6fd;
+				}
+				
+				/* Results */
+				.pump-selector-empty-result {
+				margin-top: 24px;
+				padding: 16px 20px;
+				background: #fff;
+				border: 1px dashed #cfd7e2;
+				border-radius: 8px;
+				color: #667085;
+				}
+				
+				.pump-selector-results {
+				margin-top: 20px;
+				}
+				
+				.pump-selector-results-layout {
+				position: relative;
+				margin-top: 18px;
+				}
+				
+				.pump-selector-results-layout > .col-lg-3 {
+				padding-right: 18px;
+				}
+				
+				.pump-selector-results-layout > .col-lg-9 {
+				/* padding-left: 34px; */
+				border-left: 0;
+				}
+				
+				.pump-selector-results-item {
+				margin-bottom: 30px;
+				}
+				
+				.pump-selector-results .product-thumb {
+				position: relative;
+				min-height: 100%;
+				}
+				
+				.pump-selector-badges {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				z-index: 2;
+				}
+				
+				.pump-selector-badges .label {
+				display: inline-block;
+				margin: 0 4px 4px 0;
+				padding: 6px 8px;
+				font-size: 12px;
+				}
+				
+				.pump-selector-specs {
+				margin: 10px auto;
+				padding: 10px;
+				max-width: 260px;
+				color: #fff;
+				background: #17384d;
+				border-radius: 4px;
+				overflow: hidden;
+				}
+				
+				.pump-selector-specs .spec-item {
+				float: left;
+				width: 50%;
+				font-size: 12px;
+				line-height: 1.3;
+				}
+				
+				.pump-selector-specs .spec-value {
+				display: block;
+				font-size: 14px;
+				font-weight: 700;
+				}
+				
+				/* Result sidebar */
+				.pump-selector-result-info {
+				position: sticky;
+				top: 15px;
+				padding: 18px 16px;
+				background: #f8fbff;
+				border: 1px solid #dce6f2;
+				border-radius: 10px;
+				box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+				font-size: 14px;
+				line-height: 1.45;
+				}
+				
+				.pump-selector-result-info h3 {
+				margin: 0 0 16px;
+				padding-bottom: 10px;
+				border-bottom: 1px solid #e1e7ef;
+				font-size: 20px;
+				line-height: 1.25;
+				font-weight: 700;
+				color: #111827;
+				}
+				
+				.pump-selector-result-info-item {
+				margin-bottom: 20px;
+				}
+				
+				.pump-selector-result-info-item .label {
+				display: inline-block;
+				margin-bottom: 8px;
+				padding: 5px 9px;
+				font-size: 12px;
+				font-weight: 700;
+				border-radius: 4px;
+				}
+				
+				.result-info-title {
+				margin-bottom: 4px;
+				font-size: 15px;
+				line-height: 1.35;
+				font-weight: 700;
+				color: #1f2937;
+				}
+				
+				.pump-selector-result-info-item p {
+				margin: 0;
+				font-size: 14px;
+				line-height: 1.45;
+				font-weight: 400;
+				color: #475467;
+				}
+				
+				.pump-selector-result-info-note {
+				margin-top: 16px;
+				padding: 12px;
+				background: #fff;
+				border: 1px solid #e1e7ef;
+				border-radius: 6px;
+				color: #475467;
+				font-size: 13px;
+				line-height: 1.45;
+				}
+				
+				.pump-selector-result-info-note:before {
+				content: "Важно";
+				display: block;
+				margin-bottom: 4px;
+				font-weight: 700;
+				color: #111827;
+				}
+				
+				.pump-selector-after-results {
+				margin-top: 24px;
+				}
+				
+				.pump-selector-consultation {
+				/* margin-top: 24px;
+				padding: 20px;
+				background: #f7f7f7;
+				border: 1px solid #e5e5e5;
+				border-radius: 4px; */
+				}
+				
+				.pump-selector-consultation h3 {
+				margin-top: 0;
+				color: 
+				}
+				
+				.pump-selector-consultation p {
+				margin-bottom: 14px;
+				}
+				
+				.pump-selector-product-thumb .image {
+				position: relative;
+				}
+				
+				.pump-selector-product-thumb .product-specs {
+				/* margin: 10px 25px 0; */
+				}
+				
+				.pump-selector-product-thumb .badge-flag {
+				position: absolute;
+				top: 25px;
+				left: -20px;
+				z-index: 3;
+				}
+				
+				.pump-selector-product-thumb .badge-flag--green {
+				background: #8BC34A;
+				color: #000;
+				}
+				.pump-selector-product-thumb .badge-flag--green:after{
+				border-left: 8px solid #8BC34A;
+				}
+				.pump-selector-product-thumb .badge-flag--blue {
+				background: #6800bb;
+				color: #fff;
+				}
+				.pump-selector-product-thumb .badge-flag--blue:after{
+				border-left: 8px solid #6800bb;
+				}
+				
+				.pump-selector-product-thumb .product_buttons .price {
+				margin-bottom: 8px;
+				}
+				
+				.pump-selector-product-thumb .product_buttons .number {
+				float: left;
+				}
+				
+				.pump-selector-product-thumb .product_buttons .cart,
+				.pump-selector-product-thumb .product_buttons .compare {
+				float: right;
+				}
+				.pump-selector-results-layout .product-thumb{
+				overflow: visible
+				}
+				.pump-selector-product-thumb .product_buttons .cart a,
+				.pump-selector-product-thumb .product_buttons .compare a {
+				cursor: pointer;
+				}
+				.pump-selector-result-info {
+				position: sticky;
+				top: 15px;
+				padding: 18px 16px;
+				background: #f6f8fb;
+				border: 1px solid #dce6f2;
+				border-radius: 10px;
+				box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+				font-size: 14px;
+				line-height: 1.45;
+				}
+				
+				.pump-selector-result-info h3 {
+				margin: 0 0 14px;
+				padding-bottom: 10px;
+				border-bottom: 1px solid #e1e7ef;
+				font-size: 20px;
+				line-height: 1.25;
+				font-weight: 700;
+				color: #008fc3;
+				}
+				
+				.pump-selector-info-card {
+				margin-bottom: 12px;
+				padding: 11px 12px;
+				background: #fff;
+				border: 1px solid #e1e7ef;
+				border-left-width: 4px;
+				border-radius: 7px;
+				}
+				
+				.pump-selector-info-card--best {
+				border-left-color: #8BC34A;
+				}
+				
+				.pump-selector-info-card--optimal {
+				border-left-color: #F3C536;
+				}
+				
+				.pump-selector-info-card--premium {
+				border-left-color: #6800bb;
+				}
+				
+				.pump-selector-info-card-head {
+				display: flex;
+				align-items: center;
+				gap: 7px;
+				margin-bottom: 6px;
+				}
+				
+				.pump-selector-info-dot {
+				width: 9px;
+				height: 9px;
+				border-radius: 50%;
+				display: inline-block;
+				flex: 0 0 9px;
+				}
+				
+				.pump-selector-info-card--best .pump-selector-info-dot {
+				background: #8BC34A;
+				}
+				
+				.pump-selector-info-card--optimal .pump-selector-info-dot {
+				background: #F3C536;
+				}
+				
+				.pump-selector-info-card--premium .pump-selector-info-dot {
+				background: #6800bb;
+				}
+				
+				.pump-selector-info-label {
+				font-size: 12px;
+				line-height: 1.2;
+				font-weight: 700;
+				color: #667085;
+				text-transform: uppercase;
+				letter-spacing: .02em;
+				}
+				
+				.pump-selector-info-title {
+				margin-bottom: 4px;
+				font-size: 15px;
+				line-height: 1.35;
+				font-weight: 700;
+				color: #1f2937;
+				}
+				h3.h3_no_blue{
+				color:#111827!important;
+				}
+				.pump-selector-info-card p {
+				margin: 0;
+				font-size: 13px;
+				line-height: 1.45;
+				color: #475467;
+				}
+				
+				.pump-selector-result-info-note {
+				margin-top: 14px;
+				padding: 12px;
+				background: #fff;
+				border: 1px solid #e1e7ef;
+				border-radius: 7px;
+				color: #475467;
+				font-size: 13px;
+				line-height: 1.45;
+				}
+				
+				.pump-selector-result-info-note:before {
+				content: "Важно";
+				display: block;
+				margin-bottom: 4px;
+				font-weight: 700;
+				color: #111827;
+				}
+				.pump-selector-product-thumb .caption h4 {
+				min-height: 40px;
+				}
+				.pump-selector-info-card--best .pump-selector-info-icon {
+				background: #8BC34A;
+				color: #111;
+				}
+				
+				.pump-selector-info-card--optimal .pump-selector-info-icon {
+				background: #F3C536;
+				color: #111;
+				
+				}
+				.pump-selector-info-card--optimal .pump-selector-info-icon .fa.fa-balance-scale:before{
+				display: block;
+				max-width: 16px;
+				}
+				
+				.pump-selector-info-card--premium .pump-selector-info-icon {
+				background: #6800bb;
+				color: #fff;
+				}
+				.pump-selector-info-icon{
+				width: 32px;
+				height: 24px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 50%;
+				}
+				.pump-selector-scheme-text {
+				text-decoration: underline;
+				text-decoration-style: dashed;
+				transition: .2s;
+				}
+				.pump-selector-scheme-text:hover{
+				color: var(--accent-color);
+				}
+				.pump-selector-cta-card {
+				min-height: 278px;
+				padding: 28px 24px;
+				border: 1px dashed #c8d6e5;
+				background: #f8fbff;
+				text-align: center;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				}
+				
+				.pump-selector-cta-icon {
+				width: 46px;
+				height: 46px;
+				margin: 0 auto 16px;
+				border-radius: 50%;
+				background: #eef5ff;
+				color: #0057b8;
+				font-size: 24px;
+				font-weight: 700;
+				line-height: 46px;
+				}
+				
+				.pump-selector-cta-title {
+				margin-bottom: 10px;
+				font-size: 17px;
+				font-weight: 700;
+				color: #1f2937;
+				}
+				
+				.pump-selector-cta-text {
+				margin-bottom: 18px;
+				font-size: 13px;
+				line-height: 1.45;
+				color: #4b5563;
+				}
+				
+				.pump-selector-cta-button {
+				align-self: center;
+				}
+				
+				
+				.pump-selector-consult-box h3 {
+				margin-top: 0;
+				margin-bottom: 12px;
+				font-size: 20px;
+				}
+				
+				.pump-selector-consult-box p {
+				margin-bottom: 16px;
+				max-width: 860px;
+				}
+				.pump-selector-warnings ul {
+				padding-left: 0;
+				margin-bottom: 0;
+				list-style: none;
+				}
+				
+				.pump-selector-warnings li {
+				margin-bottom: 0;
+				}
+				.pump-selector-warnings {
+				padding: 14px 18px;
+				background: #fff8df;
+				border-left: 4px solid #f0b429;
+				color: #7a5200;
+				}
+				.pump-selector-calc-table {
+				width: 100%;
+				border-collapse: collapse;
+				background: #fff;
+				}
+				
+				.pump-selector-calc-table td {
+				padding: 10px 12px;
+				border: 1px solid #e1e5ea;
+				}
+				
+				.pump-selector-calc-table td:first-child {
+				width: 70%;
+				color: #4b5563;
+				}
+				
+				.pump-selector-calc-table td:last-child {
+				font-weight: 600;
+				}
+				
+				@media (max-width: 991px) {
+				.pump-selector-form-grid {
+				flex-wrap: wrap;
+				}
+				
+				.pump-selector-form-section {
+				flex: 1 0 48%;
+				max-width: 48%;
+				}
+				
+				.pump-selector-results-layout > .col-lg-3 {
+				padding-right: 15px;
+				}
+				
+				.pump-selector-results-layout > .col-lg-9 {
+				padding-left: 15px;
+				}
+				
+				.pump-selector-result-info {
+				position: static;
+				margin-bottom: 20px;
+				}
+				}
+				
+				@media (max-width: 767px) {
+				.pump-selector-form-grid {
+				display: block;
+				}
+				
+				.pump-selector-form-section {
+				width: 100%;
+				max-width: none;
+				margin-bottom: 16px;
+				}
+				
+				.pump-selector-actions {
+				text-align: left;
+				}
+				
+				.pump-selector-scheme-toggle {
+				align-items: flex-start;
+				flex-direction: column;
+				padding-left: 54px;
+				position: relative;
+				}
+				
+				.pump-selector-scheme-toggle:before {
+				position: absolute;
+				left: 16px;
+				top: 14px;
+				}
+				
+				.pump-selector-scheme-text {
+				white-space: normal;
+				}
+				}
+			</style>
 			
 			<div class="pump-selector-page">
 				<h1><?php echo $heading_title; ?></h1>
@@ -613,10 +913,15 @@
 							
 							<span>
 								Верхняя точка воды:
-								<?php if ($input['highest_water_point_floor'] == 'custom') { ?>
-									<?php echo htmlspecialchars($input['custom_vertical_lift_m'], ENT_QUOTES, 'UTF-8'); ?> м
+								<?php if ($input['highest_water_point_floor'] == '3') { ?>
+									3 этажа и выше
+									<?php if (!empty($input['custom_vertical_lift_m'])) { ?>
+										(<?php echo htmlspecialchars($input['custom_vertical_lift_m'], ENT_QUOTES, 'UTF-8'); ?> м)
+									<?php } ?>
+									<?php } elseif ($input['highest_water_point_floor'] == '2') { ?>
+									2 этажа
 									<?php } else { ?>
-									<?php echo htmlspecialchars($input['highest_water_point_floor'], ENT_QUOTES, 'UTF-8'); ?> этаж
+									1 этаж
 								<?php } ?>
 							</span>
 						</div>
@@ -709,14 +1014,14 @@
 									<select name="highest_water_point_floor" id="input-floor" class="form-control">
 										<option value="1"<?php if ($input['highest_water_point_floor'] == '1') { ?> selected="selected"<?php } ?>>1 этаж</option>
 										<option value="2"<?php if ($input['highest_water_point_floor'] == '2') { ?> selected="selected"<?php } ?>>2 этаж</option>
-										<option value="3"<?php if ($input['highest_water_point_floor'] == '3') { ?> selected="selected"<?php } ?>>3 этаж</option>
-										<option value="custom"<?php if ($input['highest_water_point_floor'] == 'custom') { ?> selected="selected"<?php } ?>>Другое значение</option>
+										<option value="3"<?php if ($input['highest_water_point_floor'] == '3') { ?> selected="selected"<?php } ?>>3 этажа и выше</option>
 									</select>
 								</div>
 								
 								<div class="form-group">
-									<label class="control-label" for="input-custom-lift">Высота, м</label>
+									<label class="control-label" for="input-custom-lift">Высота для 3+ этажей, м</label>
 									<input type="text" name="custom_vertical_lift_m" value="<?php echo htmlspecialchars($input['custom_vertical_lift_m'], ENT_QUOTES, 'UTF-8'); ?>" id="input-custom-lift" class="form-control pump-selector-number" />
+									<div class="help-block">Можно оставить пустым — будет принято 9 м.</div>
 								</div>
 								
 								<div class="form-group">
@@ -800,7 +1105,7 @@
 									<i class="fa fa-search"></i> Подобрать насос
 								</span>
 								<span class="pump-selector-submit-loading" style="display: none;">
-									<i class="fa fa-spinner fa-spin"></i> Подбираем...
+									<i class="fa fa-spinner fa-spin"></i> Подбираю...
 								</span>
 							</button>
 						</div>
@@ -817,25 +1122,42 @@
 								
 								<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
 									<div class="pump-selector-result-info">
-										<h3>Как читать подбор</h3>
+										<h3 class="h3_no_blue">Как читать подбор</h3>
 										
-										<div class="pump-selector-result-info-item">
-	<span class="label label-success">Лучшая цена</span>
-	<div class="result-info-title">Минимальная цена</div>
-	<p>Подходящий насос без лишнего запаса.</p>
-</div>
-
-<div class="pump-selector-result-info-item">
-	<span class="label label-warning">Оптимальный выбор</span>
-	<div class="result-info-title">Баланс цены и запаса</div>
-	<p>Обычно основной вариант для дома.</p>
-</div>
-
-<div class="pump-selector-result-info-item">
-	<span class="label label-primary">Премиум</span>
-	<div class="result-info-title">Больше запас и бренд</div>
-	<p>Для надежности, ресурса и спокойного выбора.</p>
-</div>
+										<div class="pump-selector-info-card pump-selector-info-card--best">
+											<div class="pump-selector-info-card-head">
+												<span class="pump-selector-info-icon">
+													<i class="fa fa-rub"></i>
+												</span>
+												<span class="pump-selector-info-label">Лучшая цена</span>
+											</div>
+											<div class="pump-selector-info-title">Минимальная цена</div>
+											<p>Подходящий насос без лишнего запаса.</p>
+										</div>
+										
+										<div class="pump-selector-info-card pump-selector-info-card--optimal">
+											<div class="pump-selector-info-card-head">
+												<span class="pump-selector-info-icon">
+													<i class="fa fa-balance-scale"></i>
+												</span>
+												<span class="pump-selector-info-label">Оптимальный выбор</span>
+											</div>
+											<div class="pump-selector-info-title">Баланс цены и запаса</div>
+											<p>Обычно основной вариант для дома.</p>
+										</div>
+										<?php $has_premium = !empty($products) && count($products) >= 3; ?>
+										<?php if($has_premium){ ?>
+											<div class="pump-selector-info-card pump-selector-info-card--premium">
+												<div class="pump-selector-info-card-head">
+													<span class="pump-selector-info-icon">
+														<i class="fa fa-diamond"></i>
+													</span>
+													<span class="pump-selector-info-label">Премиум качество</span>
+												</div>
+												<div class="pump-selector-info-title">Запас по напору и брендовое качество</div>
+												<p>Для надежности, ресурса и спокойного выбора.</p>
+											</div>
+										<?php } ?>
 										<div class="pump-selector-result-info-note">
 											Подбор предварительный. Перед покупкой лучше подтвердить параметры скважины со специалистом.
 										</div>
@@ -844,116 +1166,225 @@
 								
 								<div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
 									<div class="row">
+										<?php $result_count = !empty($products) ? count($products) : 0; ?>
 										
 										<?php foreach ($products as $product) { ?>
 											<div class="product-layout product-grid col-lg-4 col-md-4 col-sm-6 col-xs-12 pump-selector-results-item">
-												<div class="product-thumb transition">
+												<?php
+													$flow_m3_h = round($product['max_flow_l_min'] * 0.06, 1);
+												?>
+												
+												<div class="product-thumb product_<?php echo $product['product_id']; ?> pump-selector-product-thumb" itemprop="itemListElement" itemscope itemtype="http://schema.org/Product">
 													
-													<div class="pump-selector-badges">
-														<?php foreach ($product['result_types'] as $result_type) { ?>
-															<?php if ($result_type == 'best_price') { ?>
-																<?php $label_class = 'label-success'; ?>
-																<?php } elseif ($result_type == 'optimal_choice') { ?>
-																<?php $label_class = 'label-warning'; ?>
-																<?php } elseif ($result_type == 'premium') { ?>
-																<?php $label_class = 'label-primary'; ?>
-																<?php } else { ?>
-																<?php $label_class = 'label-info'; ?>
-															<?php } ?>
-															
-															<span class="label <?php echo $label_class; ?>">
-																<?php echo isset($result_type_labels[$result_type]) ? $result_type_labels[$result_type] : $result_type; ?>
-															</span>
-														<?php } ?>
-													</div>
-													
-													<div class="image">
+													<div class="image pb-60">
 														<a href="<?php echo $product['href']; ?>">
 															<img
 															src="<?php echo $product['thumb']; ?>"
 															alt="<?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?>"
 															title="<?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?>"
 															class="img-responsive"
+															itemprop="image"
 															/>
 														</a>
-													</div>
-													
-													<div class="pump-selector-specs clearfix">
-														<div class="spec-item">
-															Напор
-															<span class="spec-value">до <?php echo $product['max_head_m']; ?> м</span>
+														
+														<div class="stiker_panel"></div>
+														
+														<div class="fapanel rev_wish_srav_prod">
+															<div class="lupa">
+																<a onclick="get_revpopup_view('<?php echo $product['product_id']; ?>');">
+																	<i data-toggle="tooltip" data-placement="left" title="Быстрый просмотр" class="fa fa-border fa-eye"></i>
+																</a>
+															</div>
+															
+															<div class="zakaz">
+																<a onclick="get_revpopup_purchase('<?php echo $product['product_id']; ?>');">
+																	<i data-toggle="tooltip" data-placement="left" title="Купить в 1 клик" class="fa fa-border fa-gavel"></i>
+																</a>
+															</div>
 														</div>
 														
-														<div class="spec-item">
-															Подача
-															<span class="spec-value"><?php echo $product['max_flow_l_min']; ?> л/мин</span>
+														<?php foreach ($product['result_types'] as $result_type) { ?>
+															<?php if ($result_type == 'best_price') { ?>
+																<div class="badge-flag badge-flag--green">
+																	<span class="star">★</span>
+																	<?php echo isset($result_type_labels[$result_type]) ? $result_type_labels[$result_type] : 'Лучшая цена'; ?>
+																</div>
+																<?php } elseif ($result_type == 'optimal_choice') { ?>
+																<div class="badge-flag badge-flag--yellow">
+																	<span class="star">★</span>
+																	<?php echo isset($result_type_labels[$result_type]) ? $result_type_labels[$result_type] : 'Оптимальный выбор'; ?>
+																</div>
+																<?php } elseif ($result_type == 'premium') { ?>
+																<div class="badge-flag badge-flag--blue">
+																	<span class="star">★</span>
+																	<?php echo isset($result_type_labels[$result_type]) ? $result_type_labels[$result_type] : 'Премиум качество'; ?>
+																</div>
+															<?php } ?>
+														<?php } ?>
+														
+														<div class="product-specs">
+															<div class="spec-item">
+																<img src="catalog/view/theme/revolution/image/spec/dropwater.svg" width="30" height="30" alt="" />
+																<div class="spec-text">
+																	<div class="label">Напор</div>
+																	<div class="value">До <?php echo $product['max_head_m']; ?> м</div>
+																</div>
+															</div>
+															
+															<div class="spec-item-divider" style="width:1px;height:30px;background: #fff;"></div>
+															
+															<div class="spec-item">
+																<img src="catalog/view/theme/revolution/image/spec/seawaves.svg" width="30" height="30" alt="" />
+																<div class="spec-text">
+																	<div class="label">Подача</div>
+																	<div class="value"><?php echo $flow_m3_h; ?> м³/ч</div>
+																</div>
+															</div>
 														</div>
 													</div>
 													
-													<div class="caption">
+													<div class="caption product-info clearfix" style="margin-left: initial;">
 														<h4>
 															<a href="<?php echo $product['href']; ?>">
-																<?php echo $product['name'] ? $product['name'] : 'Товар #' . $product['product_id']; ?>
+																<span itemprop="name">
+																	<?php echo $product['name'] ? $product['name'] : 'Товар #' . $product['product_id']; ?>
+																</span>
 															</a>
 														</h4>
 														
-														<?php if ($product['manufacturer']) { ?>
-															<p>Производитель: <?php echo $product['manufacturer']; ?></p>
-														<?php } ?>
+														<link itemprop="url" href="<?php echo $product['href']; ?>" />
 														
-														<?php if ($product['price']) { ?>
-															<p class="price">
-																<?php if (!$product['special']) { ?>
-																	<?php echo $product['price']; ?>
-																	<?php } else { ?>
-																	<span class="price-new"><?php echo $product['special']; ?></span>
-																	<span class="price-old"><?php echo $product['price']; ?></span>
+														<div class="rating">
+															<span itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+																<meta itemprop="worstRating" content="1" />
+																<meta itemprop="bestRating" content="5" />
+																<meta itemprop="ratingValue" content="0.0" />
+																<meta itemprop="reviewCount" content="" />
+																<span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
+																<span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
+																<span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
+																<span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
+																<span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
+															</span>
+														</div>
+														
+														<div class="description_options">
+															<div class="description">
+																<?php if ($product['manufacturer']) { ?>
+																	<span class="attr_i_1">
+																		<span class="span_attr_name">Производитель:</span>
+																		<?php echo $product['manufacturer']; ?>
+																	</span>
 																<?php } ?>
+															</div>
+														</div>
+														
+														<div class="product_buttons">
+															<div class="fapanel-price">
+																<div class="zakaz">
+																	<a onclick="get_revpopup_purchase('<?php echo $product['product_id']; ?>');">
+																		<i data-toggle="tooltip" data-placement="top" title="Купить в 1 клик" class="fa fa-border fa-gavel"></i>
+																	</a>
+																</div>
 																
-																<?php if ($product['tax']) { ?>
-																	<span class="price-tax">с НДС: <?php echo $product['tax']; ?></span>
-																<?php } ?>
-															</p>
-														<?php } ?>
-														
-														<div class="pump-selector-debug">
-															<div>Запас напора: <?php echo $product['head_reserve']; ?> м</div>
-															<div>Запас подачи: <?php echo $product['flow_reserve']; ?> л/мин</div>
-															<div>Напряжение: <?php echo $product['voltage']; ?>В</div>
-															<div>Диаметр насоса: <?php echo $product['pump_diameter_mm']; ?> мм</div>
+																<div class="lupa">
+																	<a onclick="get_revpopup_view('<?php echo $product['product_id']; ?>');">
+																		<i data-toggle="tooltip" data-placement="top" title="Быстрый просмотр" class="fa fa-border fa-eye"></i>
+																	</a>
+																</div>
+															</div>
 															
-															<?php if ($product['stock_status']) { ?>
-																<div>Наличие: <?php echo $product['stock_status']; ?></div>
+															<?php if ($product['price']) { ?>
+																<div class="price" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+																	<?php if (!$product['special']) { ?>
+																		<span class="price_no_format"><?php echo $product['price']; ?></span>
+																		<?php } else { ?>
+																		<span class="price-new"><?php echo $product['special']; ?></span>
+																		<span class="price-old"><?php echo $product['price']; ?></span>
+																	<?php } ?>
+																	
+																	<meta itemprop="priceCurrency" content="RUB" />
+																	
+																	<?php if ($product['tax']) { ?>
+																		<small class="price-hint price-hint--top-1">с НДС</small>
+																	<?php } ?>
+																</div>
 															<?php } ?>
+															
+															<div class="number">
+																<div class="frame-change-count">
+																	<div class="btn-plus">
+																		<button type="button" onclick="var q=document.getElementById('pump-selector-qty-<?php echo $product['product_id']; ?>'); q.value=parseInt(q.value || 1, 10)+1;">+</button>
+																	</div>
+																	
+																	<div class="btn-minus">
+																		<button type="button" onclick="var q=document.getElementById('pump-selector-qty-<?php echo $product['product_id']; ?>'); q.value=Math.max(1, parseInt(q.value || 1, 10)-1);">-</button>
+																	</div>
+																</div>
+																
+																<input
+																type="text"
+																name="quantity"
+																id="pump-selector-qty-<?php echo $product['product_id']; ?>"
+																class="plus-minus"
+																value="<?php echo $product['minimum']; ?>"
+																/>
+															</div>
+															
+															<div class="clearfix"></div>
+															
+															<div class="compare">
+																<a onclick="compare.add('<?php echo $product['product_id']; ?>', '');" data-toggle="tooltip" title="Сравнить">
+																	<i class="fa fa-border fa-bar-chart-o"></i>
+																</a>
+															</div>
+															
+															<div class="cart">
+																<a onclick="cart.add('<?php echo $product['product_id']; ?>', document.getElementById('pump-selector-qty-<?php echo $product['product_id']; ?>').value);" data-toggle="tooltip" title="Купить">
+																	<i class="fa fa-border fa-shopping-basket">
+																		<span class="prlistb">Купить</span>
+																	</i>
+																</a>
+															</div>
 														</div>
 													</div>
-													
-													<div class="button-group">
-														<button type="button" onclick="cart.add('<?php echo $product['product_id']; ?>', '<?php echo $product['minimum']; ?>');">
-															<i class="fa fa-shopping-cart"></i>
-															<span>Купить</span>
-														</button>
-													</div>
-													
 												</div>
 											</div>
 										<?php } ?>
-										
+										<?php if ($result_count == 2) { ?>
+											<div class="product-layout col-lg-4 col-md-4 col-sm-6 col-xs-12">
+												<div class="pump-selector-cta-card">
+													<div class="pump-selector-cta-icon">?</div>
+													
+													<div class="pump-selector-cta-title">
+														Нужен вариант с большим запасом?
+													</div>
+													
+													<div class="pump-selector-cta-text">
+														Если хотите насос с повышенным запасом по напору и ресурсу — специалист проверит параметры и подберёт подходящую модель.
+													</div>
+													
+													<button type="button" class="btn btn-primary pump-selector-cta-button">
+														Получить консультацию
+													</button>
+												</div>
+											</div>
+										<?php } ?>
 									</div>
 								</div>
 								
 							</div>
 						</div>
 						
-						<div class="pump-selector-consultation">
-							<h3>Не уверены в выборе?</h3>
-							<p>
-								Специалист проверит параметры скважины, уровень воды, диаметр обсадной трубы и условия установки перед покупкой.
-							</p>
-							<a href="/index.php?route=information/contact" class="btn btn-primary">
-								Получить консультацию специалиста
-							</a>
-						</div>
+						<?php if ($result_count != 2) { ?>
+							<div class="pump-selector-consult-box">
+								<h3 class="h3_no_blue">Не уверены в выборе?</h3>
+								<p>Специалист проверит параметры скважины, уровень воды, диаметр обсадной трубы и условия установки перед покупкой.</p>
+								<button type="button" class="btn btn-primary">
+									Получить консультацию специалиста
+								</button>
+							</div>
+						<?php } ?>
 						
 						<?php } else { ?>
 						<div class="alert alert-info">
@@ -964,7 +1395,7 @@
 					
 					<div class="pump-selector-after-results">
 						<?php if ($warnings) { ?>
-							<h3>Важно перед покупкой</h3>
+							<h3 class="h3_no_blue">Важно перед покупкой</h3>
 							
 							<div class="alert alert-warning">
 								<ul>
@@ -975,7 +1406,7 @@
 							</div>
 						<?php } ?>
 						
-						<h3>Расчетные параметры</h3>
+						<h3 class="h3_no_blue">Расчетные параметры</h3>
 						
 						<table class="table table-bordered">
 							<tbody>
@@ -1271,6 +1702,30 @@
 							this.value = value;
 						});
 					}
+				});
+			</script>
+			<script type="text/javascript">
+				document.addEventListener('DOMContentLoaded', function () {
+					var floor = document.getElementById('input-floor');
+					var lift = document.getElementById('input-custom-lift');
+
+					if (!floor || !lift) {
+						return;
+					}
+
+					function updateLiftField() {
+						if (floor.value === '3') {
+							lift.disabled = false;
+							lift.classList.remove('is-disabled');
+						} else {
+							lift.value = '';
+							lift.disabled = true;
+							lift.classList.add('is-disabled');
+						}
+					}
+
+					floor.addEventListener('change', updateLiftField);
+					updateLiftField();
 				});
 			</script>
 			<?php echo $content_bottom; ?>

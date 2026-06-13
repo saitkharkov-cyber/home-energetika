@@ -52,7 +52,7 @@ class ControllerExtensionModulePumpSelector extends Controller {
 		$data['result_type_labels'] = array(
 			'best_price'      => 'Лучшая цена',
 			'optimal_choice'  => 'Оптимальный выбор',
-			'premium'         => 'Премиум'
+			'premium'         => 'Премиум качество'
 		);
 
 		$data['breadcrumbs'] = array();
