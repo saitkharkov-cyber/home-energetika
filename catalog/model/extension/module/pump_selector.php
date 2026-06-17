@@ -34,14 +34,6 @@ class ModelExtensionModulePumpSelector extends Model {
 			$errors['highest_water_point_floor'] = 'Укажите самую высокую точку водоразбора: 1, 2 или 3 этажа и выше.';
 		}
 
-		if ($highest_water_point_floor == 'custom') {
-			$custom_vertical_lift_m = $this->toFloat($this->getValue($input, 'custom_vertical_lift_m', 0));
-
-			if ($custom_vertical_lift_m <= 0) {
-				$errors['custom_vertical_lift_m'] = 'Высота самой высокой точки должна быть больше 0.';
-			}
-		}
-
 		$selected_water_points = $this->getSelectedWaterPoints($input);
 		if (count($selected_water_points) < 1) {
 			$errors['water_points'] = 'Выберите минимум одну точку водоразбора.';
@@ -500,11 +492,13 @@ class ModelExtensionModulePumpSelector extends Model {
 		}
 
 		if ($highest_water_point_floor == '3') {
-			return 9.0;
-		}
+			$custom_vertical_lift_m = $this->toFloat($this->getValue($input, 'custom_vertical_lift_m', 0));
 
-		if ($highest_water_point_floor == '4') {
-			return 12.0;
+			if ($custom_vertical_lift_m > 0) {
+				return $custom_vertical_lift_m;
+			}
+
+			return 9.0;
 		}
 
 		return 3.0;

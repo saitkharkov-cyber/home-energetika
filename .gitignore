@@ -4,3 +4,4 @@
 /config.php
 /admin/config.php
 *.log
+/local_proxy.txt
