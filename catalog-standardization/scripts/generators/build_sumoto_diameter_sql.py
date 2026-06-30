@@ -1,28 +1,46 @@
 import csv
+from pathlib import Path
 
-out = []
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-with open("sumoto_import_ready_98.csv", encoding="utf-8-sig", newline="") as f:
-    rows = list(csv.DictReader(f))
+INPUT_CSV = BASE_DIR / "data" / "sumoto" / "validated" / "sumoto_import_ready_98.csv"
+OUTPUT_SQL = BASE_DIR / "sql" / "generated" / "sumoto" / "sumoto_diameter_attribute_98.sql"
 
-for r in rows:
-    if r.get("match_status") != "matched":
-        continue
+ATTRIBUTE_ID = 44
 
-    diameter = (r.get("diameter_mm") or "").strip()
 
-    if not diameter:
-        continue
+def sql_escape(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("'", "\\'")
 
-    product_id = int(r["product_id"])
 
-    out.append(
-        "REPLACE INTO oc_product_attribute "
-        "(product_id, attribute_id, language_id, text) "
-        f"VALUES ({product_id}, 44, 1, '{diameter}');"
-    )
+with INPUT_CSV.open("r", encoding="utf-8-sig", newline="") as f:
+    reader = csv.DictReader(f)
 
-with open("sumoto_diameter_attribute_98.sql", "w", encoding="utf-8") as f:
-    f.write("\n".join(out) + "\n")
+    with OUTPUT_SQL.open("w", encoding="utf-8", newline="") as out:
 
-print("written:", len(out), "sumoto_diameter_attribute_98.sql")
+        out.write("-- Sumoto diameter import\n")
+        out.write("-- Attribute: Диаметр насоса (мм)\n\n")
+
+        count = 0
+
+        for row in reader:
+
+            product_id = row["product_id"].strip()
+            diameter = row["diameter_mm"].strip()
+
+            if not product_id or not diameter:
+                continue
+
+            out.write(
+                "UPDATE oc_product_attribute\n"
+                f"SET text = '{sql_escape(diameter)}'\n"
+                f"WHERE product_id = {product_id}\n"
+                f"  AND attribute_id = {ATTRIBUTE_ID};\n\n"
+            )
+
+            count += 1
+
+        out.write(f"-- Total updates: {count}\n")
+
+print(f"Generated {count} UPDATE statements.")
+print(OUTPUT_SQL)
