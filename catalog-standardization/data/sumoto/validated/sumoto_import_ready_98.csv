@@ -1,0 +1,99 @@
+﻿product_id,home_name,home_model,home_voltage_from_name,home_norm_model,match_key_home,source_title,source_model,source_voltage,match_key_source,closest_source_model,closest_source_norm_model,max_head_m,max_flow_original,max_flow_l_min,voltage,power_kw,diameter_raw,diameter_mm,source_url,source_status,source_used,match_status
+1812,Погружной скважинный насос SUMOTO 3OPC1.8/47,3OPC1.8/47,,3OPC1.8/47,3OPC1.8/47,,3OPC1.8/47,,3OPC1.8/47,3OPC1.8/47,3OPC1.8/47,196,,45,220,1.5,3OPC heuristic,76,,ok,manual,matched
+1813,Погружной скважинный насос SUMOTO 3OPC1.8/7,3OPC1.8/7,,3OPC1.8/7,3OPC1.8/7,,3OPC1.8/7,,3OPC1.8/7,3OPC1.8/7,3OPC1.8/7,30,,45,220,0.18,3OPC heuristic,76,,ok,manual,matched
+1814,Погружной скважинный насос SUMOTO 3OPC1.8/10,3OPC1.8/10,,3OPC1.8/10,3OPC1.8/10,,3OPC1.8/10,,3OPC1.8/10,3OPC1.8/10,3OPC1.8/10,42,,45,220,0.25,3OPC heuristic,76,,ok,manual,matched
+1815,Погружной скважинный насос SUMOTO 3OPC1.8/14,3OPC1.8/14,,3OPC1.8/14,3OPC1.8/14,,3OPC1.8/14,,3OPC1.8/14,3OPC1.8/14,3OPC1.8/14,59,,45,220,0.37,3OPC heuristic,76,,ok,manual,matched
+1816,Погружной скважинный насос SUMOTO 3OPC1.8/20,3OPC1.8/20,,3OPC1.8/20,3OPC1.8/20,,3OPC1.8/20,,3OPC1.8/20,3OPC1.8/20,3OPC1.8/20,84,,45,220,0.55,3OPC heuristic,76,,ok,manual,matched
+1817,Погружной скважинный насос SUMOTO 3OPC1.8/27,3OPC1.8/27,,3OPC1.8/27,3OPC1.8/27,,3OPC1.8/27,,3OPC1.8/27,3OPC1.8/27,3OPC1.8/27,113,,45,220,0.75,3OPC heuristic,76,,ok,manual,matched
+1818,Погружной скважинный насос SUMOTO 3OPC1.8/37,3OPC1.8/37,,3OPC1.8/37,3OPC1.8/37,,3OPC1.8/37,,3OPC1.8/37,3OPC1.8/37,3OPC1.8/37,154,,45,220,1.1,3OPC heuristic,76,,ok,manual,matched
+1819,Погружной скважинный насос SUMOTO 3OPC2.5/5,3OPC2.5/5,,3OPC2.5/5,3OPC2.5/5,,3OPC2.5/5,,3OPC2.5/5,3OPC2.5/5,3OPC2.5/5,24,,60,220,0.18,3OPC heuristic,76,,ok,manual,matched
+1820,Погружной скважинный насос SUMOTO 3OPC2.5/7,3OPC2.5/7,,3OPC2.5/7,3OPC2.5/7,,3OPC2.5/7,,3OPC2.5/7,3OPC2.5/7,3OPC2.5/7,32,,60,220,0.25,3OPC heuristic,76,,ok,manual,matched
+1821,Погружной скважинный насос SUMOTO 3OPC2.5/10,3OPC2.5/10,,3OPC2.5/10,3OPC2.5/10,,3OPC2.5/10,,3OPC2.5/10,3OPC2.5/10,3OPC2.5/10,44,,60,220,0.37,3OPC heuristic,76,,ok,manual,matched
+1822,Погружной скважинный насос SUMOTO 3OPC2.5/15,3OPC2.5/15,,3OPC2.5/15,3OPC2.5/15,,3OPC2.5/15,,3OPC2.5/15,3OPC2.5/15,3OPC2.5/15,65,,60,220,0.55,3OPC heuristic,76,,ok,manual,matched
+1823,Погружной скважинный насос SUMOTO 3OPC2.5/20,3OPC2.5/20,,3OPC2.5/20,3OPC2.5/20,,3OPC2.5/20,,3OPC2.5/20,3OPC2.5/20,3OPC2.5/20,87,,60,220,0.75,3OPC heuristic,76,,ok,manual,matched
+1824,Погружной скважинный насос SUMOTO 3OPC2.5/28,3OPC2.5/28,,3OPC2.5/28,3OPC2.5/28,,3OPC2.5/28,,3OPC2.5/28,3OPC2.5/28,3OPC2.5/28,122,,60,220,1.1,3OPC heuristic,76,,ok,manual,matched
+1825,Погружной скважинный насос SUMOTO 3OPC2.5/36,3OPC2.5/36,,3OPC2.5/36,3OPC2.5/36,,3OPC2.5/36,,3OPC2.5/36,3OPC2.5/36,3OPC2.5/36,156,,60,220,1.5,3OPC heuristic,76,,ok,manual,matched
+1826,Погружной скважинный насос SUMOTO 3OPC4/7,3OPC4/7,,3OPC4/7,3OPC4/7,,3OPC4/7,,3OPC4/7,3OPC4/7,3OPC4/7,24,,80,220,0.25,3OPC heuristic,76,,ok,manual,matched
+1827,Погружной скважинный насос SUMOTO 3OPC4/9,3OPC4/9,,3OPC4/9,3OPC4/9,,3OPC4/9,,3OPC4/9,3OPC4/9,3OPC4/9,31,,80,220,0.37,3OPC heuristic,76,,ok,manual,matched
+1828,Погружной скважинный насос SUMOTO 3OPC4/14,3OPC4/14,,3OPC4/14,3OPC4/14,,3OPC4/14,,3OPC4/14,3OPC4/14,3OPC4/14,48,,80,220,0.55,3OPC heuristic,76,,ok,manual,matched
+1829,Погружной скважинный насос 3OPC4/19,3OPC4/19,,3OPC4/19,3OPC4/19,,3OPC4/19,,3OPC4/19,3OPC4/19,3OPC4/19,65,,80,220,0.75,3OPC heuristic,76,,ok,manual,matched
+1830,Погружной скважинный насос SUMOTO 3OPC4/26,3OPC4/26,,3OPC4/26,3OPC4/26,,3OPC4/26,,3OPC4/26,3OPC4/26,3OPC4/26,88,,80,220,1.1,3OPC heuristic,76,,ok,manual,matched
+1831,Погружной скважинный насос SUMOTO 3OPC4/35,3OPC4/35,,3OPC4/35,3OPC4/35,,3OPC4/35,,3OPC4/35,3OPC4/35,3OPC4/35,119,,80,220,1.5,3OPC heuristic,76,,ok,manual,matched
+1832,Погружной скважинный насос SUMOTO 3OPC5/4,3OPC5/4,,3OPC5/4,3OPC5/4,,3OPC5/4,,3OPC5/4,3OPC5/4,3OPC5/4,15,,100,220,0.25,3OPC heuristic,76,,ok,manual,matched
+1833,Погружной скважинный насос SUMOTO 3OPC5/7,3OPC5/7,,3OPC5/7,3OPC5/7,,3OPC5/7,,3OPC5/7,3OPC5/7,3OPC5/7,26,,100,220,0.37,3OPC heuristic,76,,ok,manual,matched
+1834,Погружной скважинный насос SUMOTO 3OPC5/9,3OPC5/9,,3OPC5/9,3OPC5/9,,3OPC5/9,,3OPC5/9,3OPC5/9,3OPC5/9,32,,100,220,0.55,3OPC heuristic,76,,ok,manual,matched
+1835,Погружной скважинный насос SUMOTO 3OPC5/13,3OPC5/13,,3OPC5/13,3OPC5/13,,3OPC5/13,,3OPC5/13,3OPC5/13,3OPC5/13,47,,100,220,0.75,3OPC heuristic,76,,ok,manual,matched
+1836,Погружной скважинный насос SUMOTO 3OPC5/19,3OPC5/19,,3OPC5/19,3OPC5/19,,3OPC5/19,,3OPC5/19,3OPC5/19,3OPC5/19,68,,100,220,1.1,3OPC heuristic,76,,ok,manual,matched
+1838,Погружной скважинный насос SUMOTO 3OPC5/26,3OPC5/26,,3OPC5/26,3OPC5/26,,3OPC5/26,,3OPC5/26,3OPC5/26,3OPC5/26,94,,100,220,1.5,3OPC heuristic,76,,ok,manual,matched
+1839,Погружной скважинный насос SUMOTO 4SRM2/7 (220V),4SRM2/7,220,4SRM2/7,4SRM2/7,,4SRM2/7,,4SRM2/7,4SRM2/7,4SRM2/7,45,,60,220,0.37,4SR heuristic,96,,ok,manual,matched
+1840,Погружной скважинный насос SUMOTO 4SRM2/10 (220V),4SRM2/10,220,4SRM2/10,4SRM2/10,,4SRM2/10,,4SRM2/10,4SRM2/10,4SRM2/10,65,,60,220,0.55,4SR heuristic,96,,ok,manual,matched
+1841,Погружной скважинный насос SUMOTO 4SRM2/13 (220V),4SRM2/13,220,4SRM2/13,4SRM2/13,,4SRM2/13,,4SRM2/13,4SRM2/13,4SRM2/13,84,,60,220,0.75,4SR heuristic,96,,ok,manual,matched
+1842,Погружной скважинный насос SUMOTO 4SRM2/20 (220V),4SRM2/20,220,4SRM2/20,4SRM2/20,,4SRM2/20,,4SRM2/20,4SRM2/20,4SRM2/20,130,,60,220,1.1,4SR heuristic,96,,ok,manual,matched
+1843,Погружной скважинный насос SUMOTO 4SRM2/27 (220V),4SRM2/27,220,4SRM2/27,4SRM2/27,,4SRM2/27,,4SRM2/27,4SRM2/27,4SRM2/27,175,,60,220,1.5,4SR heuristic,96,,ok,manual,matched
+1844,Погружной скважинный насос SUMOTO 4SRM2/39 (220V),4SRM2/39,220,4SRM2/39,4SRM2/39,,4SRM2/39,,4SRM2/39,4SRM2/39,4SRM2/39,253,,60,220,2.2,4SR heuristic,96,,ok,manual,matched
+1845,Погружной скважинный насос SUMOTO 4SR2/7 (380V),4SR2/7,380,4SR2/7,4SR2/7,,4SR2/7,,4SR2/7,4SR2/7,4SR2/7,45,,60,380,0.37,4SR heuristic,96,,ok,manual,matched
+1846,Погружной скважинный насос SUMOTO 4SR2/10 (380V),4SR2/10,380,4SR2/10,4SR2/10,,4SR2/10,,4SR2/10,4SR2/10,4SR2/10,65,,60,380,0.55,4SR heuristic,96,,ok,manual,matched
+1847,Погружной скважинный насос SUMOTO 4SR2/13 (380V),4SR2/13,380,4SR2/13,4SR2/13,,4SR2/13,,4SR2/13,4SR2/13,4SR2/13,84,,60,380,0.75,4SR heuristic,96,,ok,manual,matched
+1848,Погружной скважинный насос SUMOTO 4SR2/20 (380V),4SR2/20,380,4SR2/20,4SR2/20,,4SR2/20,,4SR2/20,4SR2/20,4SR2/20,130,,60,380,1.1,4SR heuristic,96,,ok,manual,matched
+1849,Погружной скважинный насос SUMOTO 4SR2/27 (380V),4SR2/27,380,4SR2/27,4SR2/27,,4SR2/27,,4SR2/27,4SR2/27,4SR2/27,175,,60,380,1.5,4SR heuristic,96,,ok,manual,matched
+1851,Погружной скважинный насос SUMOTO OPC 4SRM4/5,OPC 4SRM4/5,,4SRM4/5,4SRM4/5,,4SRM4/5,,4SRM4/5,4SRM4/5,4SRM4/5,32,,100,220,0.37,4SR heuristic,96,,ok,manual,matched
+1852,Погружной скважинный насос SUMOTO 4SRM4/7,4SRM4/7,,4SRM4/7,4SRM4/7,,4SRM4/7,,4SRM4/7,4SRM4/7,4SRM4/7,45,,100,220,0.55,4SR heuristic,96,,ok,manual,matched
+1853,Погружной скважинный насос SUMOTO 4SRM4/9,4SRM4/9,,4SRM4/9,4SRM4/9,,4SRM4/9,,4SRM4/9,4SRM4/9,4SRM4/9,57,,100,220,0.75,4SR heuristic,96,,ok,manual,matched
+1854,Погружной скважинный насос SUMOTO 4SRM4/14,4SRM4/14,,4SRM4/14,4SRM4/14,,4SRM4/14,,4SRM4/14,4SRM4/14,4SRM4/14,90,,100,220,1.1,4SR heuristic,96,,ok,manual,matched
+1855,Погружной скважинный насос SUMOTO OPC 4SRM4/18,OPC 4SRM4/18,,4SRM4/18,4SRM4/18,,4SRM4/18,,4SRM4/18,4SRM4/18,4SRM4/18,115,,100,220,1.5,4SR heuristic,96,,ok,manual,matched
+1856,Погружной скважинный насос SUMOTO OPC 4SRM4/26,OPC 4SRM4/26,,4SRM4/26,4SRM4/26,,4SRM4/26,,4SRM4/26,4SRM4/26,4SRM4/26,173,,100,220,2.2,4SR heuristic,96,,ok,manual,matched
+1857,Погружной скважинный насос SUMOTO 4SR4/5,4SR4/5,,4SR4/5,4SR4/5,,4SR4/5,,4SR4/5,4SR4/5,4SR4/5,32,,100,380,0.37,4SR heuristic,96,,ok,manual,matched
+1858,Погружной скважинный насос SUMOTO 4SR4/7,4SR4/7,,4SR4/7,4SR4/7,,4SR4/7,,4SR4/7,4SR4/7,4SR4/7,45,,100,380,0.55,4SR heuristic,96,,ok,manual,matched
+1859,Погружной скважинный насос SUMOTO 4SR4/9,4SR4/9,,4SR4/9,4SR4/9,,4SR4/9,,4SR4/9,4SR4/9,4SR4/9,57,,100,380,0.75,4SR heuristic,96,,ok,manual,matched
+1860,Погружной скважинный насос SUMOTO 4SR4/14,4SR4/14,,4SR4/14,4SR4/14,,4SR4/14,,4SR4/14,4SR4/14,4SR4/14,90,,100,380,1.1,4SR heuristic,96,,ok,manual,matched
+1861,Погружной скважинный насос SUMOTO OPC 4SR4/18,OPC 4SR4/18,,4SR4/18,4SR4/18,,4SR4/18,,4SR4/18,4SR4/18,4SR4/18,115,,100,380,1.5,4SR heuristic,96,,ok,manual,matched
+1862,Погружной скважинный насос SUMOTO OPC 4SR4/26,OPC 4SR4/26,,4SR4/26,4SR4/26,,4SR4/26,,4SR4/26,4SR4/26,4SR4/26,173,,100,380,2.2,4SR heuristic,96,,ok,manual,matched
+1863,Погружной скважинный насос SUMOTO OPC 4SR4/35,OPC 4SR4/35,,4SR4/35,4SR4/35,,4SR4/35,,4SR4/35,4SR4/35,4SR4/35,225,,100,380,3.0,4SR heuristic,96,,ok,manual,matched
+1864,Погружной скважинный насос SUMOTO OPC 4SR4/46,OPC 4SR4/46,,4SR4/46,4SR4/46,,4SR4/46,,4SR4/46,4SR4/46,4SR4/46,308,,100,380,4.0,4SR heuristic,96,,ok,manual,matched
+1865,Погружной скважинный насос SUMOTO OPC 4SR4/60,OPC 4SR4/60,,4SR4/60,4SR4/60,,4SR4/60,,4SR4/60,4SR4/60,4SR4/60,405,,100,380,5.5,4SR heuristic,96,,ok,manual,matched
+1866,Погружной скважинный насос SUMOTO 4SRM6/7 (220V),4SRM6/7,220,4SRM6/7,4SRM6/7,,4SRM6/7,,4SRM6/7,4SRM6/7,4SRM6/7,42,,160,220,0.75,4SR heuristic,96,,ok,manual,matched
+1867,Погружной скважинный насос SUMOTO 4SRM6/10 (220V),4SRM6/10,220,4SRM6/10,4SRM6/10,,4SRM6/10,,4SRM6/10,4SRM6/10,4SRM6/10,60,,160,220,1.1,4SR heuristic,96,,ok,manual,matched
+1868,Погружной скважинный насос SUMOTO 4SRM6/14 (220V),4SRM6/14,220,4SRM6/14,4SRM6/14,,4SRM6/14,,4SRM6/14,4SRM6/14,4SRM6/14,84,,160,220,1.5,4SR heuristic,96,,ok,manual,matched
+1869,Погружной скважинный насос SUMOTO 4SRM6/20 (220V),4SRM6/20,220,4SRM6/20,4SRM6/20,,4SRM6/20,,4SRM6/20,4SRM6/20,4SRM6/20,120,,160,220,2.2,4SR heuristic,96,,ok,manual,matched
+1870,Погружной скважинный насос SUMOTO 4SR6/7,4SR6/7,,4SR6/7,4SR6/7,,4SR6/7,,4SR6/7,4SR6/7,4SR6/7,42,,160,380,0.75,4SR heuristic,96,,ok,manual,matched
+1871,Погружной скважинный насос SUMOTO 4SR6/10,4SR6/10,,4SR6/10,4SR6/10,,4SR6/10,,4SR6/10,4SR6/10,4SR6/10,60,,160,380,1.1,4SR heuristic,96,,ok,manual,matched
+1872,Погружной скважинный насос SUMOTO 4SR6/14,4SR6/14,,4SR6/14,4SR6/14,,4SR6/14,,4SR6/14,4SR6/14,4SR6/14,84,,160,380,1.5,4SR heuristic,96,,ok,manual,matched
+1873,Погружной скважинный насос SUMOTO 4SR6/20,4SR6/20,,4SR6/20,4SR6/20,,4SR6/20,,4SR6/20,4SR6/20,4SR6/20,120,,160,380,2.2,4SR heuristic,96,,ok,manual,matched
+1874,Погружной скважинный насос SUMOTO OPC 4SR6/27,OPC 4SR6/27,,4SR6/27,4SR6/27,,4SR6/27,,4SR6/27,4SR6/27,4SR6/27,162,,160,380,3.0,4SR heuristic,96,,ok,manual,matched
+1875,Погружной скважинный насос SUMOTO OPC 4SR6/36,OPC 4SR6/36,,4SR6/36,4SR6/36,,4SR6/36,,4SR6/36,4SR6/36,4SR6/36,216,,160,380,4.0,4SR heuristic,96,,ok,manual,matched
+1876,Погружной скважинный насос SUMOTO OPC 4SR6/49,OPC 4SR6/49,,4SR6/49,4SR6/49,,4SR6/49,,4SR6/49,4SR6/49,4SR6/49,294,,160,380,5.5,4SR heuristic,96,,ok,manual,matched
+1877,Погружной скважинный насос SUMOTO 4SRM8/4,4SRM8/4,,4SRM8/4,4SRM8/4,,4SRM8/4,,4SRM8/4,4SRM8/4,4SRM8/4,25,,200,220,0.75,4SR heuristic,96,,ok,manual,matched
+1878,Погружной скважинный насос SUMOTO 4SRM8/6,4SRM8/6,,4SRM8/6,4SRM8/6,,4SRM8/6,,4SRM8/6,4SRM8/6,4SRM8/6,37,,200,220,1.1,4SR heuristic,96,,ok,manual,matched
+1879,Погружной скважинный насос SUMOTO 4SRM8/8,4SRM8/8,,4SRM8/8,4SRM8/8,,4SRM8/8,,4SRM8/8,4SRM8/8,4SRM8/8,80,,200,220,1.5,4SR heuristic,96,,ok,manual,matched
+1880,Погружной скважинный насос SUMOTO 4SRM8/13,4SRM8/13,,4SRM8/13,4SRM8/13,,4SRM8/13,,4SRM8/13,4SRM8/13,4SRM8/13,81,,200,220,2.2,4SR heuristic,96,,ok,manual,matched
+1881,Погружной скважинный насос SUMOTO 4SR8/4,4SR8/4,,4SR8/4,4SR8/4,,4SR8/4,,4SR8/4,4SR8/4,4SR8/4,25,,200,380,0.75,4SR heuristic,96,,ok,manual,matched
+1882,Погружной скважинный насос SUMOTO 4SR8/6,4SR8/6,,4SR8/6,4SR8/6,,4SR8/6,,4SR8/6,4SR8/6,4SR8/6,37,,200,380,1.1,4SR heuristic,96,,ok,manual,matched
+1883,Погружной скважинный насос SUMOTO 4SR8/8,4SR8/8,,4SR8/8,4SR8/8,,4SR8/8,,4SR8/8,4SR8/8,4SR8/8,80,,200,380,1.5,4SR heuristic,96,,ok,manual,matched
+1884,Погружной скважинный насос SUMOTO 4SR8/13,4SR8/13,,4SR8/13,4SR8/13,,4SR8/13,,4SR8/13,4SR8/13,4SR8/13,81,,200,380,2.2,4SR heuristic,96,,ok,manual,matched
+1885,Погружной скважинный насос SUMOTO 4SR8/17,4SR8/17,,4SR8/17,4SR8/17,,4SR8/17,,4SR8/17,4SR8/17,4SR8/17,106,,200,380,3.0,4SR heuristic,96,,ok,manual,matched
+1887,Погружной скважинный насос SUMOTO OPC 4SR8/23,OPC 4SR8/23,,4SR8/23,4SR8/23,,4SR8/23,,4SR8/23,4SR8/23,4SR8/23,143,,200,380,4.0,4SR heuristic,96,,ok,manual,matched
+1888,Погружной скважинный насос SUMOTO OPC 4SR8/32,OPC 4SR8/32,,4SR8/32,4SR8/32,,4SR8/32,,4SR8/32,4SR8/32,4SR8/32,200,,200,380,5.5,4SR heuristic,96,,ok,manual,matched
+1897,Погружной скважинный насос SUMOTO OPC 4SR10/24,OPC 4SR10/24,,4SR10/24,4SR10/24,Скважинный погружной насос Sumoto OPC 4SR10/24 (380в),OPC 4SR10/24 (380в),,4SR10/24,OPC 4SR10/24 (380в),4SR10/24,134,14.46 м³/ч,241,380,4,4SR heuristic,96,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_4sr_10_24_380v/,needs_check,nasosymarket,matched
+1898,Погружной скважинный насос SUMOTO OPC 4SR10/32,OPC 4SR10/32,,4SR10/32,4SR10/32,Скважинный погружной насос Sumoto OPC 4SR10/32 (380в),OPC 4SR10/32 (380в),,4SR10/32,OPC 4SR10/32 (380в),4SR10/32,179,14.46 м³/ч,241,380,5.5,4SR heuristic,96,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_4sr_10_32_380v/,needs_check,nasosymarket,matched
+1899,Погружной скважинный насос SUMOTO 4SRM12/7 (220V),4SRM12/7,220,4SRM12/7,4SRM12/7,,4SRM12/7,,4SRM12/7,4SRM12/7,4SRM12/7,42,,270,220,1.5,4SR heuristic,96,,ok,manual,matched
+1900,Погружной скважинный насос SUMOTO 4SRM12/10 (220V),4SRM12/10,220,4SRM12/10,4SRM12/10,,4SRM12/10,,4SRM12/10,4SRM12/10,4SRM12/10,61,,270,220,2.2,4SR heuristic,96,,ok,manual,matched
+1901,Погружной скважинный насос SUMOTO 4SR12/7,4SR12/7,,4SR12/7,4SR12/7,,4SR12/7,,4SR12/7,4SR12/7,4SR12/7,42,,270,380,1.5,4SR heuristic,96,,ok,manual,matched
+1902,Погружной скважинный насос SUMOTO 4SR12/10,4SR12/10,,4SR12/10,4SR12/10,,4SR12/10,,4SR12/10,4SR12/10,4SR12/10,61,,270,380,2.2,4SR heuristic,96,,ok,manual,matched
+1903,Погружной скважинный насос SUMOTO 4SR12/14,4SR12/14,,4SR12/14,4SR12/14,,4SR12/14,,4SR12/14,4SR12/14,4SR12/14,85,,270,380,3.0,4SR heuristic,96,,ok,manual,matched
+1905,Погружной скважинный насос SUMOTO 4SR12/19,4SR12/19,,4SR12/19,4SR12/19,,4SR12/19,,4SR12/19,4SR12/19,4SR12/19,115,,270,380,4.0,4SR heuristic,96,,ok,manual,matched
+1906,Погружной скважинный насос SUMOTO OPC 4SR12/26,OPC 4SR12/26,,4SR12/26,4SR12/26,,4SR12/26,,4SR12/26,4SR12/26,4SR12/26,158,,270,380,5.5,4SR heuristic,96,,ok,manual,matched
+1907,Погружной скважинный насос SUMOTO 4SR12/33 (220V),4SR12/33,220,4SR12/33,4SR12/33,,4SR12/33,,4SR12/33,4SR12/33,4SR12/33,200,,270,380,7.5,4SR heuristic,96,,ok,manual,matched
+1908,Погружной скважинный насос SUMOTO 4SR16/30,4SR16/30,,4SR16/30,4SR16/30,Скважинный погружной насос Sumoto OPC 4SR16/30 (380в),OPC 4SR16/30 (380в),,4SR16/30,OPC 4SR16/30 (380в),4SR16/30,178,24.1 м³/ч,401.67,380,7.5,4SR heuristic,96,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_4sh_16_30_380v/,needs_check,nasosymarket,matched
+1911,Погружной скважинный насос SUMOTO 6OPC18/11,6OPC18/11,,6OPC18/11,6OPC18/11,Скважинный погружной насос Sumoto 6OPC18/11 (380в),6OPC18/11 (380в),,6OPC18/11,6OPC18/11 (380в),6OPC18/11,162,27.11 м³/ч,451.83,380,9.2,6 inch heuristic,146,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_6opc18_11_380v/,needs_check,nasosymarket,matched
+1912,Погружной скважинный насос SUMOTO 6OPC18/13,6OPC18/13,,6OPC18/13,6OPC18/13,Скважинный погружной насос Sumoto 6OPC18/13 (380в),6OPC18/13 (380в),,6OPC18/13,6OPC18/13 (380в),6OPC18/13,191,27.11 м³/ч,451.83,380,11,6 inch heuristic,146,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_6sh_18_13_380v/,needs_check,nasosymarket,matched
+1913,Погружной скважинный насос SUMOTO 6OPC18/15,6OPC18/15,,6OPC18/15,6OPC18/15,Скважинный погружной насос Sumoto 6OPC18/15 (380в),6OPC18/15 (380в),,6OPC18/15,6OPC18/15 (380в),6OPC18/15,220,27.11 м³/ч,451.83,380,13,6 inch heuristic,146,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_6sh_18_15_380v/,needs_check,nasosymarket,matched
+1914,Погружной скважинный насос SUMOTO 6OPC18/18,6OPC18/18,,6OPC18/18,6OPC18/18,Скважинный погружной насос Sumoto 6OPC18/18 (380в),6OPC18/18 (380в),,6OPC18/18,6OPC18/18 (380в),6OPC18/18,264,27.11 м³/ч,451.83,380,15,6 inch heuristic,146,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_6sh_18_18_380v/,needs_check,nasosymarket,matched
+1921,Погружной скважинный насос SUMOTO 6OPC30/11,6OPC30/11,,6OPC30/11,6OPC30/11,Скважинный погружной насос Sumoto 6OPC30/11 (380в),6OPC30/11 (380в),,6OPC30/11,6OPC30/11 (380в),6OPC30/11,156,40.18 м³/ч,669.67,380,11,6 inch heuristic,146,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_6sh_30_11_380v/,needs_check,nasosymarket,matched
+1922,Погружной скважинный насос SUMOTO 6OPC30/13,6OPC30/13,,6OPC30/13,6OPC30/13,Скважинный погружной насос Sumoto 6OPC30/13 (380в),6OPC30/13 (380в),,6OPC30/13,6OPC30/13 (380в),6OPC30/13,185,40.18 м³/ч,669.67,380,13,6 inch heuristic,146,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_6opc30_13_380v/,needs_check,nasosymarket,matched
+1923,Погружной скважинный насос SUMOTO 6OPC30/15,6OPC30/15,,6OPC30/15,6OPC30/15,Скважинный погружной насос Sumoto 6OPC30/15 (380в),6OPC30/15 (380в),,6OPC30/15,6OPC30/15 (380в),6OPC30/15,213,40.18 м³/ч,669.67,380,15,6 inch heuristic,146,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_6opc30_15_380v/,needs_check,nasosymarket,matched
+1934,Погружной скважинный насос SUMOTO 6OPC45/14,6OPC45/14,,6OPC45/14,6OPC45/14,Скважинный погружной насос Sumoto 6OPC45/14 (380в),6OPC45/14 (380в),,6OPC45/14,6OPC45/14 (380в),6OPC45/14,200,60.24 м³/ч,1004,380,26,6 inch heuristic,146,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_6opc45_14_380v/,needs_check,nasosymarket,matched
+3934,Погружной скважинный насос SUMOTO 4SR 8/41,4SR 8/41,,4SR8/41,4SR8/41,,4SR8/41,,4SR8/41,4SR8/41,4SR8/41,256,,200,380,7.5,4SR heuristic,96,,ok,manual,matched
+3935,Погружной скважинный насос SUMOTO 3OPC4/19,3OPC4/19,,3OPC4/19,3OPC4/19,,3OPC4/19,,3OPC4/19,3OPC4/19,3OPC4/19,65,,80,220,0.75,3OPC heuristic,76,,ok,manual,matched
+4259,Погружной скважинный насос SUMOTO 6OPC30/18,6OPC30/18,,6OPC30/18,6OPC30/18,Скважинный погружной насос Sumoto 6OPC30/18 (380в),6OPC30/18 (380в),,6OPC30/18,6OPC30/18 (380в),6OPC30/18,255,40.18 м³/ч,669.67,380,18.5,6 inch heuristic,146,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_6sh_30_18_380v/,needs_check,nasosymarket,matched
+4260,Скважинный насос Sumoto 4SR 10/39,4SR 10/39,,4SR10/39,4SR10/39,Скважинный погружной насос Sumoto OPC 4SR10/39 (380в),OPC 4SR10/39 (380в),,4SR10/39,OPC 4SR10/39 (380в),4SR10/39,270,14.46 м³/ч,241,380,7.5,4SR heuristic,96,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_pogruzhnoy_nasos_sumoto_4sr_10_39_380v/,needs_check,nasosymarket,matched
+4585,Погружной скважинный насос SUMOTO 4SR12/33,4SR12/33,,4SR12/33,4SR12/33,,4SR12/33,,4SR12/33,4SR12/33,4SR12/33,200,,270,380,7.5,4SR heuristic,96,,ok,manual,matched

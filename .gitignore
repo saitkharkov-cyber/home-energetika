@@ -1,7 +1,4 @@
-/system/storage/cache/
-/system/storage/logs/
-/image/cache/
-/config.php
-/admin/config.php
 *.log
-/local_proxy.txt
+
+# Catalog Standardization
+catalog-standardization/data/tmp/

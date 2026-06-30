@@ -1,0 +1,128 @@
+﻿title,model,series,max_head_m,nominal_head_m,max_flow_original,max_flow_l_min,nominal_flow_original,nominal_flow_l_min,voltage,power_kw,diameter_raw,diameter_mm,source_url,status
+Скважинный насос Sumoto 4SR 10/39,4SR10/39,4SR,270,175,"14,4 м3/час",240,9 м3/час,150,380,7.5,"100 мм (4"")",100,https://official-sumoto.ru/product/skvazhinnyi_nasos_sumoto_4sr_10_39/,ok
+Погружной скважинный насос SUMOTO OPC 4SRM8/43,4SR 8/43,4SR,,216,12 м3/час,200,"7,2- м3/час",,380,,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4srm8_43/,missing_data
+Погружной скважинный насос SUMOTO OPC 4SRM4/5,OPC 4SRM4/5,4SR,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4srm4_5/,missing_data
+Погружной скважинный насос SUMOTO OPC 4SRM4/26,4SRM4/26,4SR,170,130,6 м3/час,100,3.6 м3/час,60,230,,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4srm4_26/,ok
+Погружной скважинный насос SUMOTO OPC 4SRM4/18,OPC 4SRM4/18,4SR,120,98,6 м3/час,100,3.0 м3/час,50,230,,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4srm4_18/,ok
+Погружной скважинный насос SUMOTO OPC 4SRM12/33,4SR 12/33,4SR,,133,"16,2 м3/час",270,- 9- м3/час,,380,,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4srm12_33/,missing_data
+Погружной скважинный насос SUMOTO OPC 4SR8/32,4SR8/32,4SR,200,169,12 м3/час,200,4.8м3/час,80,380,5.5,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr8_32/,ok
+Погружной скважинный насос SUMOTO OPC 4SR8/23,4SR8/23,4SR,143,121,12 м3/час,200,4.8 м3/час,80,380,4,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr8_23/,ok
+Погружной скважинный насос SUMOTO OPC 4SR6/49,4SR6/49,4SR,294,245,"9,6 м3/час",160,3.6 м3/час,60,380,5.5,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr6_49/,ok
+Погружной скважинный насос SUMOTO OPC 4SR6/36,4SR6/36,4SR,216,180,"9,6 м3/час",160,3.6 м3/час,60,380,4,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr6_36/,ok
+Погружной скважинный насос SUMOTO OPC 4SR6/27,4SR6/27,4SR,162,135,"9,6 м3/час",160,3.6 м3/час,60,380,3,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr6_27/,ok
+Погружной скважинный насос SUMOTO OPC 4SR4/60,4SR4/60,4SR,406,325,6 м3/час,100,3.0 м3/час,50,380,5.5,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr4_60/,ok
+Погружной скважинный насос SUMOTO OPC 4SR4/46,4SR4/46,4SR,308,249,6 м3/час,100,3.0 м3/час,50,380,4,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr4_46/,ok
+Погружной скважинный насос SUMOTO OPC 4SR4/35,4SR4/35,4SR,230,190,6 м3/час,100,3.0 м3/час,50,380,3,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr4_35/,ok
+Погружной скважинный насос SUMOTO OPC 4SR4/26,4SR4/26,4SR,170,141,6 м3/час,100,3.0 м3/час,50,380,2.2,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr4_26/,ok
+Погружной скважинный насос SUMOTO OPC 4SR4/18,4SR4/18,4SR,120,98,6 м3/час,100,3.0 м3/час,50,380,1.5,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr4_18/,ok
+Погружной скважинный насос SUMOTO OPC 4SR12/26,4SR12/26,4SR,158,122,"16,2 м3/час",270,7.2 м3/час,120,380,,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr12_26/,ok
+Погружной скважинный насос SUMOTO OPC 4SR10/32,4SR10/32,4SR,179,147,"14,4 м3/час",240,5.4 м3/час,90,380,5.5,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr10_32/,ok
+Погружной скважинный насос SUMOTO OPC 4SR10/24,4SR10/24,4SR,134,110,"14,4м3/час",240,5.4 м3/час,90,380,4,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_opc_4sr10_24/,ok
+Погружной скважинный насос SUMOTO 6OPC45/9,6OPC45/9,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh45_9/,missing_data
+Погружной скважинный насос SUMOTO 6OPC45/8,6OPC45/8,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh45_8/,missing_data
+Погружной скважинный насос SUMOTO 6OPC45/7,6OPC45/7,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh45_7/,missing_data
+Погружной скважинный насос SUMOTO 6OPC45/6,6OPC45/6,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh45_6/,missing_data
+Погружной скважинный насос SUMOTO 6OPC45/5,6OPC45/5,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh45_5/,missing_data
+Погружной скважинный насос SUMOTO 6OPC45/14,6OPC45/14,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh45_14/,missing_data
+Погружной скважинный насос SUMOTO 6OPC45/12,6OPC45/12,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh45_12/,missing_data
+Погружной скважинный насос SUMOTO 6OPC45/10,6OPC45/10,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh45_10/,missing_data
+Погружной скважинный насос SUMOTO 6OPC30/9,6OPC30/9,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh30_9/,missing_data
+Погружной скважинный насос SUMOTO 6OPC30/7,6OPC30/7,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh30_7/,missing_data
+Погружной скважинный насос SUMOTO 6OPC30/5,6OPC30/5,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh30_5/,missing_data
+Погружной скважинный насос SUMOTO 6OPC30/24,6OPC30/24,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh30_24/,missing_data
+Погружной скважинный насос SUMOTO 6OPC30/21,6OPC30/21,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh30_21/,missing_data
+Погружной скважинный насос SUMOTO 6OPC30/18,6OPC30/18,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh30_18/,missing_data
+Погружной скважинный насос SUMOTO 6OPC30/15,6OPC30/15,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh30_15/,missing_data
+Погружной скважинный насос SUMOTO 6OPC30/13,6OPC30/13,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh30_13/,missing_data
+Погружной скважинный насос SUMOTO 6OPC30/11,6OPC30/11,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh30_11/,missing_data
+Погружной скважинный насос SUMOTO 6OPC18/9,6OPC18/9,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh18_9/,missing_data
+Погружной скважинный насос SUMOTO 6OPC18/7,6OPC18/7,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh18_7/,missing_data
+Погружной скважинный насос SUMOTO 6OPC18/30,6OPC18/30,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh18_30_/,missing_data
+Погружной скважинный насос SUMOTO 6OPC18/26,6OPC18/26,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh18_26/,missing_data
+Погружной скважинный насос SUMOTO 6OPC18/22,6OPC18/22,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh18_22/,missing_data
+Погружной скважинный насос SUMOTO 6OPC18/18,6OPC18/18,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh18_18/,missing_data
+Погружной скважинный насос SUMOTO 6OPC18/15,6OPC18/15,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh18_15/,missing_data
+Погружной скважинный насос SUMOTO 6OPC18/13,6OPC18/13,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh18_13/,missing_data
+Погружной скважинный насос SUMOTO 6OPC18/11,6OPC18/11,,,,,,,,220,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_6sh18_11/,missing_data
+Погружной скважинный насос SUMOTO 4SRM8/8,4SRM8/8,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm8_8/,missing_data
+Погружной скважинный насос SUMOTO 4SRM8/6,4SRM8/6,4SR,,,,,,,,1.1,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm8_6/,missing_data
+Погружной скважинный насос SUMOTO 4SRM8/4,4SR6/49,4SR,,,,,,,,0.75,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm8_4/,missing_data
+Погружной скважинный насос SUMOTO 4SRM8/13,4SRM8/13,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm8_13/,missing_data
+Погружной скважинный насос SUMOTO 4SRM6/7,4SR6/7,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm6_7_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM6/20,4SR6/20,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm6_20_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM6/14,4SR6/14,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm6_14_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM6/10,4SRM6/10,4SR,,,,,,,,1.1,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm6_10__220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM4/9,4SRM4/9,4SR,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm4_9/,missing_data
+Погружной скважинный насос SUMOTO 4SRM4/7,4SRM4/7,4SR,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm4_7/,missing_data
+Погружной скважинный насос SUMOTO 4SRM4/14,4SRM4/14,4SR,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm4_14/,missing_data
+Погружной скважинный насос SUMOTO 4SRM2/7,4SRM2/7,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm2_7_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM2/39,4SRM2/39,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm2_39_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM2/27,4SRM2/27,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm2_27_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM2/20,4SRM2/20,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm2_20_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM2/13,4SRM2/13,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm2_13_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM2/10,4SRM2/10,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm2_10_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM12/7,4SRM12/7,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm12_7_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM12/10,4SRM12/10,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm12_10__220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM10/7,4SRM10/7,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm10_7_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM10/14,4SRM10/14,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm10_14_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SRM10/10,4SRM10/10,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4srm10_10_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SR8/8,4SR8/8,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr8_8/,missing_data
+Погружной скважинный насос SUMOTO 4SR8/6,4SR8/6,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr8_6/,missing_data
+Погружной скважинный насос SUMOTO 4SR8/4,4SR8/4,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr8_4/,missing_data
+Погружной скважинный насос SUMOTO 4SR8/21,4SR8/21,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr8_21/,missing_data
+Погружной скважинный насос SUMOTO 4SR8/17,4SR8/17,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr8_17/,missing_data
+Погружной скважинный насос SUMOTO 4SR8/13,4SR8/13,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr8_13/,missing_data
+Погружной скважинный насос SUMOTO 4SR6/7,4SR6/7,4SR,,,,,,,,0.75,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr6_7/,missing_data
+Погружной скважинный насос SUMOTO 4SR6/20,4SR6/20,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr6_20/,missing_data
+Погружной скважинный насос SUMOTO 4SR6/14,4SR6/14,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr6_14/,missing_data
+Погружной скважинный насос SUMOTO 4SR6/10,4SRM6/10,4SR,,,,,,,,1.1,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr6_10/,missing_data
+Погружной скважинный насос SUMOTO 4SR4/9,4SR4/26,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr4_9/,missing_data
+Погружной скважинный насос SUMOTO 4SR4/7,4SR4/26,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr4_7/,missing_data
+Погружной скважинный насос SUMOTO 4SR4/5,4SR4/26,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr4_5/,missing_data
+Погружной скважинный насос SUMOTO 4SR4/14,4SR4/14,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr4_14/,missing_data
+Погружной скважинный насос SUMOTO 4SR2/7 (380V),4SR2/7 (380V),,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr2_7_380v/,missing_data
+Погружной скважинный насос SUMOTO 4SR2/40 (380V),4SR2/40 (380V),,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr2_40_380v/,missing_data
+Погружной скважинный насос SUMOTO 4SR2/27 (380V),4SR2/27 (380V),,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr2_27_380v/,missing_data
+Погружной скважинный насос SUMOTO 4SR2/20 (380V),4SR2/20 (380V),,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr2_20_380v/,missing_data
+Погружной скважинный насос SUMOTO 4SR2/13 (380V),4SR2/13 (380V),,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr2_13_380v/,missing_data
+Погружной скважинный насос SUMOTO 4SR2/10 (380V),4SR2/10 (380V),,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr2_10_380v/,missing_data
+Погружной скважинный насос SUMOTO 4SR12/7,4SR12/26,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr12_7/,missing_data
+Погружной скважинный насос SUMOTO 4SR12/33,4SR12/33,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr12_33_220v/,missing_data
+Погружной скважинный насос SUMOTO 4SR12/19,4SR12/19,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr12_19/,missing_data
+Погружной скважинный насос SUMOTO 4SR12/17,4SR12/17,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr12_17/,missing_data
+Погружной скважинный насос SUMOTO 4SR12/14,4SR12/14,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr12_14/,missing_data
+Погружной скважинный насос SUMOTO 4SR12/10,4SR12/10,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr12_10/,missing_data
+Погружной скважинный насос SUMOTO 4SR10/7,4SR10/7,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr10_7/,missing_data
+Погружной скважинный насос SUMOTO 4SR10/22,4SR10/22,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr10_22/,missing_data
+Погружной скважинный насос SUMOTO 4SR10/18,4SR10/18,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr10_18/,missing_data
+Погружной скважинный насос SUMOTO 4SR10/14,4SR10/14,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr10_14/,missing_data
+Погружной скважинный насос SUMOTO 4SR10/10,4SR10/10,4SR,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr10_10/,missing_data
+Погружной скважинный насос SUMOTO 4SR 8/41,4SR 8/41,4SR,262,,12 м3/час,200,"-7,2- м3/час",,380,,"100 мм (4"")",100,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr_8_41/,ok
+Погружной скважинный насос SUMOTO 4SH16/30,4SH16/30,,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_4sr16_30_/,missing_data
+Погружной скважинный насос SUMOTO 3SOPC5/9,3OPC5/9,Sumoto 3SHM,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm5_9/,missing_data
+Погружной скважинный насос SUMOTO 3SOPC4/7,3SHM4/7,Sumoto 3SHM,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm4_7/,missing_data
+Погружной скважинный насос SUMOTO 3OPC5/7,3OPC5/7,Sumoto 3SHM,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm5_7/,missing_data
+Погружной скважинный насос SUMOTO 3OPC5/4,3OPC5/4,Sumoto 3SHM,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm5_4/,missing_data
+Погружной скважинный насос SUMOTO 3OPC5/26,3OPC5/26,Sumoto 3SHM,94,81,6 м3/час,100,3.0 м3/час,50,230,,"78 мм (3"")",78,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm5_26/,ok
+Погружной скважинный насос SUMOTO 3OPC5/24,3SHM5/24,Sumoto 3SHM,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm5_24/,missing_data
+Погружной скважинный насос SUMOTO 3OPC5/19,3OPC5/19,Sumoto 3SHM,68,59,6 м3/час,100,3.0 м3/час,50,230,,"78 мм (3"")",78,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm5_19/,ok
+Погружной скважинный насос SUMOTO 3OPC5/13,3OPC5/13,Sumoto 3SHM,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm5_13/,missing_data
+Погружной скважинный насос SUMOTO 3OPC4/9,3SHM4/9,Sumoto 3SHM,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm4_9/,missing_data
+Погружной скважинный насос SUMOTO 3OPC4/35,3OPC4/35,Sumoto 3SHM,119,91,4.8 м3/час,80,2.4 м3/час,40,230,,"78 мм (3"")",78,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm4_35/,ok
+Погружной скважинный насос SUMOTO 3OPC4/26,3OPC4/26,Sumoto 3SHM,88,68,4.8 м3/час,80,2.4 м3/час,40,230,,"78 мм (3"")",78,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm4_26/,ok
+Погружной скважинный насос SUMOTO 3OPC4/14,3SHM4/14,Sumoto 3SHM,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm4_14/,missing_data
+Погружной скважинный насос SUMOTO 3OPC2.5/7,3OPC2.5/7,Sumoto 3SHM,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm2_5_7/,missing_data
+Погружной скважинный насос SUMOTO 3OPC2.5/5,3OPC2.5/5,Sumoto 3SHM,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm2_5_5/,missing_data
+Погружной скважинный насос SUMOTO 3OPC2.5/36,3OPC2.5/36,Sumoto 3SHM,156,133,3.6 м3/час,60,1.8 м3/час,30,230,,"78 мм (3"")",78,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm25_36/,ok
+Погружной скважинный насос SUMOTO 3OPC2.5/28,3OPC2.5/28,Sumoto 3SHM,122,104,3.6 м3/час,60,1.8 м3/час,30,230,,"78 мм (3"")",78,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm25_28/,ok
+Погружной скважинный насос SUMOTO 3OPC2.5/20,3OPC2.5/20,Sumoto 3SHM,87,74,3.6 м3/час,60,"1,8 м3/час",30,230,,"78 мм (3"")",78,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm25_20/,ok
+Погружной скважинный насос SUMOTO 3OPC2.5/15,3OPC2.5/15,Sumoto 3SHM,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm2_5_10/,missing_data
+Погружной скважинный насос SUMOTO 3OPC2.5/10,3OPC2.5/10,Sumoto 3SHM,,,,,,,230,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm25_10/,missing_data
+Погружной скважинный насос SUMOTO 3OPC1.8/7,3OPC1.8/7,Sumoto 3SHM,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm1_8_7/,missing_data
+Погружной скважинный насос SUMOTO 3OPC1.8/47,3OPC1.8/47,Sumoto 3SHM,196,138,2.7 м3/час,45,2 м3/час,33.33,230,,"78 мм (3"")",78,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm18_47/,ok
+Погружной скважинный насос SUMOTO 3OPC1.8/37,3OPC1.8/37,Sumoto 3SHM,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm18_37/,missing_data
+Погружной скважинный насос SUMOTO 3OPC1.8/27,3OPC1.8/27,Sumoto 3SHM,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm18_27/,missing_data
+Погружной скважинный насос SUMOTO 3OPC1.8/20,3OPC1.8/20,Sumoto 3SHM,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm1_8_20/,missing_data
+Погружной скважинный насос SUMOTO 3OPC1.8/14,3OPC1.8/14,Sumoto 3SHM,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm18_14/,missing_data
+Погружной скважинный насос SUMOTO 3OPC1.8/10,3OPC1.8/10,Sumoto 3SHM,,,,,,,,,,,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_sumoto_3shm1_8_10/,missing_data
+Погружной скважинный насос 3OPC4/19,3OPC4/19,Sumoto 3SHM,65,49,4.8 м3/час,80,2.4 м3/час,40,230,,"78 мм (3"")",78,https://official-sumoto.ru/product/pogruzhnoi_skvazhinnyi_nasos_3shm4_19/,ok
