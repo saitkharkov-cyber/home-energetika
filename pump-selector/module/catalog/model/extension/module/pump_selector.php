@@ -1,5 +1,7 @@
 <?php
 class ModelExtensionModulePumpSelector extends Model {
+	private $premium_brand_min_priority = 8; // Минимальный brand_priority для участия в роли Premium
+
 	public function validateInput($input) {
 		$errors = array();
 
@@ -390,7 +392,7 @@ class ModelExtensionModulePumpSelector extends Model {
 		}
 
 		if ($premium_only) {
-			$where[] = "psp.brand_priority > 0";
+			$where[] = "psp.brand_priority >= " . (int)$this->premium_brand_min_priority;
 		}
 
 		return $where;
