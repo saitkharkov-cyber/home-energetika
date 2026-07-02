@@ -28,13 +28,8 @@ class ControllerExtensionModulePumpSelector extends Controller {
 
 			$errors = $this->model_extension_module_pump_selector->validateInput($input);
 			$data['errors'] = $errors;
-			$trace = true;
 
 			if (!$errors) {
-				if ($trace) {
-					error_log(json_encode($this->model_extension_module_pump_selector->debugTraceSelection($input), JSON_UNESCAPED_UNICODE));
-				}
-
 				$requirements = $this->model_extension_module_pump_selector->calculateRequirements($input);
 				$products = $this->model_extension_module_pump_selector->getRecommendedProducts($requirements);
 
