@@ -138,12 +138,17 @@ class ModelExtensionModulePumpSelector extends Model {
 		$products = array();
 		$best_price_product = $this->getBestPriceProduct($requirements);
 		$best_price_product_id = 0;
+		$best_price_product_price = 0;
 
 		if ($best_price_product && isset($best_price_product['product_id'])) {
 			$best_price_product_id = (int)$best_price_product['product_id'];
 		}
 
-		$optimal_product = $this->getOptimalProduct($requirements, $best_price_product_id);
+		if ($best_price_product && isset($best_price_product['price'])) {
+			$best_price_product_price = (float)$best_price_product['price'];
+		}
+
+		$optimal_product = $this->getOptimalProduct($requirements, $best_price_product_id, $best_price_product_price);
 
 		$candidates = array(
 			$best_price_product,
@@ -194,12 +199,18 @@ class ModelExtensionModulePumpSelector extends Model {
 		return $this->fetchProduct($sql);
 	}
 
-	public function getOptimalProduct($requirements, $excluded_product_id = 0) {
+	public function getOptimalProduct($requirements, $excluded_product_id = 0, $best_price = 0) {
 		$where = $this->buildProductWhere($requirements, false);
 		$required_head_m = (float)$requirements['required_head_m'];
 		$required_flow_l_min = (float)$requirements['required_flow_l_min'];
 		$head_reserve_expression = "(psp.max_head_m - " . $required_head_m . ")";
 		$total_reserve_expression = "((psp.max_head_m - " . $required_head_m . ") + (psp.max_flow_l_min - " . $required_flow_l_min . "))";
+		$max_optimal_price_ratio = 1.8;
+		$optimal_price_limit = 0;
+
+		if ((float)$best_price > 0) {
+			$optimal_price_limit = (float)$best_price * $max_optimal_price_ratio;
+		}
 
 		$sql = "SELECT 'optimal_choice' AS result_type, psp.product_id, psp.max_head_m, psp.max_flow_l_min, psp.pump_diameter_mm, psp.voltage, psp.brand_priority,";
 		$sql .= " (psp.max_head_m - " . $required_head_m . ") AS head_reserve,";
@@ -208,6 +219,9 @@ class ModelExtensionModulePumpSelector extends Model {
 		$sql .= " psp.product_price AS price";
 		$sql .= " FROM " . DB_PREFIX . "pump_selector_product psp";
 		$sql .= " WHERE " . implode(" AND ", $where);
+		if ($optimal_price_limit > 0) {
+			$sql .= " AND psp.product_price <= " . $optimal_price_limit;
+		}
 		$sql .= " AND " . $head_reserve_expression . " >= 5";
 		$sql .= " AND " . $head_reserve_expression . " <= 15";
 		$sql .= " AND " . $total_reserve_expression . " <= 30";
@@ -230,6 +244,9 @@ class ModelExtensionModulePumpSelector extends Model {
 		$sql .= " psp.product_price AS price";
 		$sql .= " FROM " . DB_PREFIX . "pump_selector_product psp";
 		$sql .= " WHERE " . implode(" AND ", $where);
+		if ($optimal_price_limit > 0) {
+			$sql .= " AND psp.product_price <= " . $optimal_price_limit;
+		}
 		$sql .= " AND " . $total_reserve_expression . " >= 10";
 		$sql .= " AND " . $total_reserve_expression . " <= 30";
 		if ((int)$excluded_product_id > 0) {
@@ -251,6 +268,9 @@ class ModelExtensionModulePumpSelector extends Model {
 		$sql .= " psp.product_price AS price";
 		$sql .= " FROM " . DB_PREFIX . "pump_selector_product psp";
 		$sql .= " WHERE " . implode(" AND ", $where);
+		if ($optimal_price_limit > 0) {
+			$sql .= " AND psp.product_price <= " . $optimal_price_limit;
+		}
 		$sql .= " AND " . $total_reserve_expression . " >= 10";
 		$sql .= " AND " . $total_reserve_expression . " <= 30";
 		$sql .= " ORDER BY psp.product_price ASC, " . $total_reserve_expression . " ASC, psp.product_id ASC";
@@ -269,6 +289,9 @@ class ModelExtensionModulePumpSelector extends Model {
 		$sql .= " psp.product_price AS price";
 		$sql .= " FROM " . DB_PREFIX . "pump_selector_product psp";
 		$sql .= " WHERE " . implode(" AND ", $where);
+		if ($optimal_price_limit > 0) {
+			$sql .= " AND psp.product_price <= " . $optimal_price_limit;
+		}
 		$sql .= " ORDER BY " . $total_reserve_expression . " ASC, psp.product_price ASC, psp.product_id ASC";
 		$sql .= " LIMIT 1";
 
