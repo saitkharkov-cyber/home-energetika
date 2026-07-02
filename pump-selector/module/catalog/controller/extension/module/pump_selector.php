@@ -28,8 +28,13 @@ class ControllerExtensionModulePumpSelector extends Controller {
 
 			$errors = $this->model_extension_module_pump_selector->validateInput($input);
 			$data['errors'] = $errors;
+			$trace = true;
 
 			if (!$errors) {
+				if ($trace) {
+					error_log(json_encode($this->model_extension_module_pump_selector->debugTraceSelection($input), JSON_UNESCAPED_UNICODE));
+				}
+
 				$requirements = $this->model_extension_module_pump_selector->calculateRequirements($input);
 				$products = $this->model_extension_module_pump_selector->getRecommendedProducts($requirements);
 
@@ -75,6 +80,34 @@ class ControllerExtensionModulePumpSelector extends Controller {
 		$this->response->setOutput($this->load->view('extension/module/pump_selector', $data));
 	}
 
+	public function rebuildCache() {
+		$this->response->addHeader('Content-Type: application/json; charset=utf-8');
+
+		$token = isset($this->request->get['token']) ? (string)$this->request->get['token'] : '';
+
+		if (!hash_equals($this->getRebuildToken(), $token)) {
+			$this->response->addHeader('HTTP/1.1 403 Forbidden');
+			$this->response->setOutput(json_encode(array(
+				'error' => 'forbidden'
+			)));
+			return;
+		}
+
+		try {
+			$this->load->model('extension/module/pump_selector_cache_builder');
+			$result = $this->model_extension_module_pump_selector_cache_builder->rebuild();
+
+			$this->response->addHeader('HTTP/1.1 200 OK');
+			$this->response->setOutput(json_encode($result));
+		} catch (Exception $e) {
+			$this->response->addHeader('HTTP/1.1 500 Internal Server Error');
+			$this->response->setOutput(json_encode(array(
+				'exception_message' => $e->getMessage(),
+				'exception_trace' => $e->getTraceAsString()
+			)));
+		}
+	}
+
 	private function buildInputFromPost() {
 		$post = $this->request->post;
 
@@ -113,5 +146,9 @@ class ControllerExtensionModulePumpSelector extends Controller {
 		}
 
 		return $default;
+	}
+
+	private function getRebuildToken() {
+		return 'd7f3c91a4b6e8d0f2c5a1e9b8f6d4c3a7e9f1b2c4d6a8e0f3c5b7d9a1e2f4c6';
 	}
 }
