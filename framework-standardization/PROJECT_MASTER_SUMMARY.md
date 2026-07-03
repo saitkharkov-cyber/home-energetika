@@ -48,6 +48,7 @@
 | `sql/CREATE_TABLE_canonical_attributes.sql` | SQL-драфт таблицы canonical attributes |
 | `docs/ANALYZE_NAMES_STAGE.md` | Контракт stage анализа имён атрибутов и формирования кандидатов в синонимы |
 | `docs/ANALYZE_VALUES_STAGE.md` | Контракт stage анализа и нормализации значений атрибутов |
+| `docs/BUILD_SQL_PREVIEW_STAGE.md` | Контракт stage формирования безопасного SQL preview |
 
 ---
 
@@ -393,6 +394,7 @@ docs/FRAMEWORK_RESULT.md
 docs/VALUE_PARSER.md
 docs/ANALYZE_NAMES_STAGE.md
 docs/ANALYZE_VALUES_STAGE.md
+docs/BUILD_SQL_PREVIEW_STAGE.md
 sql/CREATE_TABLE_canonical_attributes.sql
 ```
 
@@ -417,10 +419,10 @@ Scope, правила обработки, синонимы и результат
 
 ## Следующий логичный шаг
 
-Описать контракт `BuildSqlPreviewStage`:
+Описать контракт `BuildReportStage`:
 
 ```text
-docs/BUILD_SQL_PREVIEW_STAGE.md
+docs/BUILD_REPORT_STAGE.md
 ```
 
 SQL пока должен быть именно драфтом/документом, не автоматической миграцией и не применением на продуктиве.
