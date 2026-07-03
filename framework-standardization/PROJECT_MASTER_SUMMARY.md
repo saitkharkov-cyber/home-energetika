@@ -425,9 +425,9 @@ Scope, правила обработки, синонимы и результат
 
 ```text
 docs/BUILD_FRAMEWORK_RESULT_STAGE.md
-```
+````
 
-SQL пока должен быть именно драфтом/документом, не автоматической миграцией и не применением на продуктиве.
+Документ должен зафиксировать, как Framework собирает финальный `FrameworkResult` из `AttributeContext`, report, warnings, errors, SQL preview и stage summary.
 
 ---
 
