@@ -390,6 +390,12 @@ sql/CREATE_TABLE_canonical_attributes.sql
 
 Критичные противоречия закрыты.
 
+```text
+Attribute Job
+→ AttributeContext
+→ Attribute Pipeline
+→ FrameworkResult
+```
 Последнее зафиксированное решение:
 
 ```text
