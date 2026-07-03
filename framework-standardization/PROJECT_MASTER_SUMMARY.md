@@ -38,6 +38,11 @@
 | `README.md`                  | Навигация по проекту                                 |
 | `PROJECT_MASTER_SUMMARY.md`  | Сводка архитектуры и текущего состояния              |
 | `docs/ATTRIBUTE_PIPELINE.md` | Архитектурный контракт конвейера обработки атрибутов |
+| `docs/CANONICAL_ATTRIBUTE_REGISTRATION.md` | Контракт регистрации канонического атрибута |
+| `docs/ATTRIBUTE_JOB.md`      | Контракт одной задачи обработки характеристики       |
+| `docs/ATTRIBUTE_CONTEXT.md`  | Контракт рабочего состояния Framework                |
+| `docs/FRAMEWORK_RESULT.md`   | Контракт финального результата Framework             |
+| `sql/CREATE_TABLE_canonical_attributes.sql` | SQL-драфт таблицы canonical attributes |
 
 ---
 
@@ -370,10 +375,15 @@ Framework не публикует результат автоматически.
 
 ## Текущий статус
 
-Зафиксировано и закоммичено:
+Зафиксированы архитектурные контракты:
 
 ```text
-ATTRIBUTE_PIPELINE.md
+docs/ATTRIBUTE_PIPELINE.md
+docs/CANONICAL_ATTRIBUTE_REGISTRATION.md
+docs/ATTRIBUTE_JOB.md
+docs/ATTRIBUTE_CONTEXT.md
+docs/FRAMEWORK_RESULT.md
+sql/CREATE_TABLE_canonical_attributes.sql
 ```
 
 Документ прошёл read-only ревью Codex.
@@ -391,10 +401,12 @@ Scope, правила обработки, синонимы и результат
 
 ## Следующий логичный шаг
 
-Подготовить SQL-драфт для создания таблицы:
+Описать контракт stage pipeline: список stages, порядок выполнения, входы/выходы каждой stage и правила остановки pipeline.
+
+Ближайший документ:
 
 ```text
-{DB_PREFIX}canonical_attributes
+docs/PIPELINE_STAGES.md
 ```
 
 SQL пока должен быть именно драфтом/документом, не автоматической миграцией и не применением на продуктиве.
