@@ -41,6 +41,7 @@
 | `docs/STAGES_PIPELINE.md`    | Контракт stage pipeline: порядок stages, входы/выходы, ошибки и правила остановки |
 | `docs/CANONICAL_ATTRIBUTE_REGISTRATION.md` | Контракт регистрации канонического атрибута |
 | `docs/ATTRIBUTE_JOB.md`      | Контракт одной задачи обработки характеристики       |
+| `docs/ATTRIBUTE_EXPORTER.md` | Контракт для чтения фактов из OpenCart для Framework Standardization. |
 | `docs/ATTRIBUTE_CONTEXT.md`  | Контракт рабочего состояния Framework                |
 | `docs/FRAMEWORK_RESULT.md`   | Контракт финального результата Framework             |
 | `sql/CREATE_TABLE_canonical_attributes.sql` | SQL-драфт таблицы canonical attributes |
@@ -383,6 +384,7 @@ docs/ATTRIBUTE_PIPELINE.md
 docs/STAGES_PIPELINE.md
 docs/CANONICAL_ATTRIBUTE_REGISTRATION.md
 docs/ATTRIBUTE_JOB.md
+docs/ATTRIBUTE_EXPORTER.md
 docs/ATTRIBUTE_CONTEXT.md
 docs/FRAMEWORK_RESULT.md
 sql/CREATE_TABLE_canonical_attributes.sql
