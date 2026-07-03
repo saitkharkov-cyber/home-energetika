@@ -101,32 +101,33 @@
 
 Для работы со стандартизацией нужен отдельный реестр канонических характеристик.
 
-Рабочее название:
+На текущем этапе в БД выносится только одна таблица:
 
 ```text
-canonical_attributes
+DB_PREFIXcanonical_attributes
 ```
 
 Назначение таблицы:
 
 ```text
-Хранить список утверждённых глобальных канонических характеристик,
-которые могут использоваться AttributeExporter, Framework и будущим импортом.
+Ответить на вопрос:
+какой реальный attribute_id OpenCart считается глобальным каноном.
 ```
 
 Таблица канонов не хранит синонимы.
 
 Она хранит только утверждённые целевые характеристики.
 
-Минимальная структура:
+Итоговая структура:
 
 ```text
-canonical_attributes
-├─ id
-├─ target_oc_attribute_id
-├─ canonical_attribute_name
-├─ canonical_attribute_group_id
-├─ canonical_attribute_group_name
+DB_PREFIXcanonical_attributes
+├─ canonical_id
+├─ canonical_code              UNIQUE
+├─ target_attribute_id         UNIQUE
+├─ target_attribute_name
+├─ target_attribute_group_id
+├─ target_attribute_group_name
 ├─ status
 ├─ locked
 ├─ comment
@@ -136,14 +137,27 @@ canonical_attributes
 
 Где:
 
-* `id` — `canonical_id`, ID записи в нашем реестре канонов;
-* `target_oc_attribute_id` — реальный `attribute_id` в OpenCart, используемый как целевой канон;
-* `canonical_attribute_name` — контрольное имя канонического атрибута;
-* `canonical_attribute_group_id` — группа атрибута в OpenCart;
-* `canonical_attribute_group_name` — контрольное имя группы;
-* `status` — состояние канона;
-* `locked` — признак защиты от случайных изменений;
+* `canonical_id` — ID записи в нашем реестре канонов;
+* `canonical_code` — стабильный код канона, уникальный внутри реестра;
+* `target_attribute_id` — реальный `attribute_id` OpenCart, используемый как целевой канон;
+* `target_attribute_name` — контрольное имя целевого атрибута OpenCart;
+* `target_attribute_group_id` — группа целевого атрибута в OpenCart;
+* `target_attribute_group_name` — контрольное имя группы;
+* `status` — состояние канона: `draft` или `active`;
+* `locked` — признак защиты от случайных изменений: `0` или `1`;
 * `comment` — инженерный комментарий.
+
+`DB_PREFIXcanonical_attributes` не отвечает за:
+
+* область применения;
+* правила нормализации;
+* правила валидации;
+* обработку значений;
+* синонимы.
+
+Scope и `category_id` не хранятся в БД на текущем этапе.
+
+Они передаются через `Attribute Job` или конфигурацию запуска.
 
 Правила обработки значений не являются частью идентичности глобального канона.
 
@@ -151,57 +165,31 @@ canonical_attributes
 
 `value_type` и `allow_empty` относятся к этапу проверки или к конфигурации обработки конкретной задачи.
 
+Эти правила не хранятся в БД на текущем этапе.
+
+Они остаются внутри Framework, `Attribute Job` или конфигурации запуска.
+
 ---
 
 # Области применения канона
 
-Так как канон глобальный, но стандартизация выполняется в рамках конкретных категорий, область применения должна храниться отдельно.
+Scope обязателен всегда как область анализа и применения.
 
-Рабочее название:
+На текущем этапе scope не выносится в отдельную таблицу БД.
 
-```text
-canonical_attribute_scopes
-```
-
-Назначение:
-
-```text
-Определить, в каких категориях разрешено использовать конкретный канонический атрибут.
-```
-
-Минимальная структура:
-
-```text
-canonical_attribute_scopes
-├─ id
-├─ canonical_id
-├─ category_id
-├─ status
-├─ comment
-├─ created_at
-└─ updated_at
-```
-
-Где:
-
-* `canonical_id` — ссылка на запись в `canonical_attributes`;
-* `category_id` — категория, в которой этот канон разрешён к применению;
-* `status` — активна ли область применения;
-* `comment` — пояснение или примечание.
+`category_id` передаётся через `Attribute Job` или конфигурацию запуска.
 
 Таким образом:
 
 ```text
-canonical_attributes
-→ что является каноном по смыслу
+DB_PREFIXcanonical_attributes
+→ какой реальный attribute_id OpenCart является глобальным каноном
 
-canonical_attribute_scopes
-→ где этот канон разрешено применять
+Attribute Job / конфигурация запуска
+→ где этот канон анализируется и применяется
 ```
 
-Scope обязателен всегда как область анализа и применения.
-
-Физическая таблица `canonical_attribute_scopes` может быть отложена только если scope временно приходит из `Attribute Job` или конфигурации запуска.
+Отдельная таблица областей применения может быть добавлена позже, если потребуется хранить разрешённые категории для канона в БД.
 
 ---
 
@@ -286,16 +274,16 @@ Attribute Job
 AttributeExportResult
 ├─ target_attribute_check
 │  ├─ status
-│  ├─ target_oc_attribute_id
-│  ├─ target_oc_attribute_name
+│  ├─ target_attribute_id
+│  ├─ target_attribute_name
 │  └─ warnings[]
 │
 ├─ canonical_attribute
 │  ├─ canonical_id
-│  ├─ target_oc_attribute_id
-│  ├─ attribute_name
-│  ├─ attribute_group_id
-│  └─ attribute_group_name
+│  ├─ target_attribute_id
+│  ├─ target_attribute_name
+│  ├─ target_attribute_group_id
+│  └─ target_attribute_group_name
 │
 ├─ category_scope
 │  └─ category_id
@@ -331,10 +319,10 @@ AttributeExportResult
 Attribute Job
 ├─ canonical_attribute
 │  ├─ canonical_id
-│  ├─ target_oc_attribute_id
-│  ├─ attribute_name
-│  ├─ attribute_group_id
-│  └─ attribute_group_name
+│  ├─ target_attribute_id
+│  ├─ target_attribute_name
+│  ├─ target_attribute_group_id
+│  └─ target_attribute_group_name
 │
 ├─ category_scope
 │  └─ category_id
@@ -689,7 +677,7 @@ category_id
 + incoming_attribute_name
 + incoming_attribute_group
 + source
-→ canonical_id + target_oc_attribute_id / not_found / ambiguous
+→ canonical_id + target_attribute_id / not_found / ambiguous
 ```
 
 Его будущая роль:
