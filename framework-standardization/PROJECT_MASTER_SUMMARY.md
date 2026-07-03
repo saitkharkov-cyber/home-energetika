@@ -46,6 +46,7 @@
 | `docs/FRAMEWORK_RESULT.md`   | Контракт финального результата Framework             |
 | `docs/VALUE_PARSER.md`       | Контракт компонента нормализации одного значения характеристики |
 | `sql/CREATE_TABLE_canonical_attributes.sql` | SQL-драфт таблицы canonical attributes |
+| `docs/ANALYZE_NAMES_STAGE.md` | Контракт stage анализа имён атрибутов и формирования кандидатов в синонимы |
 
 ---
 
@@ -389,6 +390,7 @@ docs/ATTRIBUTE_EXPORTER.md
 docs/ATTRIBUTE_CONTEXT.md
 docs/FRAMEWORK_RESULT.md
 docs/VALUE_PARSER.md
+docs/ANALYZE_NAMES_STAGE.md
 sql/CREATE_TABLE_canonical_attributes.sql
 ```
 
@@ -413,10 +415,10 @@ Scope, правила обработки, синонимы и результат
 
 ## Следующий логичный шаг
 
-Описать контракт `AnalyzeNamesStage` / анализа имён атрибутов:
+Описать контракт `AnalyzeValuesStage`:
 
 ```text
-docs/ANALYZE_NAMES_STAGE.md
+docs/ANALYZE_VALUES_STAGE.md
 ```
 
 SQL пока должен быть именно драфтом/документом, не автоматической миграцией и не применением на продуктиве.
