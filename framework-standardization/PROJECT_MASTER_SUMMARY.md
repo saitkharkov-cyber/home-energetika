@@ -51,6 +51,7 @@
 | `docs/BUILD_SQL_PREVIEW_STAGE.md` | Контракт stage формирования безопасного SQL preview |
 | `docs/BUILD_REPORT_STAGE.md` | Контракт stage формирования человекочитаемого отчёта для инженера |
 | `docs/BUILD_FRAMEWORK_RESULT_STAGE.md` | Контракт финальной stage сборки FrameworkResult из AttributeContext |
+| `docs/IMPLEMENTATION_STRUCTURE.md` | Архитектурный план структуры будущей реализации Framework |
 
 ---
 
@@ -403,6 +404,7 @@ docs/ANALYZE_VALUES_STAGE.md
 docs/BUILD_SQL_PREVIEW_STAGE.md
 docs/BUILD_REPORT_STAGE.md
 docs/BUILD_FRAMEWORK_RESULT_STAGE.md
+docs/IMPLEMENTATION_STRUCTURE.md
 sql/CREATE_TABLE_canonical_attributes.sql
 
 ```
@@ -410,6 +412,12 @@ sql/CREATE_TABLE_canonical_attributes.sql
 Базовый документ ATTRIBUTE_PIPELINE.md прошёл read-only ревью Codex.
 
 Критичные противоречия закрыты.
+
+Структура будущей реализации Framework зафиксирована в:
+
+```text
+docs/IMPLEMENTATION_STRUCTURE.md
+```
 
 ```text
 Attribute Job
@@ -428,7 +436,7 @@ Scope, правила обработки, синонимы и результат
 
 ## Следующий логичный шаг
 
-После исправления рассинхронов перейти к проектированию структуры будущей реализации Framework: каталогов, классов/компонентов и точек запуска, без написания бизнес-логики.
+Создать минимальный implementation skeleton: StageInterface, PipelineEngine, DTO и 9 пустых stages без бизнес-логики.
 
 ---
 
