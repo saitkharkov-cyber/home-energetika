@@ -829,7 +829,8 @@ stage_results
 ├─ analyze_names
 ├─ analyze_values
 ├─ build_sql_preview
-└─ build_report
+├─ build_report
+└─ build_framework_result
 ```
 
 Каждый stage может записать:
@@ -995,18 +996,20 @@ AttributeExporter
 ```
 
 ```text
-AnalyzeStage
+AnalyzeNamesStage
 → synonym_candidates
 → diagnostics
 → warnings
 ```
 
 ```text
-ValueParserStage
+AnalyzeValuesStage
 → attribute_value_structure.normalized_values
 → attribute_value_structure.unknown_values
 → value_report
 ```
+
+`ValueParser` используется как компонент внутри `AnalyzeValuesStage`, но не является отдельной stage.
 
 Stage не должен перезаписывать чужие результаты без явного правила.
 

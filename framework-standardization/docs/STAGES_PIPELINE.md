@@ -1159,6 +1159,15 @@ ResolveCanonicalStage
 ```
 
 ```text
+ResolveScopeStage
+→ scope
+→ raw_data.products
+→ warnings
+→ errors
+→ stage_results.resolve_scope
+```
+
+```text
 ExportAttributesStage
 → raw_data
 → attribute_name_structure.found_attributes

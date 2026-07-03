@@ -587,6 +587,7 @@ analyze_names: ok_with_warnings
 analyze_values: ok
 build_sql_preview: blocked
 build_report: ok
+build_framework_result: ok
 ```
 
 ---
@@ -719,6 +720,9 @@ stage_summary:
     - export_attributes
     - analyze_names
     - analyze_values
+    - build_sql_preview
+    - build_report
+    - build_framework_result
   failed_stage:
   stage_results:
     validate_job: ok
@@ -728,6 +732,8 @@ stage_summary:
     analyze_names: ok_with_warnings
     analyze_values: ok
     build_sql_preview: blocked
+    build_report: ok
+    build_framework_result: ok
 ```
 
 ---

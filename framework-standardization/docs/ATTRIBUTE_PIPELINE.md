@@ -104,7 +104,7 @@
 На текущем этапе в БД выносится только одна таблица:
 
 ```text
-DB_PREFIXcanonical_attributes
+{DB_PREFIX}canonical_attributes
 ```
 
 Назначение таблицы:
@@ -121,7 +121,7 @@ DB_PREFIXcanonical_attributes
 Итоговая структура:
 
 ```text
-DB_PREFIXcanonical_attributes
+{DB_PREFIX}canonical_attributes
 ├─ canonical_id
 ├─ canonical_code              UNIQUE
 ├─ target_attribute_id         UNIQUE
@@ -147,7 +147,7 @@ DB_PREFIXcanonical_attributes
 * `locked` — признак защиты от случайных изменений: `0` или `1`;
 * `comment` — инженерный комментарий.
 
-`DB_PREFIXcanonical_attributes` не отвечает за:
+`{DB_PREFIX}canonical_attributes` не отвечает за:
 
 * область применения;
 * правила нормализации;
@@ -182,7 +182,7 @@ Scope обязателен всегда как область анализа и 
 Таким образом:
 
 ```text
-DB_PREFIXcanonical_attributes
+{DB_PREFIX}canonical_attributes
 → какой реальный attribute_id OpenCart является глобальным каноном
 
 Attribute Job / конфигурация запуска
@@ -465,15 +465,23 @@ for stage in pipeline:
 * не изменяет БД напрямую;
 * не применяет SQL самостоятельно.
 
-Примеры этапов:
+Актуальная модель stages описана в:
 
-* `LoadStage`
-* `AnalyzeStage`
-* `NormalizeStage`
-* `ValidateStage`
-* `GenerateSqlStage`
-* `GenerateReportStage`
-* `UnknownValuesStage`
+```text
+docs/STAGES_PIPELINE.md
+```
+
+Текущий порядок stages:
+
+1. `ValidateJobStage`
+2. `ResolveCanonicalStage`
+3. `ResolveScopeStage`
+4. `ExportAttributesStage`
+5. `AnalyzeNamesStage`
+6. `AnalyzeValuesStage`
+7. `BuildSqlPreviewStage`
+8. `BuildReportStage`
+9. `BuildFrameworkResultStage`
 
 ---
 
@@ -501,45 +509,103 @@ for stage in pipeline:
 
 ---
 
-# Этап 1. Загрузка
+# Актуальная модель pipeline
+
+Подробный контракт stages находится в `docs/STAGES_PIPELINE.md`.
+
+Ниже приведено краткое описание текущей модели.
+
+---
+
+# Этап 1. ValidateJobStage
 
 ### Ответственность
 
-Получить исходные данные для задачи обработки.
+Проверить входной `Attribute Job`.
 
-На этом этапе `AttributeExporter` читает фактическое состояние БД в рамках заданной области.
+Stage проверяет обязательные параметры задачи, источник данных, правила обработки и базовые ограничения запуска.
 
 ### Вход
 
-* `Attribute Job`;
-* канонический атрибут;
-* область анализа;
-* категория.
+* сырой `Attribute Job`;
+* конфигурация запуска.
 
 ### Выход
 
-* `AttributeExportResult`;
-* найденные сырые атрибуты;
-* частотность использования;
-* примеры значений;
+* валидированный job;
+* source;
 * предупреждения.
 
 ---
 
-# Этап 2. Анализ
+# Этап 2. ResolveCanonicalStage
 
 ### Ответственность
 
-Проанализировать полученные данные.
+Получить глобальный канонический атрибут из реестра `{DB_PREFIX}canonical_attributes`.
 
 ### Результат
 
-* список найденных вариантов характеристики;
-* оценка найденных атрибутов как кандидатов;
-* статистика повторяемости;
-* список уникальных значений;
-* предварительная диагностика;
-* предупреждения о несоответствиях.
+* `canonical_id`;
+* `canonical_code`;
+* `target_attribute_id`;
+* `target_attribute_name`;
+* `target_attribute_group_id`;
+* `target_attribute_group_name`;
+* статус и lock-флаги канона.
+
+---
+
+# Этап 3. ResolveScopeStage
+
+### Ответственность
+
+Определить область анализа и применения.
+
+Scope обязателен концептуально, но на текущем этапе не хранится в БД.
+
+`category_id` приходит из `Attribute Job` или конфигурации запуска.
+
+### Результат
+
+* scope;
+* список товаров в области анализа;
+* количество товаров;
+* предупреждения;
+* ошибки.
+
+---
+
+# Этап 4. ExportAttributesStage
+
+### Ответственность
+
+Прочитать фактические атрибуты и значения из БД OpenCart.
+
+На этом этапе `AttributeExporter` работает как read-only экспортёр фактов из БД.
+
+### Результат
+
+* наличие целевого OpenCart-атрибута;
+* найденные сырые атрибуты;
+* `usage_count`;
+* `sample_values`;
+* сырые значения.
+
+---
+
+# Этап 5. AnalyzeNamesStage
+
+### Ответственность
+
+Проанализировать найденные атрибуты как кандидатов.
+
+### Результат
+
+* диагностика найденных имён;
+* `proposed_synonym_candidates`;
+* отклонённые и спорные кандидаты;
+* предупреждения.
 
 Частотность используется только как диагностический сигнал.
 
@@ -547,17 +613,15 @@ for stage in pipeline:
 
 Если выбранный канон не является самым частотным вариантом, это должно быть отражено как предупреждение, а не как автоматическая ошибка.
 
-Этап не изменяет данные.
-
 ---
 
-# Этап 3. Нормализация
+# Этап 6. AnalyzeValuesStage
 
 ### Ответственность
 
-Вызвать соответствующий парсер значений (`ValueParser`).
+Проанализировать значения найденных атрибутов.
 
-`value_parser` относится к `NormalizeStage`.
+`AnalyzeValuesStage` использует `ValueParser` для нормализации отдельных значений.
 
 Парсер значений отвечает исключительно за преобразование одного значения.
 
@@ -569,15 +633,7 @@ for stage in pipeline:
 * не выполняет запись результатов;
 * не принимает решение о публикации.
 
----
-
-# Этап 4. Проверка
-
-### Ответственность
-
-Проверить результат нормализации.
-
-`value_type` и `allow_empty` относятся к `ValidateStage` или к конфигурации обработки конкретной задачи.
+`value_type` и `allow_empty` относятся к правилам обработки в Framework, `Attribute Job` или конфигурации запуска.
 
 ### Возможные статусы
 
@@ -591,7 +647,7 @@ for stage in pipeline:
 
 ---
 
-# Этап 5. Генерация SQL
+# Этап 7. BuildSqlPreviewStage
 
 ### Ответственность
 
@@ -603,7 +659,7 @@ SQL является preview-результатом для ручной пров
 
 ---
 
-# Этап 6. Формирование отчёта
+# Этап 8. BuildReportStage
 
 ### Ответственность
 
@@ -622,13 +678,15 @@ SQL является preview-результатом для ручной пров
 
 ---
 
-# Этап 7. Неизвестные значения
+# Этап 9. BuildFrameworkResultStage
 
 ### Ответственность
 
-Сформировать список значений, требующих ручной обработки.
+Собрать финальный `FrameworkResult` из `AttributeContext`.
 
-Фреймворк не пытается автоматически интерпретировать неизвестные значения.
+`BuildFrameworkResultStage` не принимает новых смысловых решений.
+
+Итоговый `result_status` определяется детерминированно из данных, уже накопленных в `AttributeContext`.
 
 ---
 

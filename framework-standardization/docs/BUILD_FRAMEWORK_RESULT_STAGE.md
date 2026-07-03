@@ -109,7 +109,7 @@ FrameworkResult
 Stage отвечает за:
 
 * сбор финального `FrameworkResult`;
-* определение `result_status`;
+* детерминированное определение `result_status` из `AttributeContext`;
 * перенос краткой информации о задаче;
 * перенос данных канонического атрибута;
 * перенос scope summary;
@@ -203,6 +203,10 @@ FrameworkResult
 ## result_status
 
 Итоговый статус выполнения.
+
+`BuildFrameworkResultStage` не принимает новое смысловое решение о статусе.
+
+`result_status` выводится детерминированно из данных, уже накопленных в `AttributeContext`: errors, warnings, blockers, SQL preview и результатов предыдущих stages.
 
 Допустимые значения первого этапа:
 
@@ -630,6 +634,7 @@ stage_summary:
     - analyze_values
     - build_sql_preview
     - build_report
+    - build_framework_result
   failed_stage:
   stage_results:
     validate_job: ok
@@ -640,6 +645,7 @@ stage_summary:
     analyze_values: ok_with_warnings
     build_sql_preview: blocked
     build_report: ok
+    build_framework_result: ok
 ```
 
 ---
@@ -680,7 +686,7 @@ report_missing
 11. Перенести errors
 12. Сформировать stage_summary
 13. Перенести report
-14. Определить result_status
+14. Детерминированно вывести result_status из AttributeContext
 15. Записать stage_result
 16. Вернуть FrameworkResult
 ```
@@ -893,6 +899,7 @@ stage_summary:
     - analyze_values
     - build_sql_preview
     - build_report
+    - build_framework_result
   failed_stage:
   stage_results:
     validate_job: ok
@@ -903,6 +910,7 @@ stage_summary:
     analyze_values: ok_with_warnings
     build_sql_preview: blocked
     build_report: ok
+    build_framework_result: ok
 
 report:
   format: markdown
@@ -937,7 +945,7 @@ AttributeContext.sql_preview
 
 * переноса SQL preview;
 * определения blockers;
-* определения `result_status`.
+* детерминированного определения `result_status` из `AttributeContext`.
 
 Но она не должна создавать новые SQL statements.
 

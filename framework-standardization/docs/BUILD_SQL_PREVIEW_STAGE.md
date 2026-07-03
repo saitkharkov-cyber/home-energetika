@@ -922,31 +922,3 @@ ManualApprovalStage
 Документ является архитектурным контрактом `BuildSqlPreviewStage`.
 
 Код реализации должен следовать этому контракту.
-
-````
-
-В `PROJECT_MASTER_SUMMARY.md` добавить:
-
-```markdown
-| `docs/BUILD_SQL_PREVIEW_STAGE.md` | Контракт stage формирования безопасного SQL preview |
-````
-
-В список текущих контрактов:
-
-```text
-docs/BUILD_SQL_PREVIEW_STAGE.md
-```
-
-Следующий логичный шаг в summary заменить на:
-
-````markdown
-## Следующий логичный шаг
-
-Описать контракт `BuildReportStage`:
-
-```text
-docs/BUILD_REPORT_STAGE.md
-````
-
-Документ должен зафиксировать, как Framework формирует человекочитаемый отчёт для инженера на основе `AttributeContext`, warnings, errors, diagnostics и SQL preview.
-
