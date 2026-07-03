@@ -44,6 +44,7 @@
 | `docs/ATTRIBUTE_EXPORTER.md` | Контракт для чтения фактов из OpenCart для Framework Standardization. |
 | `docs/ATTRIBUTE_CONTEXT.md`  | Контракт рабочего состояния Framework                |
 | `docs/FRAMEWORK_RESULT.md`   | Контракт финального результата Framework             |
+| `docs/VALUE_PARSER.md`       | Контракт компонента нормализации одного значения характеристики |
 | `sql/CREATE_TABLE_canonical_attributes.sql` | SQL-драфт таблицы canonical attributes |
 
 ---
@@ -387,10 +388,11 @@ docs/ATTRIBUTE_JOB.md
 docs/ATTRIBUTE_EXPORTER.md
 docs/ATTRIBUTE_CONTEXT.md
 docs/FRAMEWORK_RESULT.md
+docs/VALUE_PARSER.md
 sql/CREATE_TABLE_canonical_attributes.sql
 ```
 
-Документ прошёл read-only ревью Codex.
+Базовый документ ATTRIBUTE_PIPELINE.md прошёл read-only ревью Codex.
 
 Критичные противоречия закрыты.
 
@@ -411,10 +413,10 @@ Scope, правила обработки, синонимы и результат
 
 ## Следующий логичный шаг
 
-Описать контракт `AttributeExporter`:
+Описать контракт `AnalyzeNamesStage` / анализа имён атрибутов:
 
 ```text
-docs/ATTRIBUTE_EXPORTER.md
+docs/ANALYZE_NAMES_STAGE.md
 ```
 
 SQL пока должен быть именно драфтом/документом, не автоматической миграцией и не применением на продуктиве.
