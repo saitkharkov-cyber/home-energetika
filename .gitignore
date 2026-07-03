@@ -2,3 +2,6 @@
 
 # Catalog Standardization
 catalog-standardization/data/tmp/
+
+.agents/
+**/.agents/
