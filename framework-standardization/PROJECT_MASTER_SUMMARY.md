@@ -50,6 +50,7 @@
 | `docs/ANALYZE_VALUES_STAGE.md` | Контракт stage анализа и нормализации значений атрибутов |
 | `docs/BUILD_SQL_PREVIEW_STAGE.md` | Контракт stage формирования безопасного SQL preview |
 | `docs/BUILD_REPORT_STAGE.md` | Контракт stage формирования человекочитаемого отчёта для инженера |
+| `docs/BUILD_FRAMEWORK_RESULT_STAGE.md` | Контракт финальной stage сборки FrameworkResult из AttributeContext |
 
 ---
 
@@ -397,7 +398,9 @@ docs/ANALYZE_NAMES_STAGE.md
 docs/ANALYZE_VALUES_STAGE.md
 docs/BUILD_SQL_PREVIEW_STAGE.md
 docs/BUILD_REPORT_STAGE.md
+docs/BUILD_FRAMEWORK_RESULT_STAGE.md
 sql/CREATE_TABLE_canonical_attributes.sql
+
 ```
 
 Базовый документ ATTRIBUTE_PIPELINE.md прошёл read-only ревью Codex.
@@ -421,13 +424,9 @@ Scope, правила обработки, синонимы и результат
 
 ## Следующий логичный шаг
 
-Описать контракт `BuildFrameworkResultStage`:
+Проверить согласованность всех stage-документов с `docs/STAGES_PIPELINE.md` и обновить master summary.
 
-```text
-docs/BUILD_FRAMEWORK_RESULT_STAGE.md
-````
-
-Документ должен зафиксировать, как Framework собирает финальный `FrameworkResult` из `AttributeContext`, report, warnings, errors, SQL preview и stage summary.
+После этого можно переходить от архитектурных контрактов к проектированию структуры файлов будущей реализации Framework.
 
 ---
 
