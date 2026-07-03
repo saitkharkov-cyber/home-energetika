@@ -38,6 +38,7 @@
 | `README.md`                  | Навигация по проекту                                 |
 | `PROJECT_MASTER_SUMMARY.md`  | Сводка архитектуры и текущего состояния              |
 | `docs/ATTRIBUTE_PIPELINE.md` | Архитектурный контракт конвейера обработки атрибутов |
+| `docs/STAGES_PIPELINE.md`    | Контракт stage pipeline: порядок stages, входы/выходы, ошибки и правила остановки |
 | `docs/CANONICAL_ATTRIBUTE_REGISTRATION.md` | Контракт регистрации канонического атрибута |
 | `docs/ATTRIBUTE_JOB.md`      | Контракт одной задачи обработки характеристики       |
 | `docs/ATTRIBUTE_CONTEXT.md`  | Контракт рабочего состояния Framework                |
@@ -379,6 +380,7 @@ Framework не публикует результат автоматически.
 
 ```text
 docs/ATTRIBUTE_PIPELINE.md
+docs/STAGES_PIPELINE.md
 docs/CANONICAL_ATTRIBUTE_REGISTRATION.md
 docs/ATTRIBUTE_JOB.md
 docs/ATTRIBUTE_CONTEXT.md
@@ -407,12 +409,10 @@ Scope, правила обработки, синонимы и результат
 
 ## Следующий логичный шаг
 
-Описать контракт stage pipeline: список stages, порядок выполнения, входы/выходы каждой stage и правила остановки pipeline.
-
-Ближайший документ:
+Описать контракт `AttributeExporter`:
 
 ```text
-docs/PIPELINE_STAGES.md
+docs/ATTRIBUTE_EXPORTER.md
 ```
 
 SQL пока должен быть именно драфтом/документом, не автоматической миграцией и не применением на продуктиве.
