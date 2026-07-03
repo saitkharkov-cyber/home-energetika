@@ -49,6 +49,7 @@
 | `docs/ANALYZE_NAMES_STAGE.md` | Контракт stage анализа имён атрибутов и формирования кандидатов в синонимы |
 | `docs/ANALYZE_VALUES_STAGE.md` | Контракт stage анализа и нормализации значений атрибутов |
 | `docs/BUILD_SQL_PREVIEW_STAGE.md` | Контракт stage формирования безопасного SQL preview |
+| `docs/BUILD_REPORT_STAGE.md` | Контракт stage формирования человекочитаемого отчёта для инженера |
 
 ---
 
@@ -395,6 +396,7 @@ docs/VALUE_PARSER.md
 docs/ANALYZE_NAMES_STAGE.md
 docs/ANALYZE_VALUES_STAGE.md
 docs/BUILD_SQL_PREVIEW_STAGE.md
+docs/BUILD_REPORT_STAGE.md
 sql/CREATE_TABLE_canonical_attributes.sql
 ```
 
@@ -419,10 +421,10 @@ Scope, правила обработки, синонимы и результат
 
 ## Следующий логичный шаг
 
-Описать контракт `BuildReportStage`:
+Описать контракт `BuildFrameworkResultStage`:
 
 ```text
-docs/BUILD_REPORT_STAGE.md
+docs/BUILD_FRAMEWORK_RESULT_STAGE.md
 ```
 
 SQL пока должен быть именно драфтом/документом, не автоматической миграцией и не применением на продуктиве.
