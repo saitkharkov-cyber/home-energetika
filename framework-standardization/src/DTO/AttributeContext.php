@@ -10,6 +10,8 @@ final class AttributeContext
     public $warnings = [];
     public $frameworkResult = null;
     private $canonical = [];
+    private $scope = [];
+    private $rawData = [];
     private $job;
 
     public function __construct(AttributeJob $job)
@@ -56,5 +58,25 @@ final class AttributeContext
     public function getCanonical()
     {
         return $this->canonical;
+    }
+
+    public function setScope(array $scope)
+    {
+        $this->scope = $scope;
+    }
+
+    public function getScope()
+    {
+        return $this->scope;
+    }
+
+    public function setRawDataProducts(array $products)
+    {
+        $this->rawData['products'] = $products;
+    }
+
+    public function getRawData()
+    {
+        return $this->rawData;
     }
 }
