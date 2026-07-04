@@ -434,6 +434,35 @@ Scope, правила обработки, синонимы и результат
 
 ---
 
+## Runtime первого MVP
+
+Implementation skeleton остаётся на PHP.
+
+Целевой runtime первого MVP:
+
+```text
+PHP 5.6-compatible CLI/tooling layer
+```
+
+Framework Standardization не является OpenCart-модулем и не является модулем админки OpenCart.
+
+Это отдельный инженерный tooling layer внутри `framework-standardization`.
+
+Он:
+
+* запускается вручную инженером;
+* работает по одному `Attribute Job`;
+* готовит `stage_results`, `report` и `sql_preview`;
+* не применяет SQL автоматически;
+* не создаёт OpenCart module paths: `admin/controller`, `admin/model`, `admin/view`, `catalog/controller`, `catalog/model`, `language`;
+* не подключается к `admin/index.php` или OpenCart MVC как runtime.
+
+OpenCart на текущем этапе является источником данных.
+
+Существующий PHP-импорт товаров является будущим потребителем canonical layer, но не частью первого skeleton.
+
+---
+
 ## Следующий логичный шаг
 
 Создать минимальный implementation skeleton: StageInterface, PipelineEngine, DTO и 9 пустых stages без бизнес-логики.

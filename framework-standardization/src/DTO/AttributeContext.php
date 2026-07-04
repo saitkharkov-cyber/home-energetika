@@ -1,0 +1,34 @@
+<?php
+
+namespace FrameworkStandardization\DTO;
+
+final class AttributeContext
+{
+    public $stageResults = [];
+    public $completedStages = [];
+    public $errors = [];
+    public $warnings = [];
+    public $frameworkResult = null;
+    private $job;
+
+    public function __construct(AttributeJob $job)
+    {
+        $this->job = $job;
+    }
+
+    public function addStageResult($stageName, StageResult $stageResult)
+    {
+        $this->stageResults[$stageName] = $stageResult->toArray();
+        $this->completedStages[] = $stageName;
+    }
+
+    public function hasErrors()
+    {
+        return $this->errors !== [];
+    }
+
+    public function getJob()
+    {
+        return $this->job;
+    }
+}

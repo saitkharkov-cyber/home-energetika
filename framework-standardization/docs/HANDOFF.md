@@ -254,6 +254,48 @@ framework-standardization/
 
 ---
 
+## Runtime constraint
+
+Implementation skeleton остаётся на PHP.
+
+Целевой runtime первого MVP:
+
+```text
+PHP 5.6-compatible CLI/tooling layer
+```
+
+Framework Standardization — отдельный инженерный tooling layer внутри `framework-standardization`.
+
+Это не OpenCart-модуль и не модуль админки OpenCart.
+
+Framework:
+
+```text
+запускается вручную инженером
+работает по одному Attribute Job
+готовит stage_results / report / sql_preview
+не применяет SQL автоматически
+```
+
+Не создавать OpenCart module paths:
+
+```text
+admin/controller
+admin/model
+admin/view
+catalog/controller
+catalog/model
+language
+```
+
+Не подключаться к `admin/index.php` или OpenCart MVC как runtime.
+
+OpenCart на текущем этапе является источником данных.
+
+Существующий PHP-импорт товаров является будущим потребителем canonical layer, но не частью первого skeleton.
+
+---
+
 ## Следующий шаг
 
 Завтра начать с создания минимального implementation skeleton.

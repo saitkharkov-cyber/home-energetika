@@ -86,6 +86,39 @@ framework-standardization/
 
 ---
 
+## Runtime и граница с OpenCart
+
+Первый MVP реализуется как PHP 5.6-compatible CLI/tooling layer.
+
+Framework Standardization не является OpenCart-модулем и не является модулем админки OpenCart.
+
+Это отдельный инженерный tooling layer внутри `framework-standardization`.
+
+Он запускается вручную инженером, работает по одному `Attribute Job` и готовит:
+
+* `stage_results`;
+* `report`;
+* `sql_preview`.
+
+Framework не применяет SQL автоматически.
+
+Запрещено строить реализацию как OpenCart module paths:
+
+* `admin/controller`;
+* `admin/model`;
+* `admin/view`;
+* `catalog/controller`;
+* `catalog/model`;
+* `language`.
+
+Framework не должен подключаться к `admin/index.php` или OpenCart MVC как runtime.
+
+OpenCart на текущем этапе является источником данных.
+
+Существующий PHP-импорт товаров является будущим потребителем canonical layer, но не частью первого skeleton.
+
+---
+
 ## Ключевые компоненты
 
 DTO и структуры:
