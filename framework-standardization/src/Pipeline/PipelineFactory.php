@@ -7,6 +7,7 @@ use FrameworkStandardization\Analyzer\DryRunAttributeValueAnalyzer;
 use FrameworkStandardization\Canonical\DryRunCanonicalAttributeResolver;
 use FrameworkStandardization\Exporter\DryRunAttributeExporter;
 use FrameworkStandardization\Report\DryRunReportBuilder;
+use FrameworkStandardization\Result\DryRunFrameworkResultBuilder;
 use FrameworkStandardization\Scope\DryRunScopeResolver;
 use FrameworkStandardization\SqlPreview\DryRunSqlPreviewBuilder;
 use FrameworkStandardization\Stage\AnalyzeNamesStage;
@@ -30,6 +31,7 @@ final class PipelineFactory
         $attributeValueAnalyzer = new DryRunAttributeValueAnalyzer();
         $sqlPreviewBuilder = new DryRunSqlPreviewBuilder();
         $reportBuilder = new DryRunReportBuilder();
+        $frameworkResultBuilder = new DryRunFrameworkResultBuilder();
 
         return new PipelineEngine([
             new ValidateJobStage(),
@@ -40,7 +42,7 @@ final class PipelineFactory
             new AnalyzeValuesStage($attributeValueAnalyzer),
             new BuildSqlPreviewStage($sqlPreviewBuilder),
             new BuildReportStage($reportBuilder),
-            new BuildFrameworkResultStage(),
+            new BuildFrameworkResultStage($frameworkResultBuilder),
         ]);
     }
 }

@@ -6,11 +6,13 @@ final class FrameworkResult
 {
     private $resultStatus;
     private $stageSummary;
+    private $payload;
 
-    public function __construct($resultStatus, array $stageSummary)
+    public function __construct($resultStatus, array $stageSummary, array $payload = array())
     {
         $this->resultStatus = $resultStatus;
         $this->stageSummary = $stageSummary;
+        $this->payload = $payload;
     }
 
     public static function fromContext(AttributeContext $context)
@@ -22,7 +24,8 @@ final class FrameworkResult
                 'stage_results' => $context->stageResults,
                 'warnings' => $context->warnings,
                 'errors' => $context->errors,
-            ]
+            ],
+            array()
         );
     }
 
@@ -47,5 +50,10 @@ final class FrameworkResult
     public function getStageSummary()
     {
         return $this->stageSummary;
+    }
+
+    public function getPayload()
+    {
+        return $this->payload;
     }
 }

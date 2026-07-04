@@ -165,4 +165,14 @@ final class AttributeContext
     {
         return $this->report;
     }
+
+    public function setFrameworkResult(FrameworkResult $frameworkResult)
+    {
+        $this->frameworkResult = $frameworkResult;
+    }
+
+    public function getFrameworkResult()
+    {
+        return $this->frameworkResult;
+    }
 }
