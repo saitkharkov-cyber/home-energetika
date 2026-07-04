@@ -12,6 +12,8 @@ final class AttributeContext
     private $canonical = [];
     private $scope = [];
     private $rawData = [];
+    private $attributeNameStructure = [];
+    private $attributeValueStructure = [];
     private $job;
 
     public function __construct(AttributeJob $job)
@@ -75,8 +77,43 @@ final class AttributeContext
         $this->rawData['products'] = $products;
     }
 
+    public function setRawDataAttributes(array $attributes)
+    {
+        $this->rawData['attributes'] = $attributes;
+    }
+
+    public function setRawDataAttributeGroups(array $attributeGroups)
+    {
+        $this->rawData['attribute_groups'] = $attributeGroups;
+    }
+
+    public function setRawDataProductAttributes(array $productAttributes)
+    {
+        $this->rawData['product_attributes'] = $productAttributes;
+    }
+
     public function getRawData()
     {
         return $this->rawData;
+    }
+
+    public function setAttributeNameStructure(array $attributeNameStructure)
+    {
+        $this->attributeNameStructure = $attributeNameStructure;
+    }
+
+    public function getAttributeNameStructure()
+    {
+        return $this->attributeNameStructure;
+    }
+
+    public function setAttributeValueRawValues(array $rawValues)
+    {
+        $this->attributeValueStructure['raw_values'] = $rawValues;
+    }
+
+    public function getAttributeValueStructure()
+    {
+        return $this->attributeValueStructure;
     }
 }
