@@ -9,6 +9,7 @@ final class AttributeContext
     public $errors = [];
     public $warnings = [];
     public $frameworkResult = null;
+    private $canonical = [];
     private $job;
 
     public function __construct(AttributeJob $job)
@@ -45,5 +46,15 @@ final class AttributeContext
     public function getJob()
     {
         return $this->job;
+    }
+
+    public function setCanonical(array $canonical)
+    {
+        $this->canonical = $canonical;
+    }
+
+    public function getCanonical()
+    {
+        return $this->canonical;
     }
 }
