@@ -296,6 +296,46 @@ OpenCart на текущем этапе является источником д
 
 ---
 
+## CLI dry-run entrypoint
+
+PHP 5.6-compatible CLI dry-run entrypoint уже создан.
+
+Файлы:
+
+```text
+bootstrap.php
+bin/dry-run.php
+config/jobs/pump_diameter.php
+```
+
+Запуск из корня репозитория:
+
+```text
+php framework-standardization/bin/dry-run.php framework-standardization/config/jobs/pump_diameter.php
+```
+
+Запуск из `framework-standardization`:
+
+```text
+php bin/dry-run.php config/jobs/pump_diameter.php
+```
+
+Dry-run:
+
+```text
+выводит result_status
+выводит 9 stage_results
+не подключается к OpenCart
+не подключается к DB
+не применяет SQL
+```
+
+Это всё ещё отдельный инженерный PHP CLI/tooling layer.
+
+Это не OpenCart-модуль и не модуль админки OpenCart.
+
+---
+
 ## Следующий шаг
 
 Завтра начать с создания минимального implementation skeleton.
