@@ -1,771 +1,101 @@
-# Handoff — Framework Standardization
+# Handoff - Framework Standardization
 
-**Дата:** 03.07.2026 23:02
 Проект: Home Energetika / Framework Standardization  
 Репозиторий: `D:\Git\home-energetika`  
 Рабочая папка: `framework-standardization`
 
----
-
 ## Текущий статус
 
-Архитектурная документация Framework Standardization приведена в согласованное состояние.
+Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling layer для инженерной работы со стандартизацией характеристик.
 
-Implementation skeleton создан и развивается маленькими no-DB шагами.
+Текущая стабильная точка: все 9 stages имеют no-DB boundary, dry-run зелёный на PHP 5.6, DB/OpenCart/SQL apply не подключались.
 
-Последний закрытый шаг:
+Последний закрытый шаг: `BuildFrameworkResultStage no-DB boundary`.
 
-```text
-AnalyzeValuesStage no-DB boundary
-```
+Последний коммит: `c3445c3 Add no-DB framework result boundary`.
 
-Ожидаемое состояние:
+Ожидаемое состояние репозитория: `working tree clean`, `origin/main = main`.
 
-```text
-working tree clean
-origin/main = main
-```
+## Документация
 
-Последние важные коммиты:
+Ключевые документы:
 
-```text
-a52403a Add no-DB attribute value analysis boundary
-f03bfcd Add no-DB attribute name analysis boundary
-0885b44 Add no-DB attribute export boundary
-13ba45c Add no-DB scope resolver boundary
-8bd6c45 Add no-DB canonical resolver boundary
-7a8e9c4 Set CLI timezone for PHP 5.6 dry-run
-61b65e1 Document ValidateJobStage status
-f817a53 Implement minimal ValidateJobStage checks
-```
+- `docs/STAGES_PIPELINE.md`
+- `docs/ATTRIBUTE_CONTEXT.md`
+- `docs/IMPLEMENTATION_STRUCTURE.md`
+- `docs/STAGE_BOUNDARIES.md`
 
----
+Подробные stage boundaries вынесены в `docs/STAGE_BOUNDARIES.md`.
 
-## Что уже сделано
+## Stage-модель
 
-Зафиксированы основные архитектурные документы:
+Порядок Pipeline и technical names:
 
-```text
-TECHNICAL_SPECIFICATION.md
-README.md
-PROJECT_MASTER_SUMMARY.md
-docs/STAGES_PIPELINE.md
-docs/ATTRIBUTE_JOB.md
-docs/ATTRIBUTE_CONTEXT.md
-docs/FRAMEWORK_RESULT.md
-docs/ATTRIBUTE_EXPORTER.md
-docs/VALUE_PARSER.md
-docs/ANALYZE_NAMES_STAGE.md
-docs/ANALYZE_VALUES_STAGE.md
-docs/BUILD_SQL_PREVIEW_STAGE.md
-docs/BUILD_REPORT_STAGE.md
-docs/BUILD_FRAMEWORK_RESULT_STAGE.md
-docs/CANONICAL_ATTRIBUTE_REGISTRATION.md
-docs/IMPLEMENTATION_STRUCTURE.md
-sql/CREATE_TABLE_canonical_attributes.sql
-```
+1. `validate_job`
+2. `resolve_canonical`
+3. `resolve_scope`
+4. `export_attributes`
+5. `analyze_names`
+6. `analyze_values`
+7. `build_sql_preview`
+8. `build_report`
+9. `build_framework_result`
 
-Документация проверена Codex read-only ревизией.
-
-Результат проверки:
-
-```text
-OK
-git status clean
-устаревшие stage-термины очищены
-9-stage модель согласована
-stage_results согласованы
-PROJECT_MASTER_SUMMARY.md актуален
-```
-
----
-
-## Текущая stage-модель
-
-Pipeline состоит из 9 stages:
-
-```text
-ValidateJobStage
-ResolveCanonicalStage
-ResolveScopeStage
-ExportAttributesStage
-AnalyzeNamesStage
-AnalyzeValuesStage
-BuildSqlPreviewStage
-BuildReportStage
-BuildFrameworkResultStage
-```
-
-Технические имена `stage_results`:
-
-```text
-validate_job
-resolve_canonical
-resolve_scope
-export_attributes
-analyze_names
-analyze_values
-build_sql_preview
-build_report
-build_framework_result
-```
-
----
+Все 9 stages сейчас имеют no-DB boundary.
 
 ## Главные архитектурные решения
 
-Framework работает по принципу:
+- Один запуск = один `Attribute Job`.
+- Один `Attribute Job` = одна характеристика / один canonical attribute / один scope.
+- Поток: `Attribute Job -> AttributeContext -> Pipeline -> FrameworkResult`.
+- SQL не применяется автоматически.
+- OpenCart сейчас не подключён.
 
-```text
-один запуск = один Attribute Job = одна характеристика = один canonical attribute = один scope
-```
+## Runtime-ограничения
 
-Ключевая цепочка:
+- Runtime первого MVP: `PHP 5.6-compatible CLI/tooling layer`.
+- Проверки выполнять через `C:\php56\php.exe`.
+- Не полагаться на глобальный `php` из `PATH`.
+- Framework Standardization - не OpenCart-модуль и не модуль админки OpenCart.
+- Не создавать OpenCart module paths: `admin/controller`, `admin/model`, `admin/view`, `catalog/controller`, `catalog/model`, `language`.
 
-```text
-Attribute Job
-→ AttributeContext
-→ Stages Pipeline
-→ FrameworkResult
-```
+## CLI entrypoint для dry-run
 
-Framework не применяет изменения автоматически.
+Файлы: `bootstrap.php`, `bin/dry-run.php`, `config/jobs/pump_diameter.php`.
 
-SQL preview формируется только для ручной проверки.
-
----
-
-## Canonical DB
-
-Текущая DB-модель содержит только одну canonical-таблицу:
-
-```text
-{DB_PREFIX}canonical_attributes
-```
-
-SQL-драфт:
-
-```text
-sql/CREATE_TABLE_canonical_attributes.sql
-```
-
-Решения:
-
-```text
-scope/category не хранится в БД
-value_parser/value_type/allow_empty не хранятся в БД
-synonyms не хранятся в БД на текущем этапе
-результаты анализа не хранятся в БД
-```
-
-Таблица использует:
-
-```text
-MySQL 5.7
-utf8
-utf8_general_ci
-{DB_PREFIX} placeholder
-```
-
----
-
-## Границы компонентов
-
-`AttributeExporter`:
-
-```text
-read-only
-читает факты из OpenCart
-не нормализует значения
-не утверждает синонимы
-не выбирает канон
-не пишет в БД
-```
-
-`ValueParser`:
-
-```text
-работает с одним raw value
-не знает про БД
-не знает про товары/категории
-не знает про canonical attribute
-возвращает ParseResult
-```
-
-`AnalyzeNamesStage`:
-
-```text
-анализирует имена атрибутов
-предлагает кандидатов
-не утверждает синонимы
-```
-
-`AnalyzeValuesStage`:
-
-```text
-анализирует значения через ValueParser
-не анализирует имена
-```
-
-`BuildSqlPreviewStage`:
-
-```text
-строит SQL preview
-фиксирует blockers
-не выполняет SQL
-```
-
-`BuildReportStage`:
-
-```text
-строит человекочитаемый отчёт
-не меняет смысловые данные
-```
-
-`BuildFrameworkResultStage`:
-
-```text
-собирает FrameworkResult из AttributeContext
-result_status выводится детерминированно из накопленного состояния
-```
-
----
-
-## План будущей реализации
-
-Структура будущей реализации зафиксирована в:
-
-```text
-docs/IMPLEMENTATION_STRUCTURE.md
-```
-
-Рекомендуемая будущая структура:
-
-```text
-framework-standardization/
-├─ config/
-│  ├─ jobs/
-│  └─ runtime/
-├─ src/
-│  ├─ DTO/
-│  ├─ Contract/
-│  ├─ Pipeline/
-│  ├─ Stage/
-│  ├─ Canonical/
-│  ├─ Scope/
-│  ├─ Exporter/
-│  ├─ Parser/
-│  ├─ SqlPreview/
-│  ├─ Report/
-│  ├─ Result/
-│  ├─ OpenCart/
-│  └─ Runner/
-├─ var/
-│  ├─ reports/
-│  ├─ sql-preview/
-│  └─ logs/
-└─ tests/
-```
-
-Часть каталогов уже создана в рамках PHP 5.6-compatible skeleton.
-
----
-
-## Runtime constraint
-
-Implementation skeleton остаётся на PHP.
-
-Целевой runtime первого MVP:
-
-```text
-PHP 5.6-compatible CLI/tooling layer
-```
-
-Framework Standardization — отдельный инженерный tooling layer внутри `framework-standardization`.
-
-Это не OpenCart-модуль и не модуль админки OpenCart.
-
-Framework:
-
-```text
-запускается вручную инженером
-работает по одному Attribute Job
-готовит stage_results / report / sql_preview
-не применяет SQL автоматически
-```
-
-Не создавать OpenCart module paths:
-
-```text
-admin/controller
-admin/model
-admin/view
-catalog/controller
-catalog/model
-language
-```
-
-Не подключаться к `admin/index.php` или OpenCart MVC как runtime.
-
-OpenCart на текущем этапе является источником данных.
-
-Существующий PHP-импорт товаров является будущим потребителем canonical layer, но не частью первого skeleton.
-
----
-
-## CLI dry-run entrypoint
-
-PHP 5.6-compatible CLI dry-run entrypoint уже создан.
-
-Файлы:
-
-```text
-bootstrap.php
-bin/dry-run.php
-config/jobs/pump_diameter.php
-```
-
-Проверки выполнять через локальный PHP 5.6:
-
-```text
-C:\php56\php.exe
-```
-
-Не полагаться на глобальный `php` из `PATH`.
-
-Happy path запуск из корня репозитория:
+Happy path command из корня репозитория:
 
 ```text
 C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
 ```
 
-Dry-run:
-
-```text
-выводит result_status
-выводит 9 stage_results
-не подключается к OpenCart
-не подключается к DB
-не применяет SQL
-```
-
-Ожидаемый happy path:
+Ожидаемый результат:
 
 ```text
 result_status: ok
 warnings_count: 0
 errors_count: 0
-все 9 stages ok
+all 9 stages ok
 ```
 
-Это всё ещё отдельный инженерный PHP CLI/tooling layer.
-
-Это не OpenCart-модуль и не модуль админки OpenCart.
-
----
-
-## ValidateJobStage status
-
-`ValidateJobStage` уже реализует минимальную structural/safety validation.
-
-Проверяет:
-
-```text
-job_id
-job_id format
-job_name
-canonical.canonical_code
-scope.type = category
-scope.category_id
-source.type = opencart_db
-source.language_id
-value_rules.value_parser
-value_rules.unknown_value_policy = block_sql / report_only
-output.apply_changes = 0
-```
-
-Поведение:
-
-```text
-при ошибках пишет AttributeContext.errors
-при ошибках пишет StageResult::failed
-при успехе пишет StageResult::ok
-warnings пока не добавляет
-```
-
-Не делает:
-
-```text
-OpenCart/DB connection
-canonical lookup
-category/language existence checks
-parser registry checks
-SQL apply
-```
-
-Dry-run happy path проходит.
-
----
-
-## ResolveCanonicalStage status
-
-`ResolveCanonicalStage` уже не stub.
-
-Stage использует:
-
-```text
-CanonicalAttributeResolverInterface
-```
-
-Текущая реализация resolver:
-
-```text
-DryRunCanonicalAttributeResolver
-```
-
-Поведение:
-
-```text
-fixture только для canonical_code = pump_diameter
-source = dry_run_fixture
-unknown canonical даёт canonical_code_not_found
-canonical записывается в AttributeContext
-```
-
-Важно:
-
-```text
-target_attribute_id = 0 только dry-run fixture
-это не реальный OpenCart ID
-```
-
-`ResolveCanonicalStage` не делает:
-
-```text
-DB connection
-OpenCart connection
-SQL apply
-реальную проверку target_attribute_id / target_attribute_group_id
-```
-
----
-
-## ResolveScopeStage status
-
-`ResolveScopeStage` уже не stub.
-
-Stage использует:
-
-```text
-ScopeResolverInterface
-```
-
-Текущая реализация resolver:
-
-```text
-DryRunScopeResolver
-```
-
-Поведение:
-
-```text
-fixture только для scope.type = category
-fixture только для category_id = 11900213
-source = dry_run_fixture
-unknown category даёт scope_category_not_found
-scope записывается в AttributeContext
-raw_data.products записывается в AttributeContext
-```
-
-Важно:
-
-```text
-product_id = 0 только dry-run fixture
-это не реальный OpenCart ID
-```
-
-`ResolveScopeStage` не делает:
-
-```text
-DB connection
-OpenCart connection
-SQL apply
-реальное чтение categories/products
-проверку реального имени категории
-```
-
----
-
-## ExportAttributesStage status
-
-`ExportAttributesStage` уже не stub.
-
-Stage использует:
-
-```text
-AttributeExporterInterface
-```
-
-Текущая реализация exporter:
-
-```text
-DryRunAttributeExporter
-```
-
-Поведение:
-
-```text
-fixture только для canonical_code = pump_diameter
-fixture только для category_id = 11900213
-fixture только для product_id = 0
-source = dry_run_fixture
-```
-
-Пишет в `AttributeContext`:
-
-```text
-raw_data.attributes
-raw_data.attribute_groups
-raw_data.product_attributes
-attribute_name_structure.target_attribute
-attribute_name_structure.found_attributes
-attribute_value_structure.raw_values
-```
-
-Важно:
-
-```text
-attribute_id = 0 только dry-run fixture
-product_id = 0 только dry-run fixture
-это не реальные OpenCart ID
-```
-
-`ExportAttributesStage` не делает:
-
-```text
-DB connection
-OpenCart connection
-SQL apply
-реальное чтение product_attribute / attribute / attribute_description / attribute_group
-анализ имён
-нормализацию значений
-SQL preview
-```
-
----
-
-## AnalyzeNamesStage status
-
-`AnalyzeNamesStage` уже не stub.
-
-Stage использует:
-
-```text
-AttributeNameAnalyzerInterface
-```
-
-Текущая реализация analyzer:
-
-```text
-DryRunAttributeNameAnalyzer
-```
-
-Поведение:
-
-```text
-source = dry_run_fixture
-работает только с exported facts из AttributeContext
-exact_matches является diagnostic fact, не synonym approval
-synonym_candidates proposed/rejected/ambiguous пока пустые
-```
-
-`AnalyzeNamesStage` не делает:
-
-```text
-DB connection
-OpenCart connection
-SQL apply
-fuzzy matching
-анализ значений
-использование sample_values/raw_values для решений
-утверждение synonyms
-```
-
----
-
-## AnalyzeValuesStage status
-
-`AnalyzeValuesStage` уже не stub.
-
-Stage использует:
-
-```text
-AttributeValueAnalyzerInterface
-```
-
-Текущая реализация analyzer:
-
-```text
-DryRunAttributeValueAnalyzer
-```
-
-Поведение:
-
-```text
-fixture только для canonical_code = pump_diameter
-fixture только для value_parser = diameter_mm
-fixture только для raw_text = 96 мм
-условно нормализует только "96 мм" -> 96
-source = dry_run_fixture
-```
-
-Пишет в `AttributeContext`:
-
-```text
-attribute_value_structure
-value_report
-```
-
-Важно:
-
-```text
-не является production parser
-не использует ValueParserRegistry
-unknown_value_policy не интерпретируется как SQL blocker
-SQL blockers - зона будущего BuildSqlPreviewStage
-```
-
-`AnalyzeValuesStage` не делает:
-
-```text
-DB connection
-OpenCart connection
-SQL apply
-SQL preview
-применение изменений
-production normalization
-```
-
----
-
-## Negative manual checks
-
-Для negative checks создавать временные job-файлы:
-
-```text
-config/jobs/_manual_*.php
-```
-
-Не коммитить временные файлы и удалять их после проверки.
-
-Unknown canonical:
-
-```text
-canonical_code = unknown_canonical
-ожидаемая ошибка: canonical_code_not_found
-downstream stages: skipped
-build_report: ok
-build_framework_result: ok
-```
-
-Unknown category:
-
-```text
-category_id = 99999999
-ожидаемая ошибка: scope_category_not_found
-downstream stages: skipped
-build_report: ok
-build_framework_result: ok
-```
-
-Stage-specific negative для Export/AnalyzeNames/AnalyzeValues пока не делать без test hook.
-
----
-
-## Что всё ещё НЕ сделано
-
-```text
-BuildSqlPreviewStage всё ещё stub / no SQL preview
-BuildReportStage пока минимальный
-BuildFrameworkResultStage пока минимальный
-нет DB runtime config
-нет OpenCart connection
-нет SQL apply
-нет реальных attribute/product reads
-нет production exporter/analyzer/parser
-нет ValueParserRegistry
-```
-
----
+## Что не делать
+
+- No DB connection.
+- No OpenCart connection.
+- No SQL apply.
+- No executable SQL.
+- No production exporter/analyzer/parser/generator.
+- No OpenCart module paths.
+- No Composer/YAML/test framework без отдельного решения.
 
 ## Следующий шаг
 
-Рекомендуемый следующий инженерный шаг:
+Рекомендуемый следующий инженерный шаг: read-only mini-spec для DB/runtime boundary.
 
-```text
-read-only mini-spec для BuildSqlPreviewStage no-DB boundary
-```
+Цель: спроектировать read-only подключение к реальной OpenCart базе, оставить SQL apply вне scope и не реализовывать без отдельной команды.
 
-Цель:
+## Правило работы
 
-```text
-использовать canonical/scope/export/name/value structures из AttributeContext
-построить dry-run sql_preview/report facts
-оставаться без DB/OpenCart и без SQL apply
-```
+Двигаться маленькими шагами: read-only mini-spec -> implementation -> verification -> review -> commit -> push.
 
-Не реализовывать этот шаг без отдельной команды.
-
----
-
-## Что НЕ делать на следующем шаге
-
-```text
-DB connection
-OpenCart connection
-SQL apply
-production DB
-массовый запуск
-UI
-новые таблицы
-реальное чтение атрибутов/товаров
-интеграцию с импортами
-универсальный plugin-system
-```
-
----
-
-## Рекомендуемая команда Codex на следующий шаг
-
-```text
-Работаем в репозитории D:\Git\home-energetika.
-
-Работай только внутри папки:
-framework-standardization
-
-Задача: read-only mini-spec для BuildSqlPreviewStage no-DB boundary.
-
-Ничего не изменяй и не коммить.
-
-Перед началом прочитай:
-
-- docs/STAGES_PIPELINE.md
-- docs/ATTRIBUTE_CONTEXT.md
-- docs/BUILD_SQL_PREVIEW_STAGE.md
-- docs/HANDOFF.md
-- src/Stage/BuildSqlPreviewStage.php
-- src/DTO/AttributeContext.php
-- src/Pipeline/PipelineFactory.php
-
-Нужно предложить минимальный no-DB шаг, который использует canonical/scope/export/name/value structures из AttributeContext, но не подключается к DB/OpenCart и не применяет SQL.
-```
-
----
-
-## Важное правило работы
-
-Двигаться маленькими шагами.
-
-Сначала read-only mini-spec, потом реализация по отдельной команде, потом проверка, потом коммит.
-
-Не переходить к реальной DB/OpenCart логике, пока no-DB boundaries не будут понятны и согласованы.
+PHP 5.6 checks выполнять через `C:\php56\php.exe`.
