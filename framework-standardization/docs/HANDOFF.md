@@ -336,6 +336,49 @@ Dry-run:
 
 ---
 
+## ValidateJobStage status
+
+`ValidateJobStage` уже реализует минимальную structural/safety validation.
+
+Проверяет:
+
+```text
+job_id
+job_id format
+job_name
+canonical.canonical_code
+scope.type = category
+scope.category_id
+source.type = opencart_db
+source.language_id
+value_rules.value_parser
+value_rules.unknown_value_policy = block_sql / report_only
+output.apply_changes = 0
+```
+
+Поведение:
+
+```text
+при ошибках пишет AttributeContext.errors
+при ошибках пишет StageResult::failed
+при успехе пишет StageResult::ok
+warnings пока не добавляет
+```
+
+Не делает:
+
+```text
+OpenCart/DB connection
+canonical lookup
+category/language existence checks
+parser registry checks
+SQL apply
+```
+
+Dry-run happy path проходит.
+
+---
+
 ## Следующий шаг
 
 Завтра начать с создания минимального implementation skeleton.
