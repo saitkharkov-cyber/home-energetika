@@ -2,6 +2,7 @@
 
 namespace FrameworkStandardization\Pipeline;
 
+use FrameworkStandardization\Analyzer\DryRunAttributeNameAnalyzer;
 use FrameworkStandardization\Canonical\DryRunCanonicalAttributeResolver;
 use FrameworkStandardization\Exporter\DryRunAttributeExporter;
 use FrameworkStandardization\Scope\DryRunScopeResolver;
@@ -22,13 +23,14 @@ final class PipelineFactory
         $canonicalResolver = new DryRunCanonicalAttributeResolver();
         $scopeResolver = new DryRunScopeResolver();
         $attributeExporter = new DryRunAttributeExporter();
+        $attributeNameAnalyzer = new DryRunAttributeNameAnalyzer();
 
         return new PipelineEngine([
             new ValidateJobStage(),
             new ResolveCanonicalStage($canonicalResolver),
             new ResolveScopeStage($scopeResolver),
             new ExportAttributesStage($attributeExporter),
-            new AnalyzeNamesStage(),
+            new AnalyzeNamesStage($attributeNameAnalyzer),
             new AnalyzeValuesStage(),
             new BuildSqlPreviewStage(),
             new BuildReportStage(),

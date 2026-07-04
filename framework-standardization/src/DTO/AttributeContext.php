@@ -14,6 +14,7 @@ final class AttributeContext
     private $rawData = [];
     private $attributeNameStructure = [];
     private $attributeValueStructure = [];
+    private $synonymCandidates = [];
     private $job;
 
     public function __construct(AttributeJob $job)
@@ -115,5 +116,15 @@ final class AttributeContext
     public function getAttributeValueStructure()
     {
         return $this->attributeValueStructure;
+    }
+
+    public function setSynonymCandidates(array $synonymCandidates)
+    {
+        $this->synonymCandidates = $synonymCandidates;
+    }
+
+    public function getSynonymCandidates()
+    {
+        return $this->synonymCandidates;
     }
 }
