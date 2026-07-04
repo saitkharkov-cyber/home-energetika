@@ -10,11 +10,13 @@ Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling la
 
 Текущая стабильная точка: все 9 stages имеют no-DB boundary, dry-run зелёный на PHP 5.6, DB/OpenCart/SQL apply не подключались.
 
-Последний закрытый шаг: `BuildFrameworkResultStage no-DB boundary`.
+Последний закрытый шаг: `read-only DB runtime skeleton`.
 
-Последний коммит: `c3445c3 Add no-DB framework result boundary`.
+Последний коммит: `b037fa7 Add read-only DB runtime skeleton`.
 
 Ожидаемое состояние репозитория: `working tree clean`, `origin/main = main`.
+
+Предыдущий документационный split закрыт коммитом `7c590c4 Split handoff and stage boundaries documentation`.
 
 ## Документация
 
@@ -50,6 +52,8 @@ Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling la
 - Поток: `Attribute Job -> AttributeContext -> Pipeline -> FrameworkResult`.
 - SQL не применяется автоматически.
 - OpenCart сейчас не подключён.
+- `dry_run_fixture` mode сохранён.
+- Pipeline / CLI / stages всё ещё не подключены к DB.
 
 ## Runtime-ограничения
 
@@ -84,15 +88,96 @@ all 9 stages ok
 - No OpenCart connection.
 - No SQL apply.
 - No executable SQL.
+- No INSERT/UPDATE/DELETE.
 - No production exporter/analyzer/parser/generator.
 - No OpenCart module paths.
 - No Composer/YAML/test framework без отдельного решения.
 
-## Следующий шаг
+## DB/runtime skeleton
 
-Рекомендуемый следующий инженерный шаг: read-only mini-spec для DB/runtime boundary.
+В `b037fa7` добавлен только skeleton для будущей работы с локальным OpenCart dump:
 
-Цель: спроектировать read-only подключение к реальной OpenCart базе, оставить SQL apply вне scope и не реализовывать без отдельной команды.
+- `.gitignore` защищает `framework-standardization/config/runtime/*.php` и разрешает `*.example.php`;
+- `config/runtime/local.dump.example.php`;
+- `src/Contract/ReadOnlyDbConnectionInterface.php`;
+- `src/OpenCart/OpenCartRuntimeConfig.php`;
+- `src/OpenCart/OpenCartTableName.php`;
+- `src/OpenCart/PdoReadOnlyDbConnection.php`.
+
+Skeleton не подключён к Pipeline, не создаёт `PDO` сам и не меняет dry-run.
+
+`PdoReadOnlyDbConnection` принимает `PDO` в constructor, разрешает только `SELECT` / `SHOW`, запрещает `;`, `INTO OUTFILE`, `INTO DUMPFILE`, `INSERT/UPDATE/DELETE/REPLACE/ALTER/DROP/TRUNCATE/CREATE`. `WITH` / CTE и leading comments остаются blocked. Write/transaction API нет.
+
+## Следующий шаг: dump/local DB
+
+Следующий шаг - подготовить локальный OpenCart dump или локальную БД без персональных данных. Live DB не использовать.
+
+Нужен dump только нужных таблиц OpenCart. Исключить персональные и операционные таблицы:
+
+```text
+customer*
+order*
+address*
+session
+user / user_token
+api / api_session
+cart
+coupon / voucher
+affiliate
+return*
+logs
+analytics
+```
+
+После развёртывания dump создать локальный ignored config:
+
+```text
+framework-standardization/config/runtime/local.dump.php
+```
+
+Создавать его на основе:
+
+```text
+framework-standardization/config/runtime/local.dump.example.php
+```
+
+`local.dump.php` не коммитить.
+
+Только после готового dump/config делать следующий кодовый шаг: read-only repository для canonical lookup / `DbReadOnlyCanonicalAttributeResolver`.
+
+Первым DB-backed stage остаётся `ResolveCanonicalStage`.
+
+До отдельного утверждения не подключать DB к `PipelineFactory` / CLI.
+
+SQL apply, executable SQL, `INSERT/UPDATE/DELETE` и OpenCart module paths запрещены.
+
+## Старт в новом чате
+
+Новый чат должен использовать GitHub Connector или локальный репозиторий `home-energetika`.
+
+Сначала открыть и прочитать:
+
+- `framework-standardization/docs/HANDOFF.md`
+- `framework-standardization/docs/STAGE_BOUNDARIES.md`
+
+Затем проверить:
+
+```text
+git status
+git log --oneline -5
+```
+
+Ожидаемая точка:
+
+```text
+HEAD/main/origin/main = b037fa7 Add read-only DB runtime skeleton
+```
+
+Первый ответ нового чата должен быть только кратким пониманием проекта, текущей задачи и одного следующего шага.
+
+Не реализовывать следующий шаг без отдельного подтверждения.
+
+Если пользователь пишет "дамп - завтра", текущий следующий шаг - подготовка dump/local DB checklist, а не код.
 
 ## Правило работы
 
