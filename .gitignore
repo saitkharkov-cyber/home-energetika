@@ -5,3 +5,7 @@ catalog-standardization/data/tmp/
 
 .agents/
 **/.agents/
+
+# Framework Standardization local runtime configs
+framework-standardization/config/runtime/*.php
+!framework-standardization/config/runtime/*.example.php
