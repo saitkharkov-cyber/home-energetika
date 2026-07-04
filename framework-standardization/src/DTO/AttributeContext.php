@@ -22,9 +22,24 @@ final class AttributeContext
         $this->completedStages[] = $stageName;
     }
 
+    public function addError($error)
+    {
+        $this->errors[] = $error;
+    }
+
+    public function addWarning($warning)
+    {
+        $this->warnings[] = $warning;
+    }
+
     public function hasErrors()
     {
         return $this->errors !== [];
+    }
+
+    public function getStageResults()
+    {
+        return $this->stageResults;
     }
 
     public function getJob()

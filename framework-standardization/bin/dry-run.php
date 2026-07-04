@@ -32,12 +32,24 @@ $runner = new FrameworkRunner();
 $result = $runner->run($rawJob);
 $stageSummary = $result->getStageSummary();
 $stageResults = isset($stageSummary['stage_results']) ? $stageSummary['stage_results'] : array();
+$warnings = isset($stageSummary['warnings']) ? $stageSummary['warnings'] : array();
+$errors = isset($stageSummary['errors']) ? $stageSummary['errors'] : array();
 
 echo 'result_status: ' . $result->getResultStatus() . "\n";
+echo 'warnings_count: ' . count($warnings) . "\n";
+echo 'errors_count: ' . count($errors) . "\n";
 echo "\n";
 echo "stage_results:\n";
 
 foreach ($stageResults as $stageName => $stageResult) {
     $status = isset($stageResult['status']) ? $stageResult['status'] : 'unknown';
     echo '- ' . $stageName . ': ' . $status . "\n";
+
+    if (isset($stageResult['warnings']) && is_array($stageResult['warnings']) && count($stageResult['warnings']) > 0) {
+        echo '  warnings: ' . implode(', ', $stageResult['warnings']) . "\n";
+    }
+
+    if (isset($stageResult['errors']) && is_array($stageResult['errors']) && count($stageResult['errors']) > 0) {
+        echo '  errors: ' . implode(', ', $stageResult['errors']) . "\n";
+    }
 }
