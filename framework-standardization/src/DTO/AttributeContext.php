@@ -17,6 +17,7 @@ final class AttributeContext
     private $synonymCandidates = [];
     private $valueReport = [];
     private $sqlPreview = [];
+    private $report = [];
     private $job;
 
     public function __construct(AttributeJob $job)
@@ -153,5 +154,15 @@ final class AttributeContext
     public function getSqlPreview()
     {
         return $this->sqlPreview;
+    }
+
+    public function setReport(array $report)
+    {
+        $this->report = $report;
+    }
+
+    public function getReport()
+    {
+        return $this->report;
     }
 }
