@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Europe/Moscow');
 
 spl_autoload_register(function ($className) {
     $prefix = 'FrameworkStandardization\\';
