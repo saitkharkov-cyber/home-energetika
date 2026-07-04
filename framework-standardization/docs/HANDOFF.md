@@ -11,15 +11,29 @@
 
 Архитектурная документация Framework Standardization приведена в согласованное состояние.
 
-Git clean.
+Implementation skeleton создан и развивается маленькими no-DB шагами.
+
+Последний закрытый шаг:
+
+```text
+ResolveScopeStage no-DB boundary
+```
+
+Ожидаемое состояние:
+
+```text
+working tree clean
+origin/main = main
+```
 
 Последние важные коммиты:
 
 ```text
-Align framework documentation with stages pipeline
-Document framework implementation structure
-Document build framework result stage contract
-Document build report stage contract
+13ba45c Add no-DB scope resolver boundary
+8bd6c45 Add no-DB canonical resolver boundary
+7a8e9c4 Set CLI timezone for PHP 5.6 dry-run
+61b65e1 Document ValidateJobStage status
+f817a53 Implement minimal ValidateJobStage checks
 ````
 
 ---
@@ -250,7 +264,7 @@ framework-standardization/
 └─ tests/
 ```
 
-На момент handoff эти каталоги ещё не созданы.
+Часть каталогов уже создана в рамках PHP 5.6-compatible skeleton.
 
 ---
 
@@ -308,16 +322,18 @@ bin/dry-run.php
 config/jobs/pump_diameter.php
 ```
 
-Запуск из корня репозитория:
+Проверки выполнять через локальный PHP 5.6:
 
 ```text
-php framework-standardization/bin/dry-run.php framework-standardization/config/jobs/pump_diameter.php
+C:\php56\php.exe
 ```
 
-Запуск из `framework-standardization`:
+Не полагаться на глобальный `php` из `PATH`.
+
+Happy path запуск из корня репозитория:
 
 ```text
-php bin/dry-run.php config/jobs/pump_diameter.php
+C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
 ```
 
 Dry-run:
@@ -328,6 +344,15 @@ Dry-run:
 не подключается к OpenCart
 не подключается к DB
 не применяет SQL
+```
+
+Ожидаемый happy path:
+
+```text
+result_status: ok
+warnings_count: 0
+errors_count: 0
+все 9 stages ok
 ```
 
 Это всё ещё отдельный инженерный PHP CLI/tooling layer.
@@ -379,74 +404,182 @@ Dry-run happy path проходит.
 
 ---
 
-## Следующий шаг
+## ResolveCanonicalStage status
 
-Завтра начать с создания минимального implementation skeleton.
+`ResolveCanonicalStage` уже не stub.
 
-Цель первого шага:
+Stage использует:
 
 ```text
-создать каркас выполнения pipeline и запись stage_results
-без бизнес-логики стандартизации
+CanonicalAttributeResolverInterface
 ```
 
-Создавать только минимальные файлы:
+Текущая реализация resolver:
 
 ```text
-src/Contract/StageInterface
-src/Pipeline/PipelineEngine
-src/Pipeline/PipelineFactory
-src/DTO/AttributeJob
-src/DTO/AttributeContext
-src/DTO/FrameworkResult
-src/DTO/StageResult
-src/Stage/ValidateJobStage
-src/Stage/ResolveCanonicalStage
-src/Stage/ResolveScopeStage
-src/Stage/ExportAttributesStage
-src/Stage/AnalyzeNamesStage
-src/Stage/AnalyzeValuesStage
-src/Stage/BuildSqlPreviewStage
-src/Stage/BuildReportStage
-src/Stage/BuildFrameworkResultStage
-src/Runner/FrameworkRunner
-config/jobs/pump_diameter.example
+DryRunCanonicalAttributeResolver
+```
+
+Поведение:
+
+```text
+fixture только для canonical_code = pump_diameter
+source = dry_run_fixture
+unknown canonical даёт canonical_code_not_found
+canonical записывается в AttributeContext
+```
+
+Важно:
+
+```text
+target_attribute_id = 0 только dry-run fixture
+это не реальный OpenCart ID
+```
+
+`ResolveCanonicalStage` не делает:
+
+```text
+DB connection
+OpenCart connection
+SQL apply
+реальную проверку target_attribute_id / target_attribute_group_id
 ```
 
 ---
 
-## Что НЕ делать завтра на первом шаге
+## ResolveScopeStage status
 
-Не делать:
+`ResolveScopeStage` уже не stub.
+
+Stage использует:
 
 ```text
-реальное подключение к OpenCart
+ScopeResolverInterface
+```
+
+Текущая реализация resolver:
+
+```text
+DryRunScopeResolver
+```
+
+Поведение:
+
+```text
+fixture только для scope.type = category
+fixture только для category_id = 11900213
+source = dry_run_fixture
+unknown category даёт scope_category_not_found
+scope записывается в AttributeContext
+raw_data.products записывается в AttributeContext
+```
+
+Важно:
+
+```text
+product_id = 0 только dry-run fixture
+это не реальный OpenCart ID
+```
+
+`ResolveScopeStage` не делает:
+
+```text
+DB connection
+OpenCart connection
+SQL apply
+реальное чтение categories/products
+проверку реального имени категории
+```
+
+---
+
+## Negative manual checks
+
+Для negative checks создавать временные job-файлы:
+
+```text
+config/jobs/_manual_*.php
+```
+
+Не коммитить временные файлы и удалять их после проверки.
+
+Unknown canonical:
+
+```text
+canonical_code = unknown_canonical
+ожидаемая ошибка: canonical_code_not_found
+downstream stages: skipped
+build_report: ok
+build_framework_result: ok
+```
+
+Unknown category:
+
+```text
+category_id = 99999999
+ожидаемая ошибка: scope_category_not_found
+downstream stages: skipped
+build_report: ok
+build_framework_result: ok
+```
+
+---
+
+## Что всё ещё НЕ сделано
+
+```text
+ExportAttributesStage всё ещё stub / no real export
+AnalyzeNamesStage stub
+AnalyzeValuesStage stub
+BuildSqlPreviewStage stub
+BuildReportStage пока минимальный
+BuildFrameworkResultStage пока минимальный
+нет DB runtime config
+нет OpenCart connection
+нет SQL apply
+нет реальных attribute/product reads
+```
+
+---
+
+## Следующий шаг
+
+Рекомендуемый следующий инженерный шаг:
+
+```text
+read-only mini-spec для ExportAttributesStage no-DB boundary
+```
+
+Цель:
+
+```text
+начать использовать canonical + scope из AttributeContext
+оставаться без DB/OpenCart
+не реализовывать real export на этом шаге
+```
+
+Не реализовывать этот шаг без отдельной команды.
+
+---
+
+## Что НЕ делать на следующем шаге
+
+```text
+DB connection
+OpenCart connection
 SQL apply
 production DB
 массовый запуск
 UI
 новые таблицы
-сложный fuzzy matching
-реальные переносы значений
+реальное чтение атрибутов/товаров
 интеграцию с импортами
 универсальный plugin-system
 ```
 
-Первый skeleton должен быть максимально скучным:
-
-```text
-DTO
-StageInterface
-PipelineEngine
-9 пустых stages
-stage_results
-FrameworkRunner
-example job
-```
-
 ---
 
-## Рекомендуемая команда Codex на завтра
+## Рекомендуемая команда Codex на следующий шаг
 
 ```text
 Работаем в репозитории D:\Git\home-energetika.
@@ -454,57 +587,21 @@ example job
 Работай только внутри папки:
 framework-standardization
 
-Задача: создать минимальный implementation skeleton Framework Standardization без бизнес-логики.
+Задача: read-only mini-spec для ExportAttributesStage no-DB boundary.
+
+Ничего не изменяй и не коммить.
 
 Перед началом прочитай:
 
-- PROJECT_MASTER_SUMMARY.md
-- docs/IMPLEMENTATION_STRUCTURE.md
 - docs/STAGES_PIPELINE.md
-- docs/ATTRIBUTE_JOB.md
 - docs/ATTRIBUTE_CONTEXT.md
-- docs/FRAMEWORK_RESULT.md
-
-Создай только минимальный каркас:
-
-- src/Contract/StageInterface
-- src/Pipeline/PipelineEngine
-- src/Pipeline/PipelineFactory
-- src/DTO/AttributeJob
-- src/DTO/AttributeContext
-- src/DTO/FrameworkResult
-- src/DTO/StageResult
-- src/Stage/ValidateJobStage
-- src/Stage/ResolveCanonicalStage
-- src/Stage/ResolveScopeStage
+- docs/ATTRIBUTE_EXPORTER.md
+- docs/HANDOFF.md
 - src/Stage/ExportAttributesStage
-- src/Stage/AnalyzeNamesStage
-- src/Stage/AnalyzeValuesStage
-- src/Stage/BuildSqlPreviewStage
-- src/Stage/BuildReportStage
-- src/Stage/BuildFrameworkResultStage
-- src/Runner/FrameworkRunner
-- config/jobs/pump_diameter.example
+- src/DTO/AttributeContext.php
+- src/Pipeline/PipelineFactory.php
 
-Требования:
-
-- Без реального подключения к OpenCart.
-- Без SQL apply.
-- Без production DB.
-- Без бизнес-логики стандартизации.
-- Stages могут быть пустыми/stub, но должны иметь правильные technical names.
-- PipelineEngine должен запускать stages в утверждённом порядке.
-- Каждая stage должна писать свой stage_result.
-- FrameworkRunner должен показать минимальный dry-run на example job.
-- Не создавать лишние сервисы, managers, analyzers.
-- Не коммитить.
-
-После выполнения показать:
-
-- список созданных файлов
-- кратко что делает skeleton
-- git diff --stat
-- git status
+Нужно предложить минимальный no-DB шаг, который начинает использовать canonical + scope из AttributeContext, но не подключается к DB/OpenCart и не делает real export.
 ```
 
 ---
@@ -513,6 +610,6 @@ framework-standardization
 
 Двигаться маленькими шагами.
 
-Сначала каркас, потом проверка, потом коммит.
+Сначала read-only mini-spec, потом реализация по отдельной команде, потом проверка, потом коммит.
 
-Не переходить к реальной логике, пока skeleton не будет понятен и согласован.
+Не переходить к реальной DB/OpenCart логике, пока no-DB boundaries не будут понятны и согласованы.
