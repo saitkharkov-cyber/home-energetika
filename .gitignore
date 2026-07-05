@@ -9,3 +9,4 @@ catalog-standardization/data/tmp/
 # Framework Standardization local runtime configs
 framework-standardization/config/runtime/*.php
 !framework-standardization/config/runtime/*.example.php
+_local/
