@@ -250,3 +250,101 @@ SUMOTO deploy остаётся заблокированным до read-only ver
 - `NEEDS_SQL_REBUILD`
 - `BLOCKED_BY_DATA_MISMATCH`
 - `BLOCKED_BY_NEEDS_CHECK`
+
+## Fresh production dump verification findings
+
+### Verified facts
+
+- Fresh production dump imported into local DB `he_prod_fresh_sumoto_check`.
+- `language_id = 1` confirmed as `Russian / ru-ru / status = 1`.
+- `oc_pump_selector_product` exists.
+- `oc_pump_selector_product` contains expected cache fields:
+  - `product_id`
+  - `max_head_m`
+  - `max_flow_l_min`
+  - `pump_diameter_mm`
+  - `voltage`
+  - `brand_priority`
+  - `product_price`
+  - `quantity`
+  - `status`
+- Attribute contract confirmed:
+  - `12` = `Максимальный напор`
+  - `13` = `Максимальная производительность`
+  - `15` = `Напряжение`
+  - `44` = `Диаметр насоса`
+- Manufacturer confirmed:
+  - `manufacturer_id = 58`
+  - `name = Sumoto`
+- 98 generated SQL `product_id` candidates exist on fresh production dump.
+- All 98 candidates have `manufacturer_id = 58 / Sumoto`.
+- 97 of 98 candidates are active.
+- 1 candidate is inactive:
+  - `product_id = 1821`
+  - `Погружной скважинный насос SUMOTO 3OPC2.5/10`
+  - `status = 0`
+- `product_id = 4260` is a valid active Sumoto pump and is included in generated SQL, but it is missing parent category links:
+  - missing `11900213 = Скважинные насосы`
+  - missing `11900321 = Насосы SUMOTO`
+  - current category: `11900323 = Погружные 4-х дюймовые насосы Sumoto`
+- This is treated as a catalog categorization issue, not as SQL candidate mismatch.
+
+### Existing product_attribute state
+
+For the 98 SUMOTO candidates, fresh production dump currently has only 3 `oc_product_attribute` rows total:
+
+- `1812 / attribute_id 14 / Мощность двигателя / 1,5 kw`
+- `1812 / attribute_id 45 / Материал / нержавеющая сталь`
+- `1813 / attribute_id 50 / Тип насоса / погружной`
+
+For required pump-selector attributes there are currently 0 rows:
+
+- `attribute_id = 12`
+- `attribute_id = 13`
+- `attribute_id = 15`
+- `attribute_id = 44`
+
+### SQL candidate operation types
+
+Generated SQL operation types:
+
+- `sumoto_head_attribute_98.sql` = `REPLACE INTO` x98
+- `sumoto_flow_attribute_98.sql` = `REPLACE INTO` x98
+- `sumoto_voltage_attribute_98.sql` = `REPLACE INTO` x98
+- `sumoto_diameter_attribute_98.sql` = `UPDATE` x98
+
+### Current decision
+
+Decision: `NEEDS_SQL_REBUILD`
+
+Reason:
+
+`sumoto_diameter_attribute_98.sql` is not production-ready because it uses `UPDATE`, while fresh production dump has 0 existing rows for `attribute_id = 44` for the 98 SUMOTO candidates.
+
+Applying this file as-is would update 0 rows for pump diameter.
+
+### Required next fix
+
+Rebuild `sumoto_diameter_attribute_98.sql` as reviewed insert/upsert migration, preferably consistent with the other SUMOTO SQL files.
+
+Expected direction:
+
+- replace `UPDATE` statements with reviewed `REPLACE INTO` / agreed upsert form;
+- preserve `product_id`;
+- use `attribute_id = 44`;
+- use confirmed `language_id = 1`;
+- preserve generated diameter values;
+- review before production apply.
+
+### Additional catalog fix candidate
+
+Recommended data fix before or during SUMOTO deploy:
+
+```sql
+INSERT IGNORE INTO oc_product_to_category (product_id, category_id)
+VALUES
+  (4260, 11900213),
+  (4260, 11900321);
+```
+This fix must be reviewed and applied only after backup.
+
