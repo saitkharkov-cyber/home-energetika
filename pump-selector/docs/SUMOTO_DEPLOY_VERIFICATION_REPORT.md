@@ -348,3 +348,24 @@ VALUES
 ```
 This fix must be reviewed and applied only after backup.
 
+## SQL rebuild update
+
+`sumoto_diameter_attribute_98.sql` was rebuilt locally from `UPDATE` x98 to `REPLACE INTO` x98.
+
+Current generated SQL operation types:
+
+- `sumoto_head_attribute_98.sql` = `REPLACE INTO` x98
+- `sumoto_flow_attribute_98.sql` = `REPLACE INTO` x98
+- `sumoto_voltage_attribute_98.sql` = `REPLACE INTO` x98
+- `sumoto_diameter_attribute_98.sql` = `REPLACE INTO` x98
+
+Updated decision: `READY_FOR_REVIEWED_MIGRATION`
+
+Remaining required review before production apply:
+
+- confirm generated SQL file contents;
+- apply only after production backup;
+- apply additional catalog fix for `product_id = 4260` only after review;
+- rebuild `oc_pump_selector_product` cache after SQL apply;
+- perform smoke tests.
+
