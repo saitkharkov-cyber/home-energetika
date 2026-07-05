@@ -13,9 +13,9 @@ Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling la
 
 Текущая стабильная точка: все 9 stages имеют no-DB boundary, dry-run зелёный на PHP 5.6, DB/OpenCart/SQL apply не подключались.
 
-Последний закрытый шаг: `DB readonly pipeline factory`.
+Последний закрытый шаг: `DB readonly manual runner`.
 
-Последний коммит: `3d2155d Add DB readonly pipeline factory`.
+Последний коммит: `8d98d61 Add DB readonly manual runner`.
 
 Ожидаемое состояние репозитория: `working tree clean`, `origin/main = main`.
 
@@ -122,11 +122,29 @@ DB-readonly job отличается только `job_id`, `job_name`, `source.
 
 `PipelineFactory::createDefault()`, `bin/dry-run.php` и `FrameworkRunner` не изменены. Default dry-run path не стал DB-backed.
 
+`bin/db-readonly-run.php` создан как отдельный manual runner для local dump. Он принимает path to job config и path to runtime config, использует `DbReadOnlyPipelineFactory`, но не заменяет обычный `bin/dry-run.php`.
+
+DB-backed stage пока только `resolve_canonical`. Остальные stages остаются dry-run.
+
 ## Следующий шаг: DB-backed composition
 
 Правила dump safety остаются в `docs/DUMP_LOCAL_DB_CHECKLIST.md`: live DB запрещена, персональные/операционные таблицы не использовать.
 
-Локальный dump/config, первый DB-backed resolver, отдельный DB-readonly job и `DbReadOnlyPipelineFactory` готовы. Следующий шаг - mini-spec для отдельного DB-readonly entrypoint/manual runner, который будет использовать `DbReadOnlyPipelineFactory`.
+Локальный dump/config, первый DB-backed resolver, отдельный DB-readonly job, `DbReadOnlyPipelineFactory` и manual runner готовы.
+
+Следующий шаг - выполнить и зафиксировать runtime-check DB-readonly runner на local dump, если он ещё не зафиксирован в handoff.
+
+Ожидаемый запуск:
+
+```text
+C:\php56\php.exe -c C:\php56\php.ini framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
+```
+
+После этого проверить, что обычный dry-run всё ещё зелёный:
+
+```text
+C:\php56\php.exe -c C:\php56\php.ini framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
+```
 
 Локальная DB:
 
@@ -167,7 +185,7 @@ git log --oneline -5
 Ожидаемая точка:
 
 ```text
-HEAD/main/origin/main = 3d2155d Add DB readonly pipeline factory
+HEAD/main/origin/main = 8d98d61 Add DB readonly manual runner
 ```
 
 Первый ответ нового чата должен быть только кратким пониманием проекта, текущей задачи и одного следующего шага.
