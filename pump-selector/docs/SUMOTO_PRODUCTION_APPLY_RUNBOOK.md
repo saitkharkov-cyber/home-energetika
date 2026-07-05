@@ -259,3 +259,27 @@ Decision при отсутствии backup:
 - post-apply verification result;
 - smoke test result;
 - final decision.
+
+## Production apply result
+
+Status: `PRODUCTION_APPLY_COMPLETED_WITH_NOTES`
+
+Applied:
+
+- 4 normalized SUMOTO SQL files from commit `ba19005`;
+- cache rebuild completed;
+- rebuild result: `total_scanned = 356`, `eligible_inserted = 187`;
+- SUMOTO rows added to `oc_pump_selector_product`;
+- SUMOTO `brand_priority = 8`;
+- frontend smoke test passed.
+
+Additional production note:
+
+- temporary cache hotfix applied for Belamos/Pedrollo `max_flow_l_min`;
+- reason: production rebuild restored old flow values in `m³/h` scale;
+- after hotfix, mixed brand output restored: Belamos, Pedrollo, SUMOTO;
+- do not run cache rebuild again until permanent flow normalization is fixed.
+
+Final decision:
+
+- `PRODUCTION_APPLY_COMPLETED_WITH_NOTES`
