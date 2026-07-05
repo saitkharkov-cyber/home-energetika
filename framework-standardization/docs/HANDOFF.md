@@ -13,7 +13,7 @@ Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling la
 
 Текущая стабильная точка: все 9 stages имеют no-DB boundary, dry-run зелёный на PHP 5.6, DB/OpenCart/SQL apply не подключались.
 
-Последний закрытый шаг: `DB readonly manual runner`.
+Последний закрытый шаг: `DB readonly manual runner runtime-check`.
 
 Последний коммит: `8d98d61 Add DB readonly manual runner`.
 
@@ -30,8 +30,11 @@ Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling la
 - `docs/IMPLEMENTATION_STRUCTURE.md`
 - `docs/STAGE_BOUNDARIES.md`
 - `docs/DUMP_LOCAL_DB_CHECKLIST.md`
+- `docs/RUNTIME_CHECKS.md`
 
 Подробные stage boundaries вынесены в `docs/STAGE_BOUNDARIES.md`.
+
+Подробности ручных проверок ведутся в `docs/RUNTIME_CHECKS.md`.
 
 ## Stage-модель
 
@@ -126,25 +129,15 @@ DB-readonly job отличается только `job_id`, `job_name`, `source.
 
 DB-backed stage пока только `resolve_canonical`. Остальные stages остаются dry-run.
 
+DB-readonly manual runner и обычный dry-run проверены вручную; оба `result_status = ok`, `warnings_count = 0`, `errors_count = 0`.
+
 ## Следующий шаг: DB-backed composition
 
 Правила dump safety остаются в `docs/DUMP_LOCAL_DB_CHECKLIST.md`: live DB запрещена, персональные/операционные таблицы не использовать.
 
 Локальный dump/config, первый DB-backed resolver, отдельный DB-readonly job, `DbReadOnlyPipelineFactory` и manual runner готовы.
 
-Следующий шаг - выполнить и зафиксировать runtime-check DB-readonly runner на local dump, если он ещё не зафиксирован в handoff.
-
-Ожидаемый запуск:
-
-```text
-C:\php56\php.exe -c C:\php56\php.ini framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
-```
-
-После этого проверить, что обычный dry-run всё ещё зелёный:
-
-```text
-C:\php56\php.exe -c C:\php56\php.ini framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
-```
+Следующий шаг - mini-spec для следующего DB-backed stage после `resolve_canonical`, только после отдельного решения.
 
 Локальная DB:
 
