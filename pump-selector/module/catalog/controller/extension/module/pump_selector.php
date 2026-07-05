@@ -144,6 +144,6 @@ class ControllerExtensionModulePumpSelector extends Controller {
 	}
 
 	private function getRebuildToken() {
-		return 'd7f3c91a4b6e8d0f2c5a1e9b8f6d4c3a7e9f1b2c4d6a8e0f3c5b7d9a1e2f4c6';
+		return 'a9c4f7e2d8b6130f5a7c9e4b2d6f8a1c3e5b7d9f0a2c4e6b8d1f3a5c7e9b0d2f';
 	}
 }
