@@ -1,6 +1,3 @@
--- Sumoto diameter import
--- Attribute: Диаметр насоса (мм)
-
 REPLACE INTO oc_product_attribute (product_id, attribute_id, language_id, text) VALUES (1812, 44, 1, '76');
 REPLACE INTO oc_product_attribute (product_id, attribute_id, language_id, text) VALUES (1813, 44, 1, '76');
 REPLACE INTO oc_product_attribute (product_id, attribute_id, language_id, text) VALUES (1814, 44, 1, '76');
