@@ -1,6 +1,8 @@
 # Handoff - Framework Standardization
 04.07.2026 23:10
 
+Before DB-readonly work: close SUMOTO deploy using pump-selector/docs/SUMOTO_DEPLOY_VERIFICATION_REPORT.md.
+
 Проект: Home Energetika / Framework Standardization  
 Репозиторий: `D:\Git\home-energetika`  
 Рабочая папка: `framework-standardization`
