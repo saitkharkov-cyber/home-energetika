@@ -1,5 +1,5 @@
 # Handoff - Framework Standardization
-05.07.2026 21:05
+05.07.2026 23:05
 
 SUMOTO production apply закрыт отдельными коммитами. Framework Standardization дальше работает только с локальным dump/local DB, без live DB.
 
@@ -11,11 +11,11 @@ SUMOTO production apply закрыт отдельными коммитами. Fr
 
 Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling layer для инженерной работы со стандартизацией характеристик.
 
-Текущая стабильная точка: все 9 stages имеют no-DB boundary, dry-run зелёный на PHP 5.6, DB/OpenCart/SQL apply не подключались.
+Текущая стабильная точка: default dry-run path остаётся no-DB и зелёный на PHP 5.6; DB-readonly path существует отдельно, SQL apply не подключался.
 
-Последний закрытый шаг: `DB readonly manual runner runtime-check`.
+Последний закрытый шаг: `DB readonly scope resolver standalone`.
 
-Последний коммит: `8d98d61 Add DB readonly manual runner`.
+Последний коммит: `6942862 Add DB readonly scope resolver`.
 
 Ожидаемое состояние репозитория: `working tree clean`, `origin/main = main`.
 
@@ -131,13 +131,21 @@ DB-backed stage пока только `resolve_canonical`. Остальные st
 
 DB-readonly manual runner и обычный dry-run проверены вручную; оба `result_status = ok`, `warnings_count = 0`, `errors_count = 0`.
 
+`src/Scope/DbReadOnlyScopeResolver.php` создан как standalone/no-wiring capability и проверен вручную на local dump: `category_id = 11900213`, `category_name = Скважинные насосы`, `product_count = 1972`, первый реальный `product_id = 1068`, errors/warnings пустые.
+
+Negative checks для standalone scope resolver: unsupported type -> `unsupported_scope_type`; unknown category -> `scope_category_not_supported`. Временный `_manual_check_db_readonly_scope.php` удалён.
+
+`DbReadOnlyScopeResolver` не подключён в `DbReadOnlyPipelineFactory`. DB-backed stage в runner всё ещё только `resolve_canonical`.
+
 ## Следующий шаг: DB-backed composition
 
 Правила dump safety остаются в `docs/DUMP_LOCAL_DB_CHECKLIST.md`: live DB запрещена, персональные/операционные таблицы не использовать.
 
-Локальный dump/config, первый DB-backed resolver, отдельный DB-readonly job, `DbReadOnlyPipelineFactory` и manual runner готовы.
+Локальный dump/config, DB-backed canonical resolver, standalone DB-backed scope resolver, отдельный DB-readonly job, `DbReadOnlyPipelineFactory` и manual runner готовы.
 
-Следующий шаг - mini-spec для следующего DB-backed stage после `resolve_canonical`, только после отдельного решения.
+Следующий шаг - mini-spec для связки `DbReadOnlyScopeResolver` + `DbReadOnlyAttributeExporter`.
+
+Цель: определить, как безопасно перевести пару `resolve_scope` / `export_attributes` в DB-backed режим без поломки hybrid path.
 
 Локальная DB:
 
@@ -154,6 +162,8 @@ framework-standardization/config/runtime/local.dump.php
 ```
 
 Первым DB-backed stage остаётся `ResolveCanonicalStage`.
+
+Ловушка: нельзя просто подключить `DbReadOnlyScopeResolver` в `DbReadOnlyPipelineFactory`, пока `ExportAttributesStage` остаётся на `DryRunAttributeExporter`. Текущий `DryRunAttributeExporter` несовместим с реальными `product_id` и ожидает fixture `product_id = 0`.
 
 До отдельного утверждения не подключать DB к текущему `bin/dry-run.php`.
 
@@ -178,7 +188,7 @@ git log --oneline -5
 Ожидаемая точка:
 
 ```text
-HEAD/main/origin/main = 8d98d61 Add DB readonly manual runner
+HEAD/main/origin/main = 6942862 Add DB readonly scope resolver
 ```
 
 Первый ответ нового чата должен быть только кратким пониманием проекта, текущей задачи и одного следующего шага.
