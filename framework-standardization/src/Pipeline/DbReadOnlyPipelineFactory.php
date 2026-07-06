@@ -2,17 +2,17 @@
 
 namespace FrameworkStandardization\Pipeline;
 
-use FrameworkStandardization\Analyzer\DryRunAttributeNameAnalyzer;
-use FrameworkStandardization\Analyzer\DryRunAttributeValueAnalyzer;
+use FrameworkStandardization\Analyzer\DbReadOnlyAttributeNameAnalyzer;
+use FrameworkStandardization\Analyzer\DbReadOnlyAttributeValueAnalyzer;
 use FrameworkStandardization\Canonical\DbReadOnlyCanonicalAttributeResolver;
 use FrameworkStandardization\Contract\ReadOnlyDbConnectionInterface;
-use FrameworkStandardization\Exporter\DryRunAttributeExporter;
+use FrameworkStandardization\Exporter\DbReadOnlyAttributeExporter;
 use FrameworkStandardization\OpenCart\OpenCartRuntimeConfig;
 use FrameworkStandardization\OpenCart\OpenCartTableName;
 use FrameworkStandardization\Report\DryRunReportBuilder;
 use FrameworkStandardization\Result\DryRunFrameworkResultBuilder;
-use FrameworkStandardization\Scope\DryRunScopeResolver;
-use FrameworkStandardization\SqlPreview\DryRunSqlPreviewBuilder;
+use FrameworkStandardization\Scope\DbReadOnlyScopeResolver;
+use FrameworkStandardization\SqlPreview\DbReadOnlySqlPreviewBuilder;
 use FrameworkStandardization\Stage\AnalyzeNamesStage;
 use FrameworkStandardization\Stage\AnalyzeValuesStage;
 use FrameworkStandardization\Stage\BuildFrameworkResultStage;
@@ -33,11 +33,11 @@ final class DbReadOnlyPipelineFactory
         $tableName = new OpenCartTableName($runtimeConfig->getDbPrefix());
         $canonicalResolver = new DbReadOnlyCanonicalAttributeResolver($db, $tableName, $this->buildMapping($rawJob));
 
-        $scopeResolver = new DryRunScopeResolver();
-        $attributeExporter = new DryRunAttributeExporter();
-        $attributeNameAnalyzer = new DryRunAttributeNameAnalyzer();
-        $attributeValueAnalyzer = new DryRunAttributeValueAnalyzer();
-        $sqlPreviewBuilder = new DryRunSqlPreviewBuilder();
+        $scopeResolver = new DbReadOnlyScopeResolver($db, $tableName, $this->buildScopeRuntimeContext($rawJob));
+        $attributeExporter = new DbReadOnlyAttributeExporter($db, $tableName, $this->buildExportRuntimeContext($rawJob));
+        $attributeNameAnalyzer = new DbReadOnlyAttributeNameAnalyzer();
+        $attributeValueAnalyzer = new DbReadOnlyAttributeValueAnalyzer();
+        $sqlPreviewBuilder = new DbReadOnlySqlPreviewBuilder();
         $reportBuilder = new DryRunReportBuilder();
         $frameworkResultBuilder = new DryRunFrameworkResultBuilder();
 
@@ -118,6 +118,25 @@ final class DbReadOnlyPipelineFactory
             'target_attribute_group_id' => 8,
             'target_attribute_group_name' => 'Прочие',
             'expected_usage_count' => 385,
+        );
+    }
+
+    private function buildScopeRuntimeContext(array $rawJob)
+    {
+        return array(
+            'language_id' => (int)$rawJob['source']['language_id'],
+            'expected_category_id' => (int)$rawJob['scope']['category_id'],
+            'expected_category_name' => isset($rawJob['scope']['category_name']) ? (string)$rawJob['scope']['category_name'] : '',
+            'source' => 'local_dump_db_readonly',
+        );
+    }
+
+    private function buildExportRuntimeContext(array $rawJob)
+    {
+        return array(
+            'language_id' => (int)$rawJob['source']['language_id'],
+            'source' => 'local_dump_db_readonly',
+            'max_sample_values' => isset($rawJob['analysis_rules']['max_sample_values']) ? (int)$rawJob['analysis_rules']['max_sample_values'] : 20,
         );
     }
 }

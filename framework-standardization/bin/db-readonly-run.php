@@ -107,8 +107,9 @@ function printResult($result)
     $errors = isset($stageSummary['errors']) ? $stageSummary['errors'] : array();
 
     echo "runtime_mode: db_readonly\n";
-    echo "db_backed_stage: resolve_canonical\n";
-    echo "dry_run_stages: resolve_scope, export_attributes, analyze_names, analyze_values, build_sql_preview, build_report, build_framework_result\n";
+    echo "db_backed_stages: resolve_canonical, resolve_scope, export_attributes\n";
+    echo "db_readonly_compatible_stages: analyze_names, analyze_values, build_sql_preview\n";
+    echo "dry_run_stages: build_report, build_framework_result\n";
     echo 'result_status: ' . $result->getResultStatus() . "\n";
     echo 'warnings_count: ' . count($warnings) . "\n";
     echo 'errors_count: ' . count($errors) . "\n";
