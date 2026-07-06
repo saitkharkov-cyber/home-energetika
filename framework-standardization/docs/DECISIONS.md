@@ -678,3 +678,199 @@ Parser можно развивать как standalone normalization proposal la
 Следующий безопасный engineering step может быть связан с расширением parser diagnostics или подготовкой explicit approval flow.
 
 Нельзя подключать parser output к SQL/apply path без отдельного approval flow и отдельной SQL/apply architecture.
+
+## 2026-07-06 — Approval flow отделён от parser и не разрешает SQL/apply
+
+### Решение
+
+Future explicit approval flow должен быть отдельным слоем поверх normalization proposals.
+
+`DbReadOnlyNormalizationProposalParser` не должен выставлять `approved` или `rejected`.
+
+Только approval flow может явно перевести proposal в статусы:
+
+- `approved`
+- `rejected`
+- `needs_review`
+- `unknown`
+- `proposed`
+
+`approved` proposal означает только candidate eligibility для future SQL preview.
+
+`approved` proposal не означает SQL apply и не переводит pipeline в production-ready режим.
+
+### Причина
+
+Parser является техническим deterministic layer.
+
+Он может:
+
+- разобрать raw value;
+- создать parsed value;
+- создать normalization proposal;
+- выставить parser confidence;
+- сохранить parser warnings.
+
+Но parser не должен решать:
+
+- правильно ли значение для production;
+- допустимы ли warnings;
+- можно ли использовать proposal для SQL preview;
+- кто несёт ответственность за approval decision.
+
+Approval — это controlled review decision, а не parsing result.
+
+### Разрешено
+
+Future approval flow может поддерживать actions:
+
+- `approve`
+- `reject`
+- `mark_needs_review`
+- `mark_unknown`
+- `reset_to_proposed`
+
+Approval flow может хранить audit fields:
+
+- `reviewer` или `approved_by`
+- `reviewed_at` / `approved_at`
+- `review_note`
+- `previous_status`
+- `new_status`
+- `source`
+- `review_action`
+- `proposal_id`
+- `proposal_hash`
+
+Approval flow может использовать review input:
+
+- `proposal_id`
+- `product_id`
+- `attribute_id`
+- `target_attribute_id`
+- `original_raw_value`
+- `parsed_value`
+- `proposed_normalized_value`
+- `proposed_unit`
+- `parser_confidence`
+- `parser_warnings`
+- `current approval_status`
+- `examples` / grouped raw values
+
+### Approval boundary
+
+Обязательная граница:
+
+- parser cannot approve;
+- only approval flow can approve;
+- only `approved` proposals can become candidates for future SQL preview;
+- `approved` does not mean SQL apply;
+- `approved` does not mean `safe_to_apply = 1`;
+- `approved` does not mean `production_ready = 1`.
+
+Не являются SQL preview input:
+
+- `proposed`
+- `rejected`
+- `needs_review`
+- `unknown`
+- raw diagnostics
+- `raw_profile`
+- parser diagnostics
+- suspicious diagnostics
+- unapproved proposals
+
+### Storage boundary
+
+В этом решении не выбирается storage для approval data.
+
+Допустимые варианты для future specs:
+
+- local JSON approval fixture;
+- local YAML approval fixture;
+- reviewed CSV;
+- future DB approval table.
+
+Но на текущем этапе запрещено:
+
+- создавать DB approval table;
+- использовать live DB;
+- выполнять write/schema operations;
+- создавать SQL files;
+- создавать apply plan;
+- выполнять SQL apply.
+
+Если future implementation использует local file fixture, это должен быть отдельный explicit step.
+
+### Report / framework result boundary
+
+Report и framework result могут в будущем показывать approval summaries:
+
+- proposal count;
+- approved count;
+- rejected count;
+- needs_review count;
+- unknown count;
+- proposed count;
+- reviewer/source summary;
+- examples.
+
+Но approval summaries не должны:
+
+- считать `production_ready = 1`;
+- менять `safe_to_apply`;
+- менять `statements`;
+- создавать SQL;
+- создавать apply plan;
+- выполнять SQL apply.
+
+### Запрещено
+
+До отдельной production SQL/apply architecture запрещено:
+
+- подключать approval output напрямую к SQL apply;
+- считать `approved` proposal apply command;
+- генерировать executable SQL;
+- создавать SQL files;
+- создавать SQL diff;
+- создавать apply plan;
+- выполнять SQL apply;
+- использовать live DB;
+- выполнять write/schema operations;
+- переводить `safe_to_apply` в `1`;
+- переводить `production_ready` в `1`.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Контекст
+
+Связанные документы:
+
+- `docs/DB_READONLY_NORMALIZATION_APPROVAL_FLOW_SPEC.md`
+- `docs/DB_READONLY_NORMALIZATION_APPROVAL_SPEC.md`
+- `docs/DB_READONLY_NORMALIZATION_PARSER_SKELETON_SPEC.md`
+- `docs/RUNTIME_CHECKS.md`
+
+Связанные коммиты:
+
+- `bd06b9c Add DB readonly normalization proposal parser`
+- `64522af Document standalone normalization parser boundary`
+- `a87d7da Add DB readonly normalization approval flow spec`
+
+### Последствие
+
+Следующий безопасный engineering step может быть связан с проектированием или standalone implementation approval flow.
+
+Но approval flow должен оставаться controlled review layer.
+
+SQL preview/apply остаётся blocked до отдельного production SQL/apply spec и отдельного architecture decision.
+
