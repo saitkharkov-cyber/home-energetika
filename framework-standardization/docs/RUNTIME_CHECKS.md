@@ -483,3 +483,122 @@ Commit:
 - executable SQL не добавлялся;
 - write/schema operations не использовались;
 - OpenCart module paths не создавались.
+
+## 2026-07-06 — DB-readonly SQL preview raw profile diagnostics check
+
+Commit:
+
+`ecd9196 Add DB readonly SQL preview raw profile diagnostics`
+
+Проверялось добавление read-only summary из raw value profiling в DB-readonly SQL preview diagnostics.
+
+Изменённый компонент:
+
+`framework-standardization/src/SqlPreview/DbReadOnlySqlPreviewBuilder.php`
+
+### Что добавлено
+
+`sql_preview.diagnostics` теперь содержит read-only raw profile summary:
+
+`raw_profile_present`
+
+`raw_profile_total_values`
+
+`unique_raw_values_count`
+
+`empty_values_count`
+
+`suspicious_no_digits_count`
+
+`suspicious_long_value_count`
+
+`suspicious_multiple_numbers_count`
+
+`top_raw_values_count`
+
+`raw_profile_source`
+
+Если upstream `raw_profile` отсутствует:
+
+`raw_profile_present = 0`
+
+### Boundary
+
+Blocked preview сохранён:
+
+`generated = 0`
+
+`safe_to_apply = 0`
+
+`apply_changes = 0`
+
+`statements = array()`
+
+`blocked_by` содержит:
+
+`db_readonly_sql_preview_not_implemented`
+
+SQL generation и apply plan не появились.
+
+Raw profile summary остаётся diagnostics-only и не означает:
+
+- reject;
+- approve;
+- SQL-ready normalized data;
+- safe-to-apply decision.
+
+### Syntax check
+
+Команда:
+
+`C:\php56\php.exe -l framework-standardization\src\SqlPreview\DbReadOnlySqlPreviewBuilder.php`
+
+Результат:
+
+`No syntax errors detected`
+
+### Default dry-run regression check
+
+Команда:
+
+`C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php`
+
+Результат:
+
+`result_status: ok`
+
+`warnings_count: 0`
+
+`errors_count: 0`
+
+`all 9 stages ok`
+
+### DB-readonly runner check
+
+Команда:
+
+`C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php`
+
+Результат:
+
+`result_status: ok`
+
+`warnings_count: 0`
+
+`errors_count: 0`
+
+`all 9 stages ok`
+
+### Safety result
+
+Подтверждено:
+
+- default dry-run path не менялся;
+- pipeline wiring не менялся;
+- runners не менялись;
+- SQL apply не выполнялся;
+- executable SQL не добавлялся;
+- apply plan не создавался;
+- live DB не использовалась;
+- write/schema operations не использовались;
+- OpenCart module paths не создавались.
