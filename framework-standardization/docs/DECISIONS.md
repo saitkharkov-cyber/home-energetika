@@ -101,3 +101,73 @@ Runtime-проверки зафиксированы в `docs/RUNTIME_CHECKS.md`.
 Paired wiring commit:
 
 `cb54135 Wire DB readonly scope export path`
+
+## 2026-07-06 — DB-readonly analyze_values развивается как profiling, не normalization
+
+### Решение
+
+`analyze_values` в DB-readonly path может развиваться как read-only value profiling stage.
+
+Это означает, что `DbReadOnlyAttributeValueAnalyzer` может собирать diagnostics по real DB raw values, но не должен выполнять production normalization.
+
+### Причина
+
+После DB-backed `export_attributes` доступны real raw values по target attribute.
+
+Эти данные полезны для инженерной диагностики:
+
+`raw_values`
+
+`unique_raw_values_count`
+
+`top_raw_values`
+
+`raw_value_frequencies`
+
+`empty_values_count`
+
+`length diagnostics`
+
+`suspicious diagnostics`
+
+Но на текущем этапе ещё нет отдельной production normalization architecture, parser approval flow и SQL/apply safety model.
+
+Поэтому value analysis должен оставаться profiling-only.
+
+### Последствие
+
+Разрешено:
+
+- считать raw value frequencies;
+- считать top raw values;
+- считать empty values;
+- считать length diagnostics;
+- считать heuristic suspicious diagnostics;
+- сохранять examples;
+- писать profiling facts в `attribute_value_structure.diagnostics.raw_profile`.
+
+Запрещено:
+
+- заполнять apply-ready `normalized_values`;
+- выполнять unit conversion;
+- извлекать canonical numeric value;
+- делать semantic reject / approve;
+- создавать executable SQL;
+- переводить `build_sql_preview` в `safe_to_apply = 1`;
+- выполнять SQL apply.
+
+`suspicious_*` поля являются только diagnostics и не означают reject / approve.
+
+### Ссылка
+
+Spec:
+
+`docs/DB_READONLY_VALUE_PROFILING_SPEC.md`
+
+Runtime-проверки:
+
+`docs/RUNTIME_CHECKS.md`
+
+Implementation commit:
+
+`0a470df Add DB readonly raw value profiling`
