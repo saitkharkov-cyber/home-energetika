@@ -247,3 +247,78 @@ Implementation commit:
 Documentation commit:
 
 `73f2708 Document DB readonly SQL preview diagnostics checks`
+
+## 2026-07-06 — DB-readonly build_report показывает diagnostics только как reporting-only output
+
+### Решение
+
+DB-readonly `build_report` может отображать diagnostics из `raw_profile` и `sql_preview` только как reporting-only output.
+
+Разрешено показывать:
+
+- `raw_profile_summary` как read-only report output;
+- `sql_preview_safety_summary` как read-only report output.
+
+Report output не является:
+
+- normalization;
+- reject / approve decision;
+- apply-ready data;
+- SQL plan.
+
+### Причина
+
+`raw_profile` и `sql_preview.diagnostics` содержат инженерные read-only facts о текущих raw DB values и состоянии blocked preview.
+
+Эти diagnostics помогают человеку увидеть состояние данных, но не отвечают на вопросы:
+
+```text
+какое значение нужно записать в DB?
+можно ли применять SQL?
+какие значения approved/rejected?
+```
+
+На текущем этапе нет отдельной production normalization / SQL apply architecture.
+
+### Последствие
+
+Разрешено:
+
+- отображать `raw_profile_summary` в report;
+- отображать `sql_preview_safety_summary` в report;
+- показывать `suspicious_*` counts только как diagnostics;
+- показывать, что `sql_preview` остаётся blocked preview.
+
+Запрещено:
+
+- считать report output normalization;
+- считать report output reject / approve decision;
+- считать `suspicious_*` diagnostics reject / approve;
+- использовать `normalized_values` как apply-ready data;
+- менять `sql_preview` из `build_report`;
+- менять `safe_to_apply` из `build_report`;
+- менять `statements` из `build_report`;
+- создавать SQL;
+- создавать SQL files;
+- создавать apply plan;
+- выполнять SQL apply.
+
+SQL apply запрещён до отдельной production SQL/apply architecture.
+
+### Ссылка
+
+Spec:
+
+`docs/DB_READONLY_REPORT_OUTPUT_SPEC.md`
+
+Runtime-проверки:
+
+`docs/RUNTIME_CHECKS.md`
+
+Implementation commit:
+
+`50daba1 Add DB readonly diagnostics to report output`
+
+Documentation commit:
+
+`a60c5d8 Document DB readonly report diagnostics checks`
