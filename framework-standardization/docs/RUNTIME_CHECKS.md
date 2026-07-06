@@ -1615,3 +1615,121 @@ Confirmed:
 - git status before this docs update was `working tree clean`.
 
 The standalone E2E review flow remains a contract check for standalone components only.
+
+## 2026-07-06 — DbReadOnlyLocalReviewFixtureWriter implementation check
+
+### Context
+
+Implementation commit:
+
+`5b83d6e Add DB readonly local review fixture writer`
+
+Created standalone class:
+
+`framework-standardization/src/Approval/DbReadOnlyLocalReviewFixtureWriter.php`
+
+This check covers standalone local review fixture writer implementation.
+
+### Boundary
+
+The writer is standalone only.
+
+Confirmed boundaries:
+
+- writer is not connected to pipeline;
+- writer is not connected to runners;
+- writer does not call parser;
+- writer does not call generator;
+- writer does not call fixture bridge;
+- writer does not call approval flow;
+- writer does not call SQL preview;
+- writer does not use DB or live DB;
+- writer does not create SQL/apply artifacts;
+- writer does not change fixture `approval_status`;
+- writer does not create `approved` or `rejected`.
+
+### Syntax check
+
+Command:
+
+```text
+C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyLocalReviewFixtureWriter.php
+```
+
+Result:
+
+```text
+No syntax errors detected
+```
+
+### Standalone manual check
+
+Manual check setup:
+
+- small fixture array was created in memory;
+- `writer->write($fixture, 'manual_check_YYYYMMDD_HHMMSS.review.json')` was called;
+- file was created under `framework-standardization/var/review-fixtures/`;
+- `.json` extension was confirmed;
+- executable SQL was not found;
+- generated JSON did not appear in `git status`;
+- generated fixture was deleted;
+- `framework-standardization/var/review-fixtures` remained as empty local directory;
+- no tracked/staged files exist under `var/review-fixtures`.
+
+Writer diagnostics:
+
+- `wrote_file = 1`
+- `bytes_written = 1018`
+- `fixture_type = db_readonly_normalization_review`
+- `proposals_count = 1`
+- `writes_files = 1`
+- `sql_generated = 0`
+- `apply_plan_created = 0`
+- `safe_to_apply = 0`
+- `git_ignored_expected = 1`
+
+### Default dry-run regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### Git safety
+
+Confirmed after implementation:
+
+- `git status` showed only the new PHP file before commit;
+- docs did not change during implementation;
+- `.gitignore` did not change during implementation;
+- pipeline did not change;
+- runners did not change;
+- jobs did not change;
+- config did not change;
+- generated fixture JSON was deleted;
+- `var/review-fixtures` may remain as local directory, but without tracked files.
+
+The writer remains a standalone local JSON review artifact writer only.
