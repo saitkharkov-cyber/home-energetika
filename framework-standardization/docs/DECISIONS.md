@@ -322,3 +322,95 @@ Implementation commit:
 Documentation commit:
 
 `a60c5d8 Document DB readonly report diagnostics checks`
+
+
+## 2026-07-06 — DB-readonly build_framework_result остаётся dry-run/result-packaging output после diagnostics summary
+
+### Решение
+
+`DB-readonly build_framework_result` может выводить `diagnostics_summary` и `safety_summary` только как dry-run / result-packaging output.
+
+Эти summary-блоки делают diagnostics видимыми на верхнем уровне результата, но не превращают их в production decision, apply decision или SQL plan.
+
+### Разрешено
+
+`build_framework_result` может показывать top-level diagnostics summary, основанный на уже подготовленных данных из `report` и `sql_preview`:
+
+- `raw_profile_present`
+- `raw_profile_total_values`
+- `unique_raw_values_count`
+- `suspicious_no_digits_count`
+- `suspicious_long_value_count`
+- `suspicious_multiple_numbers_count`
+- `report_has_raw_profile_summary`
+- `report_has_sql_preview_safety_summary`
+- `sql_preview_safe_to_apply`
+- `sql_preview_statement_count`
+- `blocked_preview_expected`
+
+`build_framework_result` может показывать top-level safety summary:
+
+- `generated = 0`
+- `safe_to_apply`
+- `statements_count`
+- `sql_apply_allowed = 0`
+- `production_ready = 0`
+
+### Границы
+
+`diagnostics_summary` и `safety_summary` являются только read-only output.
+
+Они не являются:
+
+- normalization;
+- reject / approve decision;
+- apply-ready data;
+- SQL diff;
+- SQL plan;
+- production readiness marker.
+
+`production_ready` должен оставаться `0`.
+
+`sql_apply_allowed` должен оставаться `0`.
+
+`statements_count` должен оставаться `0` в DB-readonly blocked-preview path.
+
+### Запрещено
+
+`build_framework_result` не должен:
+
+- менять `report`;
+- менять `sql_preview`;
+- менять `safe_to_apply`;
+- менять `statements`;
+- менять `generated`;
+- делать normalization;
+- принимать reject / approve decisions;
+- создавать executable SQL;
+- создавать SQL files;
+- создавать apply plan;
+- выполнять SQL apply;
+- менять pipeline wiring;
+- менять runners;
+- менять default dry-run path.
+
+SQL apply запрещён до отдельной production SQL/apply architecture.
+
+### Контекст
+
+Связанные документы:
+
+- `docs/DB_READONLY_FRAMEWORK_RESULT_SPEC.md`
+- `docs/DB_READONLY_REPORT_OUTPUT_SPEC.md`
+- `docs/RUNTIME_CHECKS.md`
+
+Связанные коммиты:
+
+- `ff06d47 Add DB readonly diagnostics to framework result`
+- `e0af61f Document DB readonly framework result diagnostics checks`
+
+### Последствие
+
+DB-readonly pipeline теперь может показывать diagnostics на верхнем уровне framework result, но весь путь остаётся read-only / dry-run / non-apply.
+
+Следующий production-facing шаг всё ещё требует отдельного spec и отдельного architecture decision.
