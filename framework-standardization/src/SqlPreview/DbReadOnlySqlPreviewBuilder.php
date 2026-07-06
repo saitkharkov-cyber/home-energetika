@@ -24,6 +24,9 @@ final class DbReadOnlySqlPreviewBuilder implements SqlPreviewBuilderInterface
 
         $rawValues = isset($attributeValueStructure['raw_values']) && is_array($attributeValueStructure['raw_values']) ? $attributeValueStructure['raw_values'] : array();
         $normalizedValues = isset($attributeValueStructure['normalized_values']) && is_array($attributeValueStructure['normalized_values']) ? $attributeValueStructure['normalized_values'] : array();
+        $diagnostics = isset($attributeValueStructure['diagnostics']) && is_array($attributeValueStructure['diagnostics']) ? $attributeValueStructure['diagnostics'] : array();
+        $rawProfile = isset($diagnostics['raw_profile']) && is_array($diagnostics['raw_profile']) ? $diagnostics['raw_profile'] : array();
+        $topRawValues = isset($rawProfile['top_raw_values']) && is_array($rawProfile['top_raw_values']) ? $rawProfile['top_raw_values'] : array();
 
         $sqlPreview = array(
             'enabled' => 1,
@@ -46,6 +49,15 @@ final class DbReadOnlySqlPreviewBuilder implements SqlPreviewBuilderInterface
                 'unknown_count' => $this->countValues($attributeValueStructure, 'unknown_values'),
                 'invalid_count' => $this->countValues($attributeValueStructure, 'invalid_values'),
                 'empty_count' => $this->countValues($attributeValueStructure, 'empty_values'),
+                'raw_profile_present' => $rawProfile !== array() ? 1 : 0,
+                'raw_profile_total_values' => isset($rawProfile['total_values']) ? (int)$rawProfile['total_values'] : 0,
+                'unique_raw_values_count' => isset($rawProfile['unique_raw_values_count']) ? (int)$rawProfile['unique_raw_values_count'] : 0,
+                'empty_values_count' => isset($rawProfile['empty_values_count']) ? (int)$rawProfile['empty_values_count'] : 0,
+                'suspicious_no_digits_count' => isset($rawProfile['suspicious_no_digits_count']) ? (int)$rawProfile['suspicious_no_digits_count'] : 0,
+                'suspicious_long_value_count' => isset($rawProfile['suspicious_long_value_count']) ? (int)$rawProfile['suspicious_long_value_count'] : 0,
+                'suspicious_multiple_numbers_count' => isset($rawProfile['suspicious_multiple_numbers_count']) ? (int)$rawProfile['suspicious_multiple_numbers_count'] : 0,
+                'top_raw_values_count' => count($topRawValues),
+                'raw_profile_source' => isset($rawProfile['source']) ? (string)$rawProfile['source'] : '',
                 'source' => 'local_dump_db_readonly',
             ),
         );
