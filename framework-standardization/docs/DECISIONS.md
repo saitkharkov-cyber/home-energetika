@@ -556,3 +556,125 @@ Parser не должен:
 Следующий безопасный engineering step должен двигаться в сторону normalization proposal parser / approval flow, а не SQL/apply.
 
 SQL/apply остаётся blocked до появления approved normalized proposals и отдельной production SQL/apply architecture.
+
+## 2026-07-06 — Standalone normalization parser не является approval или SQL/apply layer
+
+### Решение
+
+`DbReadOnlyNormalizationProposalParser` является standalone parser skeleton для создания normalization proposals.
+
+Он не является pipeline stage, approval layer, SQL preview input или apply-ready layer.
+
+На текущем этапе parser может создавать только proposals со статусами:
+
+- `proposed`
+- `needs_review`
+- `unknown`
+
+Parser не должен создавать proposals со статусами:
+
+- `approved`
+- `rejected`
+
+### Причина
+
+Parser нужен как следующий безопасный слой после raw value profiling.
+
+Он может технически разобрать raw value и предложить normalized value candidate, но не может сам принимать production decision.
+
+Без отдельного approval flow parser output остаётся proposal/diagnostics, а не approved normalized data.
+
+### Разрешено
+
+Standalone parser может:
+
+- принимать read-only raw values массивом;
+- читать `product_id`;
+- читать `attribute_id`;
+- читать `language_id`;
+- читать `target_attribute_id`;
+- читать `raw_text` или `value`;
+- сохранять `original_raw_value`;
+- создавать `parsed_value`;
+- создавать `proposed_normalized_value`;
+- определять `proposed_unit`;
+- выставлять `parser_confidence`;
+- сохранять `parser_warnings`;
+- создавать `normalization_value_proposals`;
+- создавать `parser_diagnostics`.
+
+Для первого skeleton разрешены только статусы:
+
+- `proposed`;
+- `needs_review`;
+- `unknown`.
+
+### Parsing boundary
+
+Safe parsing rules для standalone parser skeleton:
+
+- пустое значение -> `unknown`;
+- одно число без диапазона -> `proposed`;
+- число + `мм` / `mm` -> `proposed`;
+- decimal comma / dot -> `proposed`;
+- несколько чисел -> `needs_review`;
+- диапазон -> `needs_review`;
+- текст без чисел -> `unknown`.
+
+Диапазоны и значения с несколькими числами не должны автоматически становиться `proposed` как production-ready values.
+
+Они требуют review.
+
+### Запрещено
+
+Standalone parser не должен:
+
+- выставлять `approved`;
+- выставлять `rejected`;
+- подключаться к `analyze_values`;
+- подключаться к `sql_preview`;
+- подключаться к `build_report`;
+- подключаться к `build_framework_result`;
+- менять pipeline wiring;
+- менять runners;
+- менять default dry-run path;
+- менять `safe_to_apply`;
+- менять `statements`;
+- создавать executable SQL;
+- создавать SQL files;
+- создавать apply plan;
+- выполнять SQL apply;
+- использовать live DB;
+- выполнять write/schema operations.
+
+### Approval boundary
+
+`normalization_value_proposals` не являются apply input.
+
+`proposed`, `needs_review` и `unknown` не являются apply-ready statuses.
+
+Только future explicit approval flow может создать `approved normalized proposals`.
+
+Даже `approved normalized proposals` в будущем не должны автоматически выполнять SQL apply: для этого нужен отдельный production SQL/apply spec и отдельное architecture decision.
+
+### Контекст
+
+Связанные документы:
+
+- `docs/DB_READONLY_NORMALIZATION_PARSER_SKELETON_SPEC.md`
+- `docs/DB_READONLY_NORMALIZATION_APPROVAL_SPEC.md`
+- `docs/RUNTIME_CHECKS.md`
+
+Связанные коммиты:
+
+- `071616f Add DB readonly normalization parser skeleton spec`
+- `bd06b9c Add DB readonly normalization proposal parser`
+- `94d0f27 Document DB readonly normalization parser checks`
+
+### Последствие
+
+Parser можно развивать как standalone normalization proposal layer.
+
+Следующий безопасный engineering step может быть связан с расширением parser diagnostics или подготовкой explicit approval flow.
+
+Нельзя подключать parser output к SQL/apply path без отдельного approval flow и отдельной SQL/apply architecture.
