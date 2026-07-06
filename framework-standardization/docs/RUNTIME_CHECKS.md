@@ -1341,3 +1341,118 @@ Confirmed:
 - fixture JSON files were not committed.
 
 The bridge remains a local review artifact/process between standalone parser output and standalone approval flow.
+
+## 2026-07-06 — DB-readonly local review fixture generator standalone check
+
+### Context
+
+Implementation commit:
+
+`416579f Add DB readonly local review fixture generator`
+
+Checked component:
+
+`framework-standardization/src/Approval/DbReadOnlyLocalReviewFixtureGenerator.php`
+
+This check covers standalone local review fixture generator skeleton.
+
+The generator is not connected to pipeline wiring.
+
+### What was checked
+
+`DbReadOnlyLocalReviewFixtureGenerator` accepts standalone parser output as PHP array and returns a JSON-ready local review fixture array.
+
+The generator copies parser-owned proposal fields and creates empty reviewer-owned `review` blocks.
+
+The generator does not call approval flow, does not call fixture bridge, and does not create fixture JSON files.
+
+### Syntax check
+
+Command:
+
+`C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyLocalReviewFixtureGenerator.php`
+
+Result:
+
+`No syntax errors detected`
+
+### Standalone manual-check
+
+Manual parser output shape:
+
+- 3 proposals total;
+- one proposal with `proposed` status;
+- one proposal with `needs_review` status;
+- one proposal with `unknown` status.
+
+Observed:
+
+- `fixture_type: db_readonly_normalization_review`
+- `generator_mode: standalone_local_review_fixture_generation`
+- `proposals_count: 3`
+- `review_blocks_created_count: 3`
+- `all_review_action_empty: 1`
+- `approved_count: 0`
+- `rejected_count: 0`
+- `writes_files: 0`
+- `sql_generated: 0`
+- `apply_plan_created: 0`
+- `safe_to_apply: 0`
+- `errors_count: 0`
+- `warnings_count: 0`
+
+### Default dry-run regression check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php`
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php`
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### Boundary
+
+The local review fixture generator is standalone only.
+
+Confirmed:
+
+- pipeline wiring did not change;
+- parser did not change;
+- approval flow did not change;
+- fixture bridge did not change;
+- `sql_preview` did not change;
+- report did not change;
+- framework result did not change;
+- runners did not change;
+- default dry-run path did not change;
+- generator does not use DB or live DB;
+- approval flow was not called by generator;
+- fixture bridge was not called by generator;
+- `approved` / `rejected` statuses were not generated;
+- fixture JSON files were not written;
+- `var` directory was not created;
+- `.gitignore` did not change;
+- SQL generation was not added;
+- SQL files were not created;
+- SQL diff was not created;
+- apply plan was not created;
+- SQL apply was not performed.
+
+The generator remains a standalone JSON-ready fixture array builder for human review.
