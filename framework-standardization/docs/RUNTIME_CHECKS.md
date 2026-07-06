@@ -744,3 +744,124 @@ marker, что `blocked_by` содержит:
 - live DB не использовалась;
 - write/schema operations не использовались;
 - OpenCart module paths не создавались.
+
+## 2026-07-06 — DB-readonly diagnostics summary in build_framework_result check
+
+### Context
+
+Implementation commit:
+
+`ff06d47 Add DB readonly diagnostics to framework result`
+
+Changed component:
+
+`framework-standardization/src/Result/DryRunFrameworkResultBuilder.php`
+
+This check covers DB-readonly top-level diagnostics/safety summary in `build_framework_result`.
+
+### What was added
+
+`DryRunFrameworkResultBuilder` now adds top-level summary blocks to the framework result payload:
+
+- `diagnostics_summary`
+- `safety_summary`
+
+`diagnostics_summary` contains read-only diagnostic markers derived from already prepared report/sql_preview data:
+
+- `raw_profile_present`
+- `raw_profile_total_values`
+- `unique_raw_values_count`
+- `suspicious_no_digits_count`
+- `suspicious_long_value_count`
+- `suspicious_multiple_numbers_count`
+- `report_has_raw_profile_summary`
+- `report_has_sql_preview_safety_summary`
+- `sql_preview_safe_to_apply`
+- `sql_preview_statement_count`
+- `blocked_preview_expected`
+
+`safety_summary` contains explicit non-apply markers:
+
+- `generated = 0`
+- `safe_to_apply`
+- `statements_count`
+- `sql_apply_allowed = 0`
+- `production_ready = 0`
+
+### Boundary
+
+`build_framework_result` remains dry-run / result-packaging only.
+
+It only packages already prepared `report` and `sql_preview` diagnostics into top-level summary fields.
+
+It does not:
+
+- change `report`;
+- change `sql_preview`;
+- change `safe_to_apply`;
+- change `statements`;
+- perform normalization;
+- create executable SQL;
+- create SQL files;
+- create apply plan;
+- perform SQL apply;
+- change pipeline wiring;
+- change runners;
+- change default dry-run path.
+
+### Syntax check
+
+Command:
+
+`C:\php56\php.exe -l framework-standardization\src\Result\DryRunFrameworkResultBuilder.php`
+
+Result:
+
+`No syntax errors detected`
+
+### Default dry-run check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php`
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php`
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### Output contract check
+
+DB-readonly framework result contract:
+
+- `diagnostics_summary_present: 1`
+- `safety_summary_present: 1`
+- `production_ready: 0`
+- `sql_apply_allowed: 0`
+- `safe_to_apply: 0`
+- `statements_count: 0`
+- `report_has_raw_profile_summary: 1`
+- `report_has_sql_preview_safety_summary: 1`
+
+### Safety result
+
+The implementation keeps the framework result as a dry-run/result-packaging output.
+
+Diagnostics are visible at the top level, but they are not production decisions and are not apply-ready data.
+
+SQL generation and SQL apply remain blocked.
