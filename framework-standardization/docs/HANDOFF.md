@@ -15,25 +15,24 @@ Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling la
 Текущая стабильная точка:
 
 ```text
-125640d Document local review fixture writer boundary
+2dd86cb Document DB readonly local review fixture loader checks
 ```
 
 Последний закрытый инженерный блок:
 
 ```text
-standalone local review chain + local review artifact storage/writer boundary
+standalone local review fixture writer + loader chain
 ```
 
 Закрыто после прошлого handoff:
 
-- standalone local approval fixture bridge implemented;
-- standalone local review fixture generator implemented;
-- standalone E2E review flow temporary check completed;
-- local review artifact storage spec created;
-- local review artifact storage decision documented;
-- `.gitignore` boundary added for `framework-standardization/var/review-fixtures/*.json`;
-- standalone local review fixture writer spec created;
-- standalone local review fixture writer boundary documented.
+- standalone `DbReadOnlyLocalReviewFixtureWriter` implemented;
+- writer runtime checks documented;
+- writer standalone-only decision documented;
+- standalone `DbReadOnlyLocalReviewFixtureLoader` spec created;
+- loader standalone-only decision documented;
+- standalone `DbReadOnlyLocalReviewFixtureLoader` implemented;
+- loader runtime checks documented.
 
 Ожидаемое состояние репозитория:
 
@@ -66,6 +65,7 @@ origin/main = main
 - `docs/DB_READONLY_STANDALONE_REVIEW_FLOW_CHECK_SPEC.md`
 - `docs/DB_READONLY_LOCAL_REVIEW_ARTIFACT_STORAGE_SPEC.md`
 - `docs/DB_READONLY_LOCAL_REVIEW_FIXTURE_WRITER_SPEC.md`
+- `docs/DB_READONLY_LOCAL_REVIEW_FIXTURE_LOADER_SPEC.md`
 
 Оперативный статус находится в этом документе.
 
@@ -183,7 +183,11 @@ DB-readonly-compatible stages не являются production implementation.
 parser output
 -> DbReadOnlyLocalReviewFixtureGenerator
 -> JSON-ready review fixture array
+-> DbReadOnlyLocalReviewFixtureWriter
+-> local ignored review JSON file
 -> manual review / edited review blocks
+-> DbReadOnlyLocalReviewFixtureLoader
+-> PHP array fixture
 -> DbReadOnlyLocalApprovalFixtureBridge
 -> DbReadOnlyNormalizationApprovalFlow
 ```
@@ -208,14 +212,36 @@ Parser:
 - не должен создавать статусы `approved` или `rejected`;
 - не создаёт SQL/apply output.
 
-`src/Approval/DbReadOnlyNormalizationApprovalFlow.php` существует как standalone approval flow skeleton.
+`src/Approval/DbReadOnlyLocalReviewFixtureGenerator.php` существует как standalone generator.
 
-Approval flow:
+Generator:
 
-- не подключён к pipeline;
-- не подключён к parser автоматически;
-- может явно переводить proposals в `approved`, `rejected`, `needs_review`, `unknown`, `proposed`;
-- является единственным текущим standalone component, который может создавать `approved` / `rejected`;
+- принимает standalone parser output;
+- возвращает JSON-ready review fixture array;
+- создаёт пустой reviewer-owned `review` block;
+- не пишет fixture JSON files;
+- не вызывает bridge или approval flow;
+- не подключён к pipeline.
+
+`src/Approval/DbReadOnlyLocalReviewFixtureWriter.php` существует как standalone writer.
+
+Writer:
+
+- пишет JSON-ready review fixture array в local ignored path `framework-standardization/var/review-fixtures/*.json`;
+- не меняет fixture content или `approval_status`;
+- не вызывает bridge, approval flow или SQL preview;
+- не подключён к pipeline или runners;
+- не создаёт SQL/apply output.
+
+`src/Approval/DbReadOnlyLocalReviewFixtureLoader.php` существует как standalone loader.
+
+Loader:
+
+- читает local `.json` review fixture file из `framework-standardization/var/review-fixtures/`;
+- возвращает PHP array fixture;
+- не меняет `review.action` или `approval_status`;
+- не вызывает bridge, approval flow или SQL preview;
+- не подключён к pipeline или runners;
 - не создаёт SQL/apply output.
 
 `src/Approval/DbReadOnlyLocalApprovalFixtureBridge.php` существует как standalone bridge.
@@ -228,42 +254,15 @@ Bridge:
 - не выставляет statuses напрямую;
 - не подключён к pipeline.
 
-`src/Approval/DbReadOnlyLocalReviewFixtureGenerator.php` существует как standalone generator.
+`src/Approval/DbReadOnlyNormalizationApprovalFlow.php` существует как standalone approval flow skeleton.
 
-Generator:
+Approval flow:
 
-- принимает standalone parser output;
-- возвращает JSON-ready review fixture array;
-- создаёт пустой reviewer-owned `review` block;
-- не пишет fixture JSON files;
-- не вызывает bridge или approval flow;
-- не подключён к pipeline.
-
-Writer ещё не реализован.
-
-Future class planned:
-
-```text
-src/Approval/DbReadOnlyLocalReviewFixtureWriter.php
-```
-
-Spec exists:
-
-```text
-docs/DB_READONLY_LOCAL_REVIEW_FIXTURE_WRITER_SPEC.md
-```
-
-`.gitignore` boundary уже есть:
-
-```text
-framework-standardization/var/review-fixtures/*.json
-```
-
-Но:
-
-- `var` directory не создавать в handoff step;
-- fixture JSON files не создавать;
-- writer не реализовывать в handoff step.
+- не подключён к pipeline;
+- не подключён к parser автоматически;
+- может явно переводить proposals в `approved`, `rejected`, `needs_review`, `unknown`, `proposed`;
+- является единственным текущим standalone component, который может создавать `approved` / `rejected`;
+- не создаёт SQL/apply output.
 
 `approved` означает только future SQL preview candidate eligibility.
 
@@ -298,11 +297,8 @@ framework-standardization/var/review-fixtures/*.json
 - `production_ready = 0`.
 - `blocked_by` содержит `db_readonly_sql_preview_not_implemented`.
 - No pipeline wiring.
-- Parser не подключать к `analyze_values`.
-- Generator не подключать к pipeline.
-- Bridge не подключать к pipeline.
-- Approval flow не подключать к SQL preview.
-- Writer не подключать к pipeline.
+- Writer, loader, generator, bridge и approval flow не подключать к pipeline/runners.
+- Fixture JSON files не коммитить.
 - SQL generation запрещён.
 - SQL files не создавать.
 - SQL diff не создавать.
@@ -350,30 +346,19 @@ language
 Следующий шаг для новой Codex-сессии:
 
 ```text
-Implement standalone DbReadOnlyLocalReviewFixtureWriter according to docs/DB_READONLY_LOCAL_REVIEW_FIXTURE_WRITER_SPEC.md
+define next standalone review-chain boundary after loader, using docs/DECISIONS.md and current specs
 ```
 
 Границы следующего шага:
 
-- создать только `src/Approval/DbReadOnlyLocalReviewFixtureWriter.php`;
-- PHP 5.6-compatible;
-- minimal API: `write($fixture, $filename = null)`;
-- писать только в `framework-standardization/var/review-fixtures/`;
-- разрешать только `.json`;
-- запрещать absolute paths;
-- запрещать path traversal;
-- запрещать unsafe filename tokens: `.sql`, `apply`, `production`, `migration`, `patch`;
-- не менять fixture `approval_status`;
-- не создавать `approved` / `rejected`;
-- не вызывать bridge;
-- не вызывать approval flow;
-- не вызывать SQL preview;
-- не менять pipeline wiring;
-- не менять runners;
-- не менять default dry-run path;
-- не генерировать SQL/apply;
-- после manual check удалить generated fixture JSON;
-- `git status` после check должен показывать только новый PHP-файл.
+- сначала читать актуальные `HANDOFF.md`, `DECISIONS.md`, `RUNTIME_CHECKS.md` и релевантные specs;
+- не делать implementation сразу;
+- не предлагать SQL/apply как следующий шаг;
+- не делать pipeline wiring;
+- не подключать writer/loader/generator/bridge/approval flow к pipeline/runners;
+- не использовать live DB;
+- не делать DB/schema changes;
+- не менять default dry-run path.
 
 ## Старт в новом чате
 
@@ -382,11 +367,7 @@ Implement standalone DbReadOnlyLocalReviewFixtureWriter according to docs/DB_REA
 - `framework-standardization/docs/HANDOFF.md`
 - `framework-standardization/docs/DECISIONS.md`
 - `framework-standardization/docs/RUNTIME_CHECKS.md`
-- `framework-standardization/docs/DB_READONLY_LOCAL_REVIEW_ARTIFACT_STORAGE_SPEC.md`
-- `framework-standardization/docs/DB_READONLY_LOCAL_REVIEW_FIXTURE_WRITER_SPEC.md`
-- `framework-standardization/docs/DB_READONLY_LOCAL_REVIEW_FIXTURE_GENERATION_SPEC.md`
-- `framework-standardization/docs/DB_READONLY_LOCAL_APPROVAL_FIXTURE_SPEC.md`
-- `framework-standardization/docs/DB_READONLY_STANDALONE_REVIEW_FLOW_CHECK_SPEC.md`
+- relevant current specs for standalone review-chain boundaries
 
 Затем проверить:
 
@@ -398,7 +379,7 @@ git log --oneline -5
 Ожидаемая точка:
 
 ```text
-HEAD/main/origin/main = 125640d Document local review fixture writer boundary
+HEAD/main/origin/main = 2dd86cb Document DB readonly local review fixture loader checks
 working tree clean
 ```
 
