@@ -414,3 +414,145 @@ SQL apply запрещён до отдельной production SQL/apply architec
 DB-readonly pipeline теперь может показывать diagnostics на верхнем уровне framework result, но весь путь остаётся read-only / dry-run / non-apply.
 
 Следующий production-facing шаг всё ещё требует отдельного spec и отдельного architecture decision.
+
+
+## 2026-07-06 — SQL/apply преждевременен без normalization approval flow
+
+### Решение
+
+Production SQL/apply architecture нельзя проектировать как следующий слой, пока не описан и не реализован controlled normalization approval flow.
+
+DB-readonly parser может создавать `normalization proposals`, но не должен создавать `approved` или apply-ready values автоматически.
+
+### Причина
+
+Текущий DB-readonly pipeline уже показывает diagnostics на нескольких уровнях:
+
+- `raw_profile` в `analyze_values`;
+- `raw_profile` summary в `sql_preview.diagnostics`;
+- `raw_profile_summary` и `sql_preview_safety_summary` в `build_report`;
+- `diagnostics_summary` и `safety_summary` в `build_framework_result`.
+
+Но эти данные отвечают только на вопрос:
+
+- что сейчас лежит в raw DB values;
+- какие форматы и suspicious cases видны;
+- почему SQL preview остаётся blocked.
+
+Они не отвечают на вопросы:
+
+- какое normalized value должно быть записано;
+- какие parser warnings допустимы;
+- какие proposals approved;
+- какие proposals rejected;
+- какие proposals требуют review;
+- какие values могут стать input для future SQL preview.
+
+Поэтому SQL/apply без approval flow был бы преждевременным и небезопасным.
+
+### Разрешено
+
+Следующий production-facing слой может развиваться как controlled normalization proposal layer.
+
+Разрешено проектировать и в будущем реализовывать:
+
+- parser для raw values;
+- `parsed_value`;
+- `normalized_value_proposals`;
+- `parser_confidence`;
+- `parser_warnings`;
+- `approval_status`;
+- статусы `proposed`, `approved`, `rejected`, `needs_review`, `unknown`;
+- traceability от `original_raw_value` к proposal;
+- report/framework summaries по proposal counts и approval statuses.
+
+### Границы parser-а
+
+Parser может:
+
+- парсить числа;
+- распознавать `мм` и `mm`;
+- распознавать decimal comma / dot;
+- распознавать диапазоны только как `needs_review`;
+- сохранять original raw value;
+- создавать parser diagnostics;
+- создавать proposals со статусами `proposed`, `needs_review` или `unknown`.
+
+Parser не должен:
+
+- сам принимать production decision;
+- сам выставлять `approved`;
+- создавать SQL;
+- создавать SQL files;
+- создавать apply plan;
+- менять DB;
+- менять `safe_to_apply`;
+- менять `statements`;
+- выполнять SQL apply.
+
+### Approval boundary
+
+Только явно approved normalized proposals могут стать input для будущего SQL preview.
+
+Не являются apply input:
+
+- raw diagnostics;
+- `raw_profile`;
+- parser diagnostics;
+- `proposed`;
+- `needs_review`;
+- `unknown`;
+- `rejected`;
+- suspicious diagnostics;
+- unapproved normalized proposals.
+
+Даже approved normalized proposal не разрешает SQL apply сам по себе.
+
+Для SQL preview/apply нужен отдельный production SQL/apply spec и отдельное architecture decision.
+
+### Запрещено
+
+До отдельной production SQL/apply architecture запрещено:
+
+- генерировать executable SQL;
+- создавать SQL files;
+- создавать SQL diff;
+- создавать apply plan;
+- выполнять SQL apply;
+- использовать live DB;
+- выполнять write/schema operations;
+- переводить `safe_to_apply` в `1`;
+- считать diagnostics production-ready data;
+- считать proposals apply-ready data без explicit approval.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Контекст
+
+Связанные документы:
+
+- `docs/DB_READONLY_NORMALIZATION_APPROVAL_SPEC.md`
+- `docs/DB_READONLY_VALUE_PROFILING_SPEC.md`
+- `docs/DB_READONLY_SQL_PREVIEW_BOUNDARY_SPEC.md`
+- `docs/DB_READONLY_REPORT_OUTPUT_SPEC.md`
+- `docs/DB_READONLY_FRAMEWORK_RESULT_SPEC.md`
+- `docs/RUNTIME_CHECKS.md`
+
+Связанный коммит:
+
+- `948ae73 Add DB readonly normalization approval spec`
+
+### Последствие
+
+Следующий безопасный engineering step должен двигаться в сторону normalization proposal parser / approval flow, а не SQL/apply.
+
+SQL/apply остаётся blocked до появления approved normalized proposals и отдельной production SQL/apply architecture.
