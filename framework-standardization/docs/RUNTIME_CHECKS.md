@@ -1047,3 +1047,193 @@ The parser is a standalone normalization proposal skeleton only.
 It can create proposals with `proposed`, `needs_review` and `unknown` statuses, but it cannot approve proposals and cannot create apply-ready output.
 
 SQL generation and SQL apply remain blocked.
+
+## 2026-07-06 — DB-readonly normalization approval flow standalone check
+
+### Context
+
+Implementation commit:
+
+`7d1f3e2 Add DB readonly normalization approval flow`
+
+Created component:
+
+`framework-standardization/src/Approval/DbReadOnlyNormalizationApprovalFlow.php`
+
+This check covers standalone normalization approval flow skeleton.
+
+The approval flow is not connected to pipeline wiring.
+
+### What was added
+
+`DbReadOnlyNormalizationApprovalFlow` implements standalone method:
+
+`apply($proposals, $reviewActions)`
+
+Input contains normalization proposals with fields such as:
+
+- `proposal_id`
+- `product_id`
+- `attribute_id`
+- `target_attribute_id`
+- `original_raw_value`
+- `parsed_value`
+- `proposed_normalized_value`
+- `proposed_unit`
+- `parser_confidence`
+- `parser_warnings`
+- `approval_status`
+
+Input review actions contain fields such as:
+
+- `proposal_id`
+- `action`
+- `reviewer`
+- `review_note`
+- `source`
+
+Output contains:
+
+- `updated_proposals`
+- `approval_audit`
+- `approval_summary`
+- `errors`
+- `warnings`
+- `source`
+
+### Supported actions and status transitions
+
+The standalone approval flow supports explicit actions:
+
+- `approve` -> `approved`
+- `reject` -> `rejected`
+- `mark_needs_review` -> `needs_review`
+- `mark_unknown` -> `unknown`
+- `reset_to_proposed` -> `proposed`
+
+Only approval flow can create `approved` and `rejected` statuses.
+
+Parser remains unable to create `approved` or `rejected`.
+
+### Audit trail
+
+Each applied review action creates audit fields:
+
+- `proposal_id`
+- `review_action`
+- `reviewer`
+- `reviewed_at`
+- `review_note`
+- `previous_status`
+- `new_status`
+- `source`
+
+### Approval summary
+
+`approval_summary` contains counts:
+
+- `total_proposals`
+- `approved_count`
+- `rejected_count`
+- `needs_review_count`
+- `unknown_count`
+- `proposed_count`
+- `changed_count`
+- `error_count`
+
+### Boundary
+
+The approval flow is standalone only.
+
+It does not:
+
+- connect to parser;
+- connect to `analyze_values`;
+- connect to `sql_preview`;
+- connect to `build_report`;
+- connect to `build_framework_result`;
+- change pipeline wiring;
+- change runners;
+- change default dry-run path;
+- change docs;
+- change `HANDOFF.md`;
+- create executable SQL;
+- create SQL files;
+- create SQL diff;
+- create apply plan;
+- perform SQL apply;
+- use live DB.
+
+`approved` means only future SQL preview candidate eligibility.
+
+`approved` does not mean:
+
+- SQL apply;
+- `safe_to_apply = 1`;
+- `production_ready = 1`;
+- apply-ready output.
+
+### Syntax check
+
+Command:
+
+`C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyNormalizationApprovalFlow.php`
+
+Result:
+
+`No syntax errors detected`
+
+### Standalone manual-check
+
+Result:
+
+- `approved_count: 1`
+- `rejected_count: 1`
+- `needs_review_count: 1`
+- `unknown_count: 1`
+- `proposed_count: 1`
+- `changed_count: 5`
+- `audit_previous_status: proposed`
+- `audit_new_status: approved`
+- `reviewed_at_present: 1`
+- `reviewer_present: 1`
+- `safe_to_apply: 0`
+- `sql_generated: 0`
+- `apply_plan_created: 0`
+
+Temporary manual-check file was removed after verification.
+
+### Default dry-run regression check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php`
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php`
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### Safety result
+
+The approval flow is a standalone controlled review skeleton only.
+
+It can explicitly change proposal statuses to `approved`, `rejected`, `needs_review`, `unknown` or `proposed`, but it cannot create SQL/apply output.
+
+SQL generation and SQL apply remain blocked.
+
