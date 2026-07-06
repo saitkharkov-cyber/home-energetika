@@ -27,8 +27,10 @@ final class DryRunReportBuilder implements ReportBuilderInterface
         $proposedSynonyms = isset($synonymCandidates['proposed']) && is_array($synonymCandidates['proposed']) ? $synonymCandidates['proposed'] : array();
         $ambiguousCandidates = isset($synonymCandidates['ambiguous']) && is_array($synonymCandidates['ambiguous']) ? $synonymCandidates['ambiguous'] : array();
         $valueDiagnostics = isset($attributeValueStructure['diagnostics']) && is_array($attributeValueStructure['diagnostics']) ? $attributeValueStructure['diagnostics'] : array();
+        $rawProfile = isset($valueDiagnostics['raw_profile']) && is_array($valueDiagnostics['raw_profile']) ? $valueDiagnostics['raw_profile'] : array();
         $statements = isset($sqlPreview['statements']) && is_array($sqlPreview['statements']) ? $sqlPreview['statements'] : array();
         $blockedBy = isset($sqlPreview['blocked_by']) && is_array($sqlPreview['blocked_by']) ? $sqlPreview['blocked_by'] : array();
+        $sqlPreviewDiagnostics = isset($sqlPreview['diagnostics']) && is_array($sqlPreview['diagnostics']) ? $sqlPreview['diagnostics'] : array();
 
         $report = array(
             'generated' => 1,
@@ -86,6 +88,17 @@ final class DryRunReportBuilder implements ReportBuilderInterface
             ),
         );
 
+        if ($rawProfile !== array()) {
+            $report['raw_profile_summary'] = $this->buildRawProfileSummary($rawProfile);
+            $report['notes'][] = 'raw profile is read-only diagnostics only';
+            $report['notes'][] = 'raw profile is not normalization';
+        }
+
+        if ($this->isDbReadOnlySqlPreview($sqlPreview, $sqlPreviewDiagnostics)) {
+            $report['sql_preview_safety_summary'] = $this->buildSqlPreviewSafetySummary($sqlPreview, $sqlPreviewDiagnostics, $statements, $blockedBy);
+            $report['notes'][] = 'sql preview remains blocked and reporting-only';
+        }
+
         return array(
             'built' => 1,
             'report' => $report,
@@ -93,5 +106,61 @@ final class DryRunReportBuilder implements ReportBuilderInterface
             'warnings' => array(),
             'source' => 'dry_run_fixture',
         );
+    }
+
+    private function buildRawProfileSummary(array $rawProfile)
+    {
+        $topRawValues = isset($rawProfile['top_raw_values']) && is_array($rawProfile['top_raw_values']) ? $rawProfile['top_raw_values'] : array();
+
+        return array(
+            'total_values' => isset($rawProfile['total_values']) ? (int)$rawProfile['total_values'] : 0,
+            'unique_raw_values_count' => isset($rawProfile['unique_raw_values_count']) ? (int)$rawProfile['unique_raw_values_count'] : 0,
+            'empty_values_count' => isset($rawProfile['empty_values_count']) ? (int)$rawProfile['empty_values_count'] : 0,
+            'suspicious_no_digits_count' => isset($rawProfile['suspicious_no_digits_count']) ? (int)$rawProfile['suspicious_no_digits_count'] : 0,
+            'suspicious_long_value_count' => isset($rawProfile['suspicious_long_value_count']) ? (int)$rawProfile['suspicious_long_value_count'] : 0,
+            'suspicious_multiple_numbers_count' => isset($rawProfile['suspicious_multiple_numbers_count']) ? (int)$rawProfile['suspicious_multiple_numbers_count'] : 0,
+            'top_raw_values_count' => count($topRawValues),
+            'source' => isset($rawProfile['source']) ? (string)$rawProfile['source'] : '',
+            'note' => 'read_only_diagnostics_only',
+        );
+    }
+
+    private function buildSqlPreviewSafetySummary(array $sqlPreview, array $sqlPreviewDiagnostics, array $statements, array $blockedBy)
+    {
+        return array(
+            'generated' => isset($sqlPreview['generated']) ? (int)$sqlPreview['generated'] : 0,
+            'safe_to_apply' => isset($sqlPreview['safe_to_apply']) ? (int)$sqlPreview['safe_to_apply'] : 0,
+            'apply_changes' => isset($sqlPreview['apply_changes']) ? (int)$sqlPreview['apply_changes'] : 0,
+            'statement_count' => count($statements),
+            'blocked_by' => $blockedBy,
+            'blocked_by_contains_db_readonly_sql_preview_not_implemented' => in_array('db_readonly_sql_preview_not_implemented', $blockedBy, true) ? 1 : 0,
+            'raw_profile_present' => isset($sqlPreviewDiagnostics['raw_profile_present']) ? (int)$sqlPreviewDiagnostics['raw_profile_present'] : 0,
+            'raw_profile_total_values' => isset($sqlPreviewDiagnostics['raw_profile_total_values']) ? (int)$sqlPreviewDiagnostics['raw_profile_total_values'] : 0,
+            'unique_raw_values_count' => isset($sqlPreviewDiagnostics['unique_raw_values_count']) ? (int)$sqlPreviewDiagnostics['unique_raw_values_count'] : 0,
+            'empty_values_count' => isset($sqlPreviewDiagnostics['empty_values_count']) ? (int)$sqlPreviewDiagnostics['empty_values_count'] : 0,
+            'suspicious_no_digits_count' => isset($sqlPreviewDiagnostics['suspicious_no_digits_count']) ? (int)$sqlPreviewDiagnostics['suspicious_no_digits_count'] : 0,
+            'suspicious_long_value_count' => isset($sqlPreviewDiagnostics['suspicious_long_value_count']) ? (int)$sqlPreviewDiagnostics['suspicious_long_value_count'] : 0,
+            'suspicious_multiple_numbers_count' => isset($sqlPreviewDiagnostics['suspicious_multiple_numbers_count']) ? (int)$sqlPreviewDiagnostics['suspicious_multiple_numbers_count'] : 0,
+            'top_raw_values_count' => isset($sqlPreviewDiagnostics['top_raw_values_count']) ? (int)$sqlPreviewDiagnostics['top_raw_values_count'] : 0,
+            'raw_profile_source' => isset($sqlPreviewDiagnostics['raw_profile_source']) ? (string)$sqlPreviewDiagnostics['raw_profile_source'] : '',
+            'note' => 'blocked_preview_diagnostics_only',
+        );
+    }
+
+    private function isDbReadOnlySqlPreview(array $sqlPreview, array $sqlPreviewDiagnostics)
+    {
+        if (isset($sqlPreview['source']) && $sqlPreview['source'] === 'local_dump_db_readonly') {
+            return true;
+        }
+
+        if (isset($sqlPreviewDiagnostics['source']) && $sqlPreviewDiagnostics['source'] === 'local_dump_db_readonly') {
+            return true;
+        }
+
+        if (array_key_exists('raw_profile_present', $sqlPreviewDiagnostics)) {
+            return true;
+        }
+
+        return false;
     }
 }
