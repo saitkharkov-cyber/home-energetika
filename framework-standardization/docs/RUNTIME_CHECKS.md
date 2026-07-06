@@ -1456,3 +1456,162 @@ Confirmed:
 - SQL apply was not performed.
 
 The generator remains a standalone JSON-ready fixture array builder for human review.
+
+## 2026-07-06 — DB-readonly standalone E2E review flow temporary check
+
+### Context
+
+Working point:
+
+`eedc5f5 Document standalone review flow check boundary`
+
+This check covers the standalone in-memory review flow:
+
+```text
+parserOutput array
+-> DbReadOnlyLocalReviewFixtureGenerator::generate($parserOutput)
+-> manual in-memory edit fixture review blocks
+-> DbReadOnlyLocalApprovalFixtureBridge::applyFixture($editedFixture)
+-> DbReadOnlyNormalizationApprovalFlow::apply($proposals, $reviewActions)
+```
+
+The check was temporary only. It did not add a runner, test framework or persistent fixture files.
+
+### Syntax checks
+
+Commands:
+
+```text
+C:\php56\php.exe -l framework-standardization\src\Normalizer\DbReadOnlyNormalizationProposalParser.php
+C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyLocalReviewFixtureGenerator.php
+C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyLocalApprovalFixtureBridge.php
+C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyNormalizationApprovalFlow.php
+```
+
+Observed:
+
+- `No syntax errors detected` for all four classes.
+
+### Standalone E2E check setup
+
+Parser output contained 4 proposals:
+
+- `proposed`
+- `proposed`
+- `unknown`
+- `needs_review`
+
+Parser output contained no `approved` or `rejected` proposals.
+
+Manual review was simulated in memory:
+
+- proposal A: `approve`
+- proposal B: `reject`
+- proposal C: `mark_needs_review`
+- proposal D: empty action
+
+### Generator observed facts
+
+Observed:
+
+- `fixture_type: db_readonly_normalization_review`
+- `generator_mode: standalone_local_review_fixture_generation`
+- `proposals_count: 4`
+- `review_blocks_created_count: 4`
+- `all_review_action_empty_before_manual_edit: 1`
+- `approved_count: 0`
+- `rejected_count: 0`
+- `writes_files: 0`
+- `sql_generated: 0`
+- `apply_plan_created: 0`
+- `safe_to_apply: 0`
+
+### Bridge observed facts
+
+Observed:
+
+- `proposals_count: 4`
+- `review_actions_count: 3`
+- `skipped_empty_actions_count: 1`
+- `bridge_mode: standalone_local_fixture_bridge`
+- `sql_generated: 0`
+- `apply_plan_created: 0`
+- `safe_to_apply: 0`
+
+### Approval flow observed facts
+
+Observed:
+
+- `total_proposals: 4`
+- `approved_count: 1`
+- `rejected_count: 1`
+- `needs_review_count: 2`
+- `changed_count: 3`
+- `approval_audit_count: 3`
+- proposal D with empty action remained `needs_review`
+- `approved` / `rejected` appeared only after approval flow
+- `safe_to_apply: 0`
+- `sql_generated: 0`
+- `apply_plan_created: 0`
+- `errors_count: 0`
+- `warnings_count: 0`
+
+### Default dry-run regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
+```
+
+Observed:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
+```
+
+Observed:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### Git safety / boundary confirmation
+
+Confirmed:
+
+- temporary PHP file was created only for check and removed;
+- fixture JSON files were not created;
+- `var` directory was not created;
+- `.gitignore` was not changed;
+- production PHP code did not change;
+- docs did not change before this `RUNTIME_CHECKS.md` update;
+- pipeline wiring did not change;
+- runners did not change;
+- parser did not change;
+- generator did not change;
+- bridge did not change;
+- approval flow did not change;
+- `sql_preview` did not change;
+- report did not change;
+- framework result did not change;
+- SQL generation was not added;
+- SQL files were not created;
+- SQL diff was not created;
+- apply plan was not created;
+- SQL apply was not performed;
+- live DB was not used;
+- DB/schema operations were not used;
+- git status before this docs update was `working tree clean`.
+
+The standalone E2E review flow remains a contract check for standalone components only.
