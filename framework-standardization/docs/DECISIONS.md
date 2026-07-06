@@ -1266,3 +1266,199 @@ Implementation должен оставаться standalone.
 
 Нельзя подключать generator к pipeline, SQL preview или SQL/apply path без отдельного architecture decision.
 
+## 2026-07-06 — Standalone E2E review flow check является только contract check
+
+### Решение
+
+Standalone E2E review flow check может использоваться только как contract check для standalone components.
+
+Проверяемый flow:
+
+- parser output;
+- local review fixture generator;
+- manual in-memory edit;
+- local approval fixture bridge;
+- approval flow.
+
+Этот flow не является:
+
+- pipeline stage;
+- SQL preview input;
+- production storage;
+- apply layer.
+
+### Причина
+
+После появления standalone parser, local review fixture generator, local approval fixture bridge и approval flow нужно проверить их совместимость как цепочки.
+
+Но эту совместимость нужно проверять безопасно:
+
+- без подключения к pipeline;
+- без записи fixture JSON files;
+- без DB;
+- без SQL/apply;
+- без production storage.
+
+Цель check-а — доказать, что review decisions появляются только после manual edit и только через approval flow.
+
+### Разрешено
+
+Standalone E2E review flow check может:
+
+- подготовить `parserOutput` array;
+- вызвать `DbReadOnlyLocalReviewFixtureGenerator::generate($parserOutput)`;
+- проверить, что generator создал пустые `review` blocks;
+- симулировать manual review изменением fixture array в памяти;
+- вызвать `DbReadOnlyLocalApprovalFixtureBridge::applyFixture($editedFixture)`;
+- проверить output approval flow:
+  - `updated_proposals`;
+  - `approval_audit`;
+  - `approval_summary`.
+
+Manual review simulation может использовать in-memory actions:
+
+- `approve`;
+- `reject`;
+- `mark_needs_review`;
+- empty `review.action`.
+
+### Граница status transitions
+
+Parser может создавать только:
+
+- `proposed`;
+- `needs_review`;
+- `unknown`.
+
+Generator не должен создавать:
+
+- `approved`;
+- `rejected`.
+
+Bridge не должен напрямую выставлять statuses.
+
+`approved` и `rejected` могут появляться только через:
+
+- `DbReadOnlyNormalizationApprovalFlow`.
+
+Пустой `review.action` не должен менять исходный proposal status.
+
+### Expected contract
+
+Минимальный standalone check должен подтверждать:
+
+Generator facts:
+
+- `fixture_type = db_readonly_normalization_review`;
+- `generator_mode = standalone_local_review_fixture_generation`;
+- `review.action` пустой до manual edit;
+- `writes_files = 0`;
+- `sql_generated = 0`;
+- `apply_plan_created = 0`;
+- `safe_to_apply = 0`.
+
+Bridge facts:
+
+- непустые `review.action` rows превращаются в `$reviewActions`;
+- empty `review.action` пропускается;
+- `bridge_mode = standalone_local_fixture_bridge`;
+- `sql_generated = 0`;
+- `apply_plan_created = 0`;
+- `safe_to_apply = 0`.
+
+Approval flow facts:
+
+- explicit actions создают expected status transitions;
+- `approval_audit` создаётся только для changed rows;
+- `approved` / `rejected` созданы только approval flow.
+
+### Approval boundary
+
+`approved` в standalone E2E check означает только:
+
+- future SQL preview candidate eligibility.
+
+`approved` не означает:
+
+- SQL apply;
+- `safe_to_apply = 1`;
+- `production_ready = 1`;
+- executable SQL;
+- apply-ready output.
+
+Даже successful E2E check не разблокирует SQL/apply.
+
+Для SQL preview/apply нужен отдельный production SQL/apply spec и отдельное architecture decision.
+
+### Запрещено
+
+Standalone E2E review flow check не должен:
+
+- менять pipeline wiring;
+- подключать parser к `analyze_values`;
+- подключать generator к pipeline;
+- подключать bridge к pipeline;
+- подключать approval flow к SQL preview;
+- создавать fixture JSON files;
+- создавать `var` directory;
+- менять `.gitignore`;
+- использовать live DB;
+- менять DB/schema;
+- выполнять write/schema operations;
+- генерировать executable SQL;
+- создавать SQL files;
+- создавать SQL diff;
+- создавать apply plan;
+- выполнять SQL apply.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Verification boundary
+
+Future check должен выполняться только как temporary standalone PHP snippet/file.
+
+Если создаётся temporary file:
+
+- не commit-ить его;
+- удалить после проверки.
+
+После check-а нужно подтвердить:
+
+- generated fixture JSON files не появились в `git status`;
+- temporary PHP check file удалён;
+- local runtime config не попал в git;
+- dump files не попали в git;
+- `.gitignore` не менялся, если это не было отдельным explicit step.
+
+### Контекст
+
+Связанные документы:
+
+- `docs/DB_READONLY_STANDALONE_REVIEW_FLOW_CHECK_SPEC.md`;
+- `docs/DB_READONLY_NORMALIZATION_PARSER_SKELETON_SPEC.md`;
+- `docs/DB_READONLY_LOCAL_REVIEW_FIXTURE_GENERATION_SPEC.md`;
+- `docs/DB_READONLY_LOCAL_APPROVAL_FIXTURE_SPEC.md`;
+- `docs/DB_READONLY_NORMALIZATION_APPROVAL_FLOW_SPEC.md`;
+- `docs/RUNTIME_CHECKS.md`.
+
+Связанный коммит:
+
+- `d0cd6c9 Add DB readonly standalone review flow check spec`
+
+### Последствие
+
+Следующий безопасный engineering step может быть standalone temporary E2E check implementation/run.
+
+Он должен оставаться contract check для standalone components.
+
+Нельзя превращать E2E review flow в pipeline stage, SQL preview input, production storage или apply layer без отдельного architecture decision.
+
