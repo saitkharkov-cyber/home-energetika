@@ -1237,3 +1237,107 @@ It can explicitly change proposal statuses to `approved`, `rejected`, `needs_rev
 
 SQL generation and SQL apply remain blocked.
 
+## 2026-07-06 — DB-readonly local approval fixture bridge standalone check
+
+### Context
+
+Implementation commit:
+
+`1a5e9ef Add DB readonly local approval fixture bridge`
+
+Checked component:
+
+`framework-standardization/src/Approval/DbReadOnlyLocalApprovalFixtureBridge.php`
+
+This check covers standalone local approval fixture bridge skeleton.
+
+The bridge is not connected to pipeline wiring.
+
+### What was checked
+
+`DbReadOnlyLocalApprovalFixtureBridge` accepts local JSON fixture structure as PHP array, separates parser-owned proposal rows from reviewer-owned review actions, and delegates status transitions to:
+
+`DbReadOnlyNormalizationApprovalFlow::apply($proposals, $reviewActions)`
+
+The bridge itself does not create `approved` / `rejected` statuses directly.
+
+### Syntax check
+
+Command:
+
+`C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyLocalApprovalFixtureBridge.php`
+
+Result:
+
+`No syntax errors detected`
+
+### Standalone manual-check
+
+Manual fixture shape:
+
+- 3 proposals total;
+- one proposal with `approve` action;
+- one proposal with empty action;
+- one proposal with missing `review` block.
+
+Observed:
+
+- `proposals_count: 3`
+- `review_actions_count: 1`
+- `skipped_empty_actions_count: 2`
+- `missing_review_block_count: 1`
+- `approved_count: 1`
+- `sql_generated: 0`
+- `apply_plan_created: 0`
+- `safe_to_apply: 0`
+- `errors_count: 0`
+
+### Default dry-run regression check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php`
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php`
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### Boundary
+
+The local approval fixture bridge is standalone only.
+
+Confirmed:
+
+- pipeline wiring did not change;
+- parser did not change;
+- approval flow did not change;
+- `sql_preview` did not change;
+- report did not change;
+- framework result did not change;
+- runners did not change;
+- default dry-run path did not change;
+- bridge does not use DB or live DB;
+- SQL generation was not added;
+- SQL files were not created;
+- SQL diff was not created;
+- apply plan was not created;
+- SQL apply was not performed;
+- fixture JSON files were not committed.
+
+The bridge remains a local review artifact/process between standalone parser output and standalone approval flow.
