@@ -874,3 +874,215 @@ Report и framework result могут в будущем показывать app
 
 SQL preview/apply остаётся blocked до отдельного production SQL/apply spec и отдельного architecture decision.
 
+## 2026-07-06 — Local approval fixture является review artifact, а не storage или SQL/apply layer
+
+### Решение
+
+Local approval fixture / manual review bridge может использоваться только как локальный review artifact/process между standalone parser и standalone approval flow.
+
+Рекомендуемый первый safe format:
+
+- `JSON`
+
+JSON fixture не является:
+
+- DB storage;
+- production storage;
+- SQL file;
+- SQL diff;
+- apply plan;
+- pipeline stage;
+- SQL preview input сам по себе.
+
+### Причина
+
+Standalone parser создаёт normalization proposals, но не принимает review decisions.
+
+Standalone approval flow применяет explicit review actions, но ему нужен безопасный способ получить actions от reviewer-а.
+
+Local approval fixture нужен, чтобы:
+
+- показать proposals человеку;
+- отделить parser-owned fields от reviewer-owned fields;
+- дать reviewer-у место для explicit action;
+- передать actions в `DbReadOnlyNormalizationApprovalFlow::apply($proposals, $reviewActions)`;
+- сохранить весь процесс вне pipeline, SQL/apply и live DB.
+
+JSON выбран как первый safe format, потому что он лучше сохраняет nested data:
+
+- `parsed_value`;
+- `parser_warnings`;
+- `review`;
+- grouped examples.
+
+CSV можно рассмотреть позже отдельным spec, если понадобится табличный review workflow.
+
+### Разрешено
+
+Fixture может содержать parser-owned proposal data:
+
+- `proposal_id`;
+- `product_id`;
+- `attribute_id`;
+- `target_attribute_id`;
+- `original_raw_value`;
+- `parsed_value`;
+- `proposed_normalized_value`;
+- `proposed_unit`;
+- `parser_confidence`;
+- `parser_warnings`;
+- `approval_status`;
+- `source`.
+
+Fixture может содержать reviewer-owned block:
+
+- `review.action`;
+- `review.reviewer`;
+- `review.review_note`.
+
+Допустимые `review.action`:
+
+- `approve`;
+- `reject`;
+- `mark_needs_review`;
+- `mark_unknown`;
+- `reset_to_proposed`.
+
+Пустой `review.action` означает:
+
+- no review action;
+- proposal status не меняется.
+
+### Граница редактирования
+
+Reviewer может менять только:
+
+- `review.action`;
+- `review.reviewer`;
+- `review.review_note`.
+
+Reviewer не должен менять руками parser-owned fields:
+
+- `proposal_id`;
+- `product_id`;
+- `attribute_id`;
+- `target_attribute_id`;
+- `original_raw_value`;
+- `parsed_value`;
+- `parser_warnings`.
+
+Также не рекомендуется менять руками:
+
+- `proposed_normalized_value`;
+- `proposed_unit`;
+- `parser_confidence`;
+- `approval_status`;
+- `source`.
+
+Если reviewer считает parser output неверным, он должен использовать:
+
+- `reject`;
+- `mark_needs_review`;
+- `mark_unknown`;
+
+и при необходимости добавить `review_note`.
+
+Ручное исправление parser-owned fields требует отдельного future spec, потому что меняет traceability и может потребовать parser override model.
+
+### Bridge boundary
+
+Bridge может преобразовать fixture rows в:
+
+- `$proposals`;
+- `$reviewActions`.
+
+`$reviewActions` должен содержать только rows с непустым `review.action`.
+
+Status transitions должен выполнять только:
+
+- `DbReadOnlyNormalizationApprovalFlow::apply($proposals, $reviewActions)`.
+
+Bridge не должен напрямую выставлять statuses.
+
+Approval flow остаётся единственным standalone layer, который может явно создать:
+
+- `approved`;
+- `rejected`;
+- `needs_review`;
+- `unknown`;
+- `proposed`.
+
+### Approval boundary
+
+`approved` в fixture или после approval flow означает только:
+
+- future SQL preview candidate eligibility.
+
+`approved` не означает:
+
+- SQL apply;
+- `safe_to_apply = 1`;
+- `production_ready = 1`;
+- executable SQL;
+- apply-ready output.
+
+Только future SQL preview architecture может решить, как читать approved proposals как candidate input.
+
+Даже future SQL preview candidate input не должен автоматически означать SQL apply.
+
+### Запрещено
+
+Local approval fixture / manual review bridge не должен:
+
+- становиться DB storage;
+- становиться production storage;
+- становиться pipeline stage;
+- становиться SQL preview implementation;
+- менять pipeline wiring;
+- подключать parser к `analyze_values`;
+- подключать approval flow к SQL preview;
+- менять `DbReadOnlySqlPreviewBuilder`;
+- менять report/framework result;
+- менять runners;
+- менять default dry-run path;
+- использовать live DB;
+- создавать DB tables;
+- выполнять write/schema operations;
+- генерировать executable SQL;
+- создавать SQL files;
+- создавать SQL diff;
+- создавать apply plan;
+- выполнять SQL apply.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Контекст
+
+Связанные документы:
+
+- `docs/DB_READONLY_LOCAL_APPROVAL_FIXTURE_SPEC.md`
+- `docs/DB_READONLY_NORMALIZATION_APPROVAL_FLOW_SPEC.md`
+- `docs/DB_READONLY_NORMALIZATION_PARSER_SKELETON_SPEC.md`
+- `docs/RUNTIME_CHECKS.md`
+
+Связанный коммит:
+
+- `e79e865 Add DB readonly local approval fixture spec`
+
+### Последствие
+
+Следующий безопасный engineering step может быть standalone implementation local approval fixture bridge.
+
+Он должен оставаться local review artifact/process.
+
+Нельзя подключать fixture bridge к pipeline или SQL/apply path без отдельного architecture decision.
+
