@@ -1,29 +1,41 @@
 # Handoff - Framework Standardization
-05.07.2026 23:05
 
-SUMOTO production apply закрыт отдельными коммитами. Framework Standardization дальше работает только с локальным dump/local DB, без live DB.
+06.07.2026
 
 Проект: Home Energetika / Framework Standardization  
 Репозиторий: `D:\Git\home-energetika`  
 Рабочая папка: `framework-standardization`
 
+Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling layer для инженерной стандартизации характеристик.
+
+Проект работает только с default no-DB dry-run path и отдельным DB-readonly path на локальном dump/local DB. Live DB, SQL apply и OpenCart module runtime не подключены.
+
 ## Текущий статус
 
-Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling layer для инженерной работы со стандартизацией характеристик.
+Текущая стабильная точка:
 
-Текущая стабильная точка: default dry-run path остаётся no-DB и зелёный на PHP 5.6; DB-readonly path существует отдельно, SQL apply не подключался.
+```text
+default dry-run path остаётся no-DB fixture path
+DB-readonly path работает только с local dump DB через read-only connection
+SQL apply не подключён
+```
 
-Последний закрытый шаг: `DB readonly scope resolver standalone`.
+Последний закрытый инженерный шаг:
 
-Последний коммит: `6942862 Add DB readonly scope resolver`.
+`DB readonly scope/export path paired wiring + compatibility adapters`
 
-Ожидаемое состояние репозитория: `working tree clean`, `origin/main = main`.
+Последний инженерный коммит перед handoff update:
 
-Предыдущий документационный split закрыт коммитом `7c590c4 Split handoff and stage boundaries documentation`.
+`9948721 Document DB readonly compatibility adapters decision`
 
-## Документация
+Ожидаемое состояние репозитория:
 
-Ключевые документы:
+```text
+working tree clean
+origin/main = main
+```
+
+## Ключевая документация
 
 - `docs/STAGES_PIPELINE.md`
 - `docs/ATTRIBUTE_CONTEXT.md`
@@ -31,10 +43,15 @@ Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling la
 - `docs/STAGE_BOUNDARIES.md`
 - `docs/DUMP_LOCAL_DB_CHECKLIST.md`
 - `docs/RUNTIME_CHECKS.md`
+- `docs/DECISIONS.md`
+- `docs/DB_READONLY_SCOPE_EXPORT_MINI_SPEC.md`
+- `docs/DB_READONLY_PAIRED_WIRING_PLAN.md`
 
-Подробные stage boundaries вынесены в `docs/STAGE_BOUNDARIES.md`.
+Оперативный статус находится в этом документе.
 
-Подробности ручных проверок ведутся в `docs/RUNTIME_CHECKS.md`.
+Архитектурные решения фиксируются в `docs/DECISIONS.md`.
+
+Ручные проверки и runtime facts фиксируются в `docs/RUNTIME_CHECKS.md`.
 
 ## Stage-модель
 
@@ -50,31 +67,31 @@ Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling la
 8. `build_report`
 9. `build_framework_result`
 
-Все 9 stages сейчас имеют no-DB boundary.
+Порядок stages не менять без отдельного архитектурного решения.
 
-## Главные архитектурные решения
+## Default dry-run path
 
-- Один запуск = один `Attribute Job`.
-- Один `Attribute Job` = одна характеристика / один canonical attribute / один scope.
-- Поток: `Attribute Job -> AttributeContext -> Pipeline -> FrameworkResult`.
-- SQL не применяется автоматически.
-- OpenCart сейчас не подключён.
-- `dry_run_fixture` mode сохранён.
-- Pipeline / CLI / stages всё ещё не подключены к DB.
+Default dry-run path остаётся fixture/no-DB.
 
-## Runtime-ограничения
+Entrypoint:
 
-- Runtime первого MVP: `PHP 5.6-compatible CLI/tooling layer`.
-- Проверки выполнять через `C:\php56\php.exe`.
-- Не полагаться на глобальный `php` из `PATH`.
-- Framework Standardization - не OpenCart-модуль и не модуль админки OpenCart.
-- Не создавать OpenCart module paths: `admin/controller`, `admin/model`, `admin/view`, `catalog/controller`, `catalog/model`, `language`.
+```text
+framework-standardization/bin/dry-run.php
+```
 
-## CLI entrypoint для dry-run
+Job:
 
-Файлы: `bootstrap.php`, `bin/dry-run.php`, `config/jobs/pump_diameter.php`.
+```text
+framework-standardization/config/jobs/pump_diameter.php
+```
 
-Happy path command из корня репозитория:
+Composition:
+
+```text
+PipelineFactory::createDefault()
+```
+
+Happy path command:
 
 ```text
 C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
@@ -89,94 +106,129 @@ errors_count: 0
 all 9 stages ok
 ```
 
-## Что не делать
+Default dry-run path не должен подключать DB-backed components.
 
-- No DB connection.
-- No OpenCart connection.
-- No SQL apply.
-- No executable SQL.
-- No INSERT/UPDATE/DELETE.
-- No production exporter/analyzer/parser/generator.
-- No OpenCart module paths.
-- No Composer/YAML/test framework без отдельного решения.
+## DB-readonly path
 
-## DB/runtime skeleton
+DB-readonly path существует отдельно от default dry-run.
 
-В `b037fa7` добавлен только skeleton для будущей работы с локальным OpenCart dump:
-
-- `.gitignore` защищает `framework-standardization/config/runtime/*.php` и разрешает `*.example.php`;
-- `config/runtime/local.dump.example.php`;
-- `src/Contract/ReadOnlyDbConnectionInterface.php`;
-- `src/OpenCart/OpenCartRuntimeConfig.php`;
-- `src/OpenCart/OpenCartTableName.php`;
-- `src/OpenCart/PdoReadOnlyDbConnection.php`.
-
-Skeleton не подключён к Pipeline, не создаёт `PDO` сам и не меняет dry-run.
-
-`PdoReadOnlyDbConnection` принимает `PDO` в constructor, разрешает только `SELECT` / `SHOW`, запрещает `;`, `INTO OUTFILE`, `INTO DUMPFILE`, `INSERT/UPDATE/DELETE/REPLACE/ALTER/DROP/TRUNCATE/CREATE`. `WITH` / CTE и leading comments остаются blocked. Write/transaction API нет.
-
-`src/Canonical/DbReadOnlyCanonicalAttributeResolver.php` реализован и проверен standalone на локальной DB `he_framework_local_dump` через `C:\php56\php.exe -c C:\php56\php.ini`. Resolver работает только как DB-backed component для ручной проверки canonical lookup. Он не подключён к `PipelineFactory` / CLI; обычный dry-run остаётся прежним.
-
-`config/jobs/pump_diameter.db_readonly.php` создан для local dump DB-readonly path. Dry-run job `config/jobs/pump_diameter.php` не изменён.
-
-DB-readonly job отличается только `job_id`, `job_name`, `source.database = local_dump` и `source.language_id = 1`. `source.language_id = 1` нужен потому, что local dump содержит `language_id = 1`.
-
-`src/Pipeline/DbReadOnlyPipelineFactory.php` создан для отдельного DB-readonly composition path. Он собирает pipeline с DB-backed `ResolveCanonicalStage` через `DbReadOnlyCanonicalAttributeResolver`; остальные stages пока остаются dry-run.
-
-`PipelineFactory::createDefault()`, `bin/dry-run.php` и `FrameworkRunner` не изменены. Default dry-run path не стал DB-backed.
-
-`bin/db-readonly-run.php` создан как отдельный manual runner для local dump. Он принимает path to job config и path to runtime config, использует `DbReadOnlyPipelineFactory`, но не заменяет обычный `bin/dry-run.php`.
-
-DB-backed stage пока только `resolve_canonical`. Остальные stages остаются dry-run.
-
-DB-readonly manual runner и обычный dry-run проверены вручную; оба `result_status = ok`, `warnings_count = 0`, `errors_count = 0`.
-
-`src/Scope/DbReadOnlyScopeResolver.php` создан как standalone/no-wiring capability и проверен вручную на local dump: `category_id = 11900213`, `category_name = Скважинные насосы`, `product_count = 1972`, первый реальный `product_id = 1068`, errors/warnings пустые.
-
-Negative checks для standalone scope resolver: unsupported type -> `unsupported_scope_type`; unknown category -> `scope_category_not_supported`. Временный `_manual_check_db_readonly_scope.php` удалён.
-
-`DbReadOnlyScopeResolver` не подключён в `DbReadOnlyPipelineFactory`. DB-backed stage в runner всё ещё только `resolve_canonical`.
-
-## Следующий шаг: DB-backed composition
-
-Правила dump safety остаются в `docs/DUMP_LOCAL_DB_CHECKLIST.md`: live DB запрещена, персональные/операционные таблицы не использовать.
-
-Локальный dump/config, DB-backed canonical resolver, standalone DB-backed scope resolver, отдельный DB-readonly job, `DbReadOnlyPipelineFactory` и manual runner готовы.
-
-Следующий шаг - mini-spec для связки `DbReadOnlyScopeResolver` + `DbReadOnlyAttributeExporter`.
-
-Цель: определить, как безопасно перевести пару `resolve_scope` / `export_attributes` в DB-backed режим без поломки hybrid path.
-
-Локальная DB:
+Entrypoint:
 
 ```text
-dbname = he_framework_local_dump
-host = 127.0.1.19
-db_prefix = oc_
+framework-standardization/bin/db-readonly-run.php
 ```
 
-Локальный ignored config создан:
+Job:
+
+```text
+framework-standardization/config/jobs/pump_diameter.db_readonly.php
+```
+
+Local ignored runtime config:
 
 ```text
 framework-standardization/config/runtime/local.dump.php
 ```
 
-Первым DB-backed stage остаётся `ResolveCanonicalStage`.
+Composition:
 
-Ловушка: нельзя просто подключить `DbReadOnlyScopeResolver` в `DbReadOnlyPipelineFactory`, пока `ExportAttributesStage` остаётся на `DryRunAttributeExporter`. Текущий `DryRunAttributeExporter` несовместим с реальными `product_id` и ожидает fixture `product_id = 0`.
+```text
+DbReadOnlyPipelineFactory
+```
 
-До отдельного утверждения не подключать DB к текущему `bin/dry-run.php`.
+Текущий DB-readonly stage status:
 
-SQL apply, executable SQL, `INSERT/UPDATE/DELETE` и OpenCart module paths запрещены.
+```text
+resolve_canonical       -> DB-backed
+resolve_scope           -> DB-backed
+export_attributes       -> DB-backed
+analyze_names           -> DB-readonly-compatible adapter
+analyze_values          -> DB-readonly-compatible adapter
+build_sql_preview       -> DB-readonly-compatible blocked preview
+build_report            -> dry-run
+build_framework_result  -> dry-run
+```
+
+DB-backed stages используют local dump DB только через read-only connection.
+
+`DbReadOnlyScopeResolver` и `DbReadOnlyAttributeExporter` подключены только парой. Запрещённое состояние `DbReadOnlyScopeResolver + DryRunAttributeExporter` не должно возвращаться.
+
+`DbReadOnlySqlPreviewBuilder` остаётся blocked preview: без executable SQL statements и без safe-to-apply режима.
+
+DB-readonly-compatible adapters не являются production implementation.
+
+## Текущие архитектурные границы
+
+- Один запуск = один `Attribute Job`.
+- Один `Attribute Job` = одна характеристика / один canonical attribute / один scope.
+- Поток: `Attribute Job -> AttributeContext -> Pipeline -> FrameworkResult`.
+- DB-readonly path ограничен `pump_diameter`, `category_id = 11900213`, `language_id = 1`.
+- Default dry-run path остаётся no-DB fixture path.
+- DB-readonly path работает только с local dump DB.
+- SQL apply не выполняется.
+- Executable SQL не добавлять.
+- Live DB запрещена.
+- Production normalization пока не делать.
+- OpenCart module paths не создавать.
+
+Запрещённые write/schema operations:
+
+```text
+INSERT
+UPDATE
+DELETE
+REPLACE
+ALTER
+DROP
+TRUNCATE
+CREATE
+```
+
+## Runtime-ограничения
+
+- Runtime первого MVP: `PHP 5.6-compatible CLI/tooling layer`.
+- Проверки выполнять через `C:\php56\php.exe`.
+- Не полагаться на глобальный `php` из `PATH`.
+- Framework Standardization - не OpenCart-модуль и не модуль админки OpenCart.
+- Не создавать OpenCart module paths:
+
+```text
+admin/controller
+admin/model
+admin/view
+catalog/controller
+catalog/model
+language
+```
+
+## Следующий инженерный шаг
+
+Следующий шаг должен быть анализом / mini-spec, а не production implementation:
+
+```text
+mini-spec для следующего перехода после scope/export:
+что делать с analyze_names / analyze_values / build_sql_preview
+```
+
+Цель mini-spec:
+
+- определить, остаются ли текущие DB-readonly-compatible adapters временными;
+- определить, какой stage следующим можно переводить из compatibility adapter в полноценную DB-readonly инженерную реализацию;
+- определить data contract для следующего stage;
+- сохранить default dry-run path без изменений;
+- не переходить к production normalization;
+- не делать SQL apply;
+- не генерировать executable SQL.
+
+До отдельного решения не начинать кодовую реализацию следующего stage.
 
 ## Старт в новом чате
-
-Новый чат должен использовать GitHub Connector или локальный репозиторий `home-energetika`.
 
 Сначала открыть и прочитать:
 
 - `framework-standardization/docs/HANDOFF.md`
-- `framework-standardization/docs/STAGE_BOUNDARIES.md`
+- `framework-standardization/docs/DECISIONS.md`
+- `framework-standardization/docs/RUNTIME_CHECKS.md`
 
 Затем проверить:
 
@@ -187,18 +239,20 @@ git log --oneline -5
 
 Ожидаемая точка:
 
-```text
-HEAD/main/origin/main = 6942862 Add DB readonly scope resolver
-```
+`HEAD/main/origin/main = последний коммит с обновлённым HANDOFF после 9948721`
 
-Первый ответ нового чата должен быть только кратким пониманием проекта, текущей задачи и одного следующего шага.
-
-Не реализовывать следующий шаг без отдельного подтверждения.
-
-Если пользователь пишет "дамп - завтра", текущий следующий шаг - ожидать dump/config или помогать с read-only подготовкой по `docs/DUMP_LOCAL_DB_CHECKLIST.md`, а не писать код.
+`working tree clean`
 
 ## Правило работы
 
-Двигаться маленькими шагами: read-only mini-spec -> implementation -> verification -> review -> commit -> push.
+Двигаться маленькими шагами:
 
-PHP 5.6 checks выполнять через `C:\php56\php.exe`.
+```text
+mini-spec -> implementation -> verification -> review -> commit -> push
+```
+
+PHP 5.6 checks выполнять через:
+
+```text
+C:\php56\php.exe
+```
