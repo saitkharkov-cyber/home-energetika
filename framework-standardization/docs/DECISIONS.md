@@ -1462,3 +1462,152 @@ Future check должен выполняться только как temporary s
 
 Нельзя превращать E2E review flow в pipeline stage, SQL preview input, production storage или apply layer без отдельного architecture decision.
 
+## 2026-07-06 — Local review artifact storage является local-only boundary
+
+### Решение
+
+Local review artifact storage может использоваться только как local-only file boundary для generated review fixture JSON files.
+
+Рекомендуемый future local path:
+
+- `framework-standardization/var/review-fixtures/*.json`
+
+Этот storage boundary не является:
+
+- production storage;
+- DB storage;
+- pipeline input by default;
+- SQL preview input by default;
+- SQL file;
+- SQL diff;
+- apply plan;
+- apply layer.
+
+### Причина
+
+Standalone generator уже может создавать JSON-ready PHP array fixture.
+
+Standalone bridge уже может принимать fixture как PHP array.
+
+Standalone E2E review flow уже проверен in memory.
+
+Перед future file-writing step нужно отдельно зафиксировать, где могут жить local review artifacts и почему они не должны попадать в git по умолчанию.
+
+Review fixture JSON files могут содержать local dump facts:
+
+- `product_id`;
+- `attribute_id`;
+- `target_attribute_id`;
+- `original_raw_value`;
+- parser diagnostics;
+- review notes.
+
+Поэтому default policy:
+
+- generated review fixtures are local-only;
+- generated review fixtures are not committed by default.
+
+### Разрешено в future implementation step
+
+Future explicit implementation может:
+
+- создать local directory `framework-standardization/var/review-fixtures`;
+- писать generated review fixture JSON files локально;
+- загружать reviewed fixture JSON files локально;
+- передавать loaded fixture как PHP array в `DbReadOnlyLocalApprovalFixtureBridge::applyFixture($fixture)`;
+- удалять local fixture files после manual review/check.
+
+### Git boundary
+
+Generated review fixture JSON files не должны попадать в git по умолчанию.
+
+Перед file-writing implementation нужно отдельным explicit step проверить или добавить `.gitignore` rules.
+
+`.gitignore` changes должны быть отдельным маленьким шагом.
+
+Actual fixture JSON files не должны быть staged/tracked files.
+
+Рекомендуемый ignore target для future step:
+
+- `framework-standardization/var/review-fixtures/*.json`
+
+Если понадобится sanitized sample fixture для docs/tests, это должен быть отдельный spec и отдельный explicit commit.
+
+### File naming boundary
+
+Future fixture filenames должны быть descriptive local names, например:
+
+- `pump_diameter_YYYYMMDD_HHMMSS.review.json`
+
+Имена файлов не должны использовать executable/apply naming:
+
+- `.sql`;
+- `apply`;
+- `production`;
+- `migration`;
+- `patch`.
+
+### Запрещено
+
+Local review artifact storage не должен:
+
+- становиться production storage;
+- становиться DB storage;
+- становиться pipeline stage;
+- становиться SQL preview input by default;
+- становиться apply plan;
+- подключать generator к pipeline;
+- подключать bridge к pipeline;
+- подключать approval flow к SQL preview;
+- генерировать executable SQL;
+- создавать SQL files;
+- создавать SQL diff;
+- создавать apply plan;
+- выполнять SQL apply;
+- использовать live DB;
+- менять DB/schema;
+- выполнять write/schema operations.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Verification boundary
+
+Future implementation должен подтвердить:
+
+- `.gitignore` protects `framework-standardization/var/review-fixtures/*.json`;
+- generated fixture file appears locally but is not staged/tracked;
+- generated fixture contains no SQL content;
+- SQL/apply artifacts are not created;
+- default dry-run remains ok;
+- DB-readonly runner remains ok;
+- git status clean except intentional source/doc changes.
+
+### Контекст
+
+Связанные документы:
+
+- `docs/DB_READONLY_LOCAL_REVIEW_ARTIFACT_STORAGE_SPEC.md`;
+- `docs/DB_READONLY_LOCAL_REVIEW_FIXTURE_GENERATION_SPEC.md`;
+- `docs/DB_READONLY_LOCAL_APPROVAL_FIXTURE_SPEC.md`;
+- `docs/DB_READONLY_STANDALONE_REVIEW_FLOW_CHECK_SPEC.md`;
+- `docs/RUNTIME_CHECKS.md`.
+
+Связанный коммит:
+
+- `87d8089 Add DB readonly local review artifact storage spec`
+
+### Последствие
+
+Следующий безопасный engineering step может быть `.gitignore` boundary для local review fixtures.
+
+Нельзя реализовывать запись review fixture JSON files на диск до явной проверки/настройки git-ignore boundary.
+
