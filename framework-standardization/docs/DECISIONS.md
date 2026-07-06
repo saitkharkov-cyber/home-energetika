@@ -1793,3 +1793,94 @@ Implementation должен оставаться local file writer only.
 
 Нельзя подключать writer к pipeline, SQL preview или SQL/apply path без отдельного architecture decision.
 
+## 2026-07-06 — Implemented local review fixture writer остаётся standalone-only
+
+### Решение
+
+Реализованный `DbReadOnlyLocalReviewFixtureWriter` остаётся только standalone local file writer для human review fixture artifacts.
+
+Класс:
+
+- `src/Approval/DbReadOnlyLocalReviewFixtureWriter.php`
+
+Writer не является:
+
+- production storage;
+- DB storage;
+- pipeline stage;
+- SQL preview input by default;
+- SQL/apply layer.
+
+### Разрешено
+
+Writer может:
+
+- принимать JSON-ready review fixture array;
+- писать только local ignored JSON artifacts в `framework-standardization/var/review-fixtures/*.json`;
+- создавать local target directory при необходимости;
+- возвращать writer diagnostics;
+- использоваться только в manual/local review workflow.
+
+### Запрещено
+
+Writer не должен:
+
+- подключаться к pipeline;
+- подключаться к runners;
+- использоваться как production storage;
+- использоваться как DB storage;
+- использоваться как SQL preview input by default;
+- вызывать parser;
+- вызывать generator;
+- вызывать bridge;
+- вызывать approval flow;
+- вызывать SQL preview;
+- менять `approval_status`;
+- создавать `approved`;
+- создавать `rejected`;
+- создавать SQL files;
+- создавать SQL diff;
+- создавать apply plan;
+- выполнять SQL apply;
+- использовать DB;
+- использовать live DB;
+- выполнять DB/schema operations.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+Writer нужен только для локальной записи JSON-ready review fixture, чтобы человек мог вручную проверить или отредактировать review artifact.
+
+Implementation не меняет архитектуру pipeline и не приближает систему к SQL/apply.
+
+### Последствие
+
+После implementation writer-а дальнейшие шаги должны оставаться разделёнными:
+
+- writer = local file artifact only;
+- manual review = human-owned;
+- bridge/approval flow = отдельная standalone chain;
+- SQL/apply architecture = отдельное future decision;
+- pipeline wiring = отдельное future decision, сейчас запрещено.
+
+### Контекст
+
+Связанные документы:
+
+- `docs/DB_READONLY_LOCAL_REVIEW_FIXTURE_WRITER_SPEC.md`;
+- `docs/RUNTIME_CHECKS.md`.
+
+Связанные коммиты:
+
+- `5b83d6e Add DB readonly local review fixture writer`;
+- `3693117 Document DB readonly local review fixture writer checks`.
