@@ -602,3 +602,145 @@ Raw profile summary остаётся diagnostics-only и не означает:
 - live DB не использовалась;
 - write/schema operations не использовались;
 - OpenCart module paths не создавались.
+
+## 2026-07-06 — DB-readonly diagnostics output in build_report check
+
+Commit:
+
+`50daba1 Add DB readonly diagnostics to report output`
+
+Проверялось добавление DB-readonly diagnostics output в `build_report`.
+
+Изменённый компонент:
+
+`framework-standardization/src/Report/DryRunReportBuilder.php`
+
+### Что добавлено
+
+Report output теперь содержит `raw_profile_summary`:
+
+`total_values`
+
+`unique_raw_values_count`
+
+`empty_values_count`
+
+`suspicious_no_digits_count`
+
+`suspicious_long_value_count`
+
+`suspicious_multiple_numbers_count`
+
+`top_raw_values_count`
+
+`source`
+
+Report output также содержит `sql_preview_safety_summary`:
+
+`generated`
+
+`safe_to_apply`
+
+`apply_changes`
+
+`statement_count`
+
+`blocked_by`
+
+marker, что `blocked_by` содержит:
+
+`db_readonly_sql_preview_not_implemented`
+
+Также в summary включён raw profile diagnostics summary из SQL preview.
+
+### Boundary
+
+`build_report` остаётся reporting-only.
+
+Подтверждено:
+
+- report builder только читает готовые diagnostics;
+- `sql_preview` не меняется;
+- `safe_to_apply` не меняется;
+- `statements` не меняются;
+- normalization не выполняется;
+- SQL не создаётся;
+- apply plan не создаётся.
+
+### Syntax check
+
+Команда:
+
+`C:\php56\php.exe -l framework-standardization\src\Report\DryRunReportBuilder.php`
+
+Результат:
+
+`No syntax errors detected`
+
+### Default dry-run regression check
+
+Команда:
+
+`C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php`
+
+Результат:
+
+`result_status: ok`
+
+`warnings_count: 0`
+
+`errors_count: 0`
+
+`all 9 stages ok`
+
+### DB-readonly runner check
+
+Команда:
+
+`C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php`
+
+Результат:
+
+`result_status: ok`
+
+`warnings_count: 0`
+
+`errors_count: 0`
+
+`all 9 stages ok`
+
+### Output contract check
+
+Результат:
+
+`raw_profile_summary_present: 1`
+
+`raw_profile_total_values: 385`
+
+`unique_raw_values_count: 14`
+
+`sql_preview_safety_summary_present: 1`
+
+`generated: 0`
+
+`safe_to_apply: 0`
+
+`statement_count: 0`
+
+`blocked_by_expected: 1`
+
+### Safety result
+
+Подтверждено:
+
+- default dry-run path не менялся;
+- pipeline wiring не менялся;
+- runners не менялись;
+- `HANDOFF.md` не менялся;
+- `DECISIONS.md` не менялся;
+- SQL apply не выполнялся;
+- executable SQL не добавлялся;
+- apply plan не создавался;
+- live DB не использовалась;
+- write/schema operations не использовались;
+- OpenCart module paths не создавались.
