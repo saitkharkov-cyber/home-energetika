@@ -1086,3 +1086,183 @@ Local approval fixture / manual review bridge не должен:
 
 Нельзя подключать fixture bridge к pipeline или SQL/apply path без отдельного architecture decision.
 
+## 2026-07-06 — Local review fixture generation создаёт только human-reviewable JSON
+
+### Решение
+
+Local review fixture generation может использоваться только как standalone generation/export step, который превращает output standalone parser-а в human-reviewable local JSON fixture.
+
+Generator создаёт review artifact для человека, но не выполняет approval, normalization, SQL preview или apply.
+
+Минимальный поток:
+
+- standalone parser output;
+- local review JSON fixture;
+- human review;
+- standalone fixture bridge;
+- standalone approval flow.
+
+### Причина
+
+Standalone parser уже может создавать `normalization_value_proposals`, но эти proposals неудобны для ручной проверки напрямую.
+
+Нужен безопасный промежуточный generation step, который:
+
+- берёт parser proposals;
+- сохраняет parser-owned proposal facts;
+- добавляет пустой reviewer-owned `review` block;
+- готовит JSON artifact для ручной проверки;
+- не меняет proposal semantics;
+- не принимает review decisions.
+
+### Разрешено
+
+Generator может читать standalone parser output:
+
+- `normalization_value_proposals`;
+- `parser_diagnostics`;
+- `source`.
+
+Generator может создавать local JSON fixture shape:
+
+- `source`;
+- `fixture_type = db_readonly_normalization_review`;
+- `generated_at`;
+- `generator_mode = standalone_local_review_fixture_generation`;
+- `proposals[]`.
+
+Каждый proposal row может содержать parser-owned fields:
+
+- `proposal_id`;
+- `product_id`;
+- `attribute_id`;
+- `target_attribute_id`;
+- `original_raw_value`;
+- `parsed_value`;
+- `proposed_normalized_value`;
+- `proposed_unit`;
+- `parser_confidence`;
+- `parser_warnings`;
+- `approval_status`;
+- `source`.
+
+Каждый proposal row должен получить пустой reviewer-owned block:
+
+- `review.action = ""`;
+- `review.reviewer = ""`;
+- `review.review_note = ""`.
+
+### Граница review block
+
+Generator должен создавать только пустой `review` block.
+
+Generator не должен:
+
+- pre-approve proposals;
+- выставлять `approved`;
+- выставлять `rejected`;
+- заполнять reviewer identity;
+- писать review notes;
+- менять `approval_status`;
+- выполнять status transitions.
+
+Review fields должны заполняться только человеком или future explicit review tool.
+
+### File/output boundary
+
+Generated fixture files являются local review artifacts.
+
+Они не являются:
+
+- production storage;
+- DB storage;
+- SQL file;
+- SQL diff;
+- apply plan;
+- pipeline input by default;
+- SQL preview input by default.
+
+Рекомендуемый future local-only path:
+
+- `framework-standardization/var/review-fixtures/*.json`
+
+Generated fixture files не должны попадать в git по умолчанию, особенно если они содержат local dump facts.
+
+Создание директории `var`, `.gitignore` rules и actual fixture files должно быть отдельным implementation step.
+
+### Bridge relation
+
+Generated fixture может позже быть:
+
+- отредактирован человеком в `review` blocks;
+- загружен как PHP array;
+- передан в `DbReadOnlyLocalApprovalFixtureBridge::applyFixture($fixture)`.
+
+Bridge отвечает за mapping:
+
+- fixture `proposals[]` -> `$proposals`;
+- non-empty `review.action` rows -> `$reviewActions`.
+
+Status transitions принадлежат только:
+
+- `DbReadOnlyNormalizationApprovalFlow`.
+
+Generator не должен выполнять status transitions.
+
+### Запрещено
+
+Local review fixture generator не должен:
+
+- создавать `approved`;
+- создавать `rejected`;
+- менять proposals;
+- менять parser diagnostics;
+- выполнять approval flow;
+- вызывать `DbReadOnlyLocalApprovalFixtureBridge`;
+- вызывать SQL preview;
+- менять `safe_to_apply`;
+- менять `statements`;
+- генерировать executable SQL;
+- создавать SQL files;
+- создавать SQL diff;
+- создавать apply plan;
+- выполнять SQL apply;
+- использовать live DB;
+- выполнять write/schema operations;
+- менять pipeline wiring;
+- менять runners;
+- менять default dry-run path.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Контекст
+
+Связанные документы:
+
+- `docs/DB_READONLY_LOCAL_REVIEW_FIXTURE_GENERATION_SPEC.md`
+- `docs/DB_READONLY_LOCAL_APPROVAL_FIXTURE_SPEC.md`
+- `docs/DB_READONLY_NORMALIZATION_PARSER_SKELETON_SPEC.md`
+- `docs/DB_READONLY_NORMALIZATION_APPROVAL_FLOW_SPEC.md`
+- `docs/RUNTIME_CHECKS.md`
+
+Связанный коммит:
+
+- `16294c1 Add DB readonly local review fixture generation spec`
+
+### Последствие
+
+Следующий безопасный engineering step может быть standalone implementation local review fixture generator.
+
+Implementation должен оставаться standalone.
+
+Нельзя подключать generator к pipeline, SQL preview или SQL/apply path без отдельного architecture decision.
+
