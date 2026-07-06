@@ -865,3 +865,185 @@ The implementation keeps the framework result as a dry-run/result-packaging outp
 Diagnostics are visible at the top level, but they are not production decisions and are not apply-ready data.
 
 SQL generation and SQL apply remain blocked.
+
+## 2026-07-06 — DB-readonly normalization proposal parser standalone check
+
+### Context
+
+Implementation commit:
+
+`bd06b9c Add DB readonly normalization proposal parser`
+
+Created component:
+
+`framework-standardization/src/Normalizer/DbReadOnlyNormalizationProposalParser.php`
+
+This check covers standalone normalization proposal parser skeleton.
+
+The parser is not connected to pipeline wiring.
+
+### What was added
+
+`DbReadOnlyNormalizationProposalParser` implements standalone method:
+
+`parse($rawValues)`
+
+Input is an array of read-only raw values with fields such as:
+
+- `product_id`
+- `attribute_id`
+- `language_id`
+- `target_attribute_id`
+- `raw_text` or `value`
+
+Output contains:
+
+- `normalization_value_proposals`
+- `parser_diagnostics`
+- `errors`
+- `warnings`
+- `source = local_dump_db_readonly`
+
+### Proposal output
+
+Each proposal contains parser/proposal fields such as:
+
+- `proposal_id` or deterministic key
+- `product_id`
+- `attribute_id`
+- `language_id`
+- `target_attribute_id`
+- `original_raw_value`
+- `parsed_value`
+- `proposed_normalized_value`
+- `proposed_unit`
+- `parser_confidence`
+- `parser_warnings`
+- `approval_status`
+- `source`
+
+### Status boundary
+
+Allowed future statuses:
+
+- `proposed`
+- `needs_review`
+- `unknown`
+- `rejected`
+- `approved`
+
+Current standalone skeleton can emit only:
+
+- `proposed`
+- `needs_review`
+- `unknown`
+
+The parser must not emit:
+
+- `approved`
+- `rejected`
+
+### Safe parsing rules checked
+
+The standalone check covered raw values similar to:
+
+- empty value
+- `75`
+- `75 мм`
+- `75.5 mm`
+- `75,5 мм`
+- `75-90 мм`
+- `75 / 90 мм`
+- `abc`
+
+Expected status behavior:
+
+- empty value -> `unknown`
+- one number without range -> `proposed`
+- number with `мм` / `mm` -> `proposed`
+- decimal comma / dot -> `proposed`
+- multiple numbers -> `needs_review`
+- range -> `needs_review`
+- text without numbers -> `unknown`
+
+### Boundary
+
+The parser is standalone only.
+
+It does not:
+
+- connect to `analyze_values`;
+- connect to `sql_preview`;
+- connect to `build_report`;
+- connect to `build_framework_result`;
+- change pipeline wiring;
+- change runners;
+- change default dry-run path;
+- change `HANDOFF.md`;
+- create approved values;
+- create rejected values;
+- create executable SQL;
+- create SQL files;
+- create apply plan;
+- perform SQL apply;
+- use live DB.
+
+### Syntax check
+
+Command:
+
+`C:\php56\php.exe -l framework-standardization\src\Normalizer\DbReadOnlyNormalizationProposalParser.php`
+
+Result:
+
+`No syntax errors detected`
+
+### Standalone manual-check
+
+Result:
+
+- `approved_count: 0`
+- `rejected_count: 0`
+- `proposed_count: 4`
+- `needs_review_count: 2`
+- `unknown_count: 2`
+- `range_detected_count: 2`
+- `multiple_numbers_count: 2`
+- `sql_generated: 0`
+- `apply_plan_created: 0`
+
+Temporary manual-check file was removed after verification.
+
+### Default dry-run regression check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php`
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php`
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### Safety result
+
+The parser is a standalone normalization proposal skeleton only.
+
+It can create proposals with `proposed`, `needs_review` and `unknown` statuses, but it cannot approve proposals and cannot create apply-ready output.
+
+SQL generation and SQL apply remain blocked.
