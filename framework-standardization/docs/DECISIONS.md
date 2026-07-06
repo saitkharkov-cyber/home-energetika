@@ -1985,3 +1985,116 @@ Loader нужен только как безопасная граница чте
 Связанный коммит:
 
 - `5358890 Add DB readonly local review fixture loader spec`.
+
+## 2026-07-06 — Review chain result reporter должен оставаться standalone reporting-only
+
+### Решение
+
+Future `DbReadOnlyReviewChainResultReporter` должен быть только standalone reporting/diagnostics boundary после approval flow.
+
+Future class:
+
+- `src/Approval/DbReadOnlyReviewChainResultReporter.php`
+
+Spec:
+
+- `docs/DB_READONLY_REVIEW_CHAIN_RESULT_REPORTER_SPEC.md`
+
+Reporter не является:
+
+- pipeline stage;
+- runner integration;
+- SQL preview input by default;
+- production normalization;
+- production storage;
+- DB storage;
+- apply-ready output;
+- SQL/apply layer.
+
+### Разрешено
+
+Reporter может:
+
+- принимать result из standalone approval flow;
+- считать summary counts по statuses;
+- показывать количество proposals;
+- показывать количество `approved`;
+- показывать количество `rejected`;
+- показывать количество `needs_review`;
+- показывать количество `unknown`;
+- показывать количество `proposed`;
+- показывать unsupported/unsafe statuses как diagnostics;
+- возвращать human-readable/reporting diagnostics;
+- явно показывать, что SQL/apply still blocked;
+- использоваться только standalone/manual.
+
+### Запрещено
+
+Reporter не должен:
+
+- менять statuses;
+- создавать `approved`;
+- создавать `rejected`;
+- принимать review decisions;
+- вызывать bridge;
+- вызывать approval flow;
+- вызывать SQL preview;
+- генерировать SQL;
+- создавать SQL files;
+- создавать SQL diff;
+- создавать apply plan;
+- выполнять SQL apply;
+- использовать DB;
+- использовать live DB;
+- менять DB/schema;
+- подключаться к pipeline;
+- подключаться к runners;
+- менять default dry-run path.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Approval boundary
+
+`approved` остаётся только review-chain status.
+
+`approved` не означает:
+
+- SQL apply allowed;
+- `safe_to_apply = 1`;
+- `production_ready = 1`;
+- apply-ready output.
+
+`rejected`, `needs_review`, `unknown` и `proposed` также не являются SQL/apply instructions.
+
+### Причина
+
+После approval flow нужен безопасный reporting layer, который показывает человеку итог review chain, но не превращает `approved` / `rejected` statuses в SQL/apply permission или production normalization.
+
+### Последствие
+
+Дальнейшая chain остаётся разделённой:
+
+- writer = local JSON artifact writer;
+- human/manual review = владелец review edits;
+- loader = local JSON artifact reader;
+- bridge = standalone conversion boundary;
+- approval flow = standalone status transition boundary;
+- result reporter = standalone reporting/diagnostics boundary;
+- SQL/apply architecture = отдельное future decision;
+- pipeline wiring = отдельное future decision, сейчас запрещено.
+
+### Контекст
+
+Связанные документы:
+
+- `docs/DB_READONLY_REVIEW_CHAIN_RESULT_REPORTER_SPEC.md`;
+- `docs/RULES.md`.
