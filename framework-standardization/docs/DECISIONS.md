@@ -171,3 +171,79 @@ Runtime-проверки:
 Implementation commit:
 
 `0a470df Add DB readonly raw value profiling`
+
+## 2026-07-06 — DB-readonly build_sql_preview остаётся blocked preview после raw_profile diagnostics
+
+### Решение
+
+DB-readonly `build_sql_preview` может отображать `raw_profile` summary только как diagnostics-only.
+
+`DbReadOnlySqlPreviewBuilder` обязан оставаться blocked preview.
+
+### Причина
+
+`raw_profile` содержит read-only diagnostics по raw DB values.
+
+Он отвечает на вопрос:
+
+```text
+что сейчас лежит в raw values?
+```
+
+Он не отвечает на вопрос:
+
+```text
+что надо записать в DB?
+```
+
+На текущем этапе нет отдельной production SQL/apply architecture, parser approval flow, normalization approval и apply safety model.
+
+### Последствие
+
+Разрешено:
+
+- отображать `raw_profile` summary в `sql_preview.diagnostics`;
+- использовать `raw_profile_present`;
+- использовать count-поля вроде `raw_profile_total_values`, `unique_raw_values_count`, `empty_values_count`;
+- использовать `suspicious_*` counts только как diagnostics.
+
+Запрещено:
+
+- использовать `raw_profile` как apply input;
+- считать `suspicious_*` diagnostics reject / approve;
+- использовать `normalized_values` как apply-ready data;
+- делать `generated = 1`;
+- делать `safe_to_apply = 1`;
+- заполнять `statements`;
+- убирать blocker `db_readonly_sql_preview_not_implemented`;
+- генерировать executable SQL;
+- создавать SQL files;
+- создавать apply plan;
+- выполнять SQL apply.
+
+Обязательная безопасная форма:
+
+```text
+generated = 0
+safe_to_apply = 0
+statements = array()
+blocked_by contains db_readonly_sql_preview_not_implemented
+```
+
+### Ссылка
+
+Spec:
+
+`docs/DB_READONLY_SQL_PREVIEW_BOUNDARY_SPEC.md`
+
+Runtime-проверки:
+
+`docs/RUNTIME_CHECKS.md`
+
+Implementation commit:
+
+`ecd9196 Add DB readonly SQL preview raw profile diagnostics`
+
+Documentation commit:
+
+`73f2708 Document DB readonly SQL preview diagnostics checks`
