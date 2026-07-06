@@ -1733,3 +1733,142 @@ Confirmed after implementation:
 - `var/review-fixtures` may remain as local directory, but without tracked files.
 
 The writer remains a standalone local JSON review artifact writer only.
+
+## 2026-07-06 — DbReadOnlyLocalReviewFixtureLoader implementation check
+
+### Context
+
+Implementation commit:
+
+`d7af3d0 Add DB readonly local review fixture loader`
+
+Created standalone class:
+
+`framework-standardization/src/Approval/DbReadOnlyLocalReviewFixtureLoader.php`
+
+This check covers standalone local review fixture loader implementation.
+
+### Boundary
+
+The loader is standalone only.
+
+Confirmed boundaries:
+
+- loader is not connected to pipeline;
+- loader is not connected to runners;
+- loader does not call parser;
+- loader does not call generator;
+- loader does not call writer;
+- loader does not call fixture bridge;
+- loader does not call approval flow;
+- loader does not call SQL preview;
+- loader does not use DB or live DB;
+- loader does not create SQL/apply artifacts;
+- loader does not change `review.action`;
+- loader does not change `approval_status`;
+- loader does not create `approved` or `rejected`.
+
+### Syntax check
+
+Command:
+
+```text
+C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyLocalReviewFixtureLoader.php
+```
+
+Result:
+
+```text
+No syntax errors detected
+```
+
+### Standalone manual check
+
+Manual check setup:
+
+- temporary JSON fixture was created under `framework-standardization/var/review-fixtures/`;
+- `loader->load($filename)` was called;
+- generated JSON did not appear in `git status`;
+- temporary fixture was deleted;
+- after check, there were no JSON files in `var/review-fixtures`.
+
+Loader diagnostics:
+
+- `loaded = 1`
+- `loaded_file = 1`
+- `bytes_read = 842`
+- `fixture_type = db_readonly_normalization_review`
+- `proposals_count = 1`
+- `reads_files = 1`
+- `sql_generated = 0`
+- `apply_plan_created = 0`
+- `safe_to_apply = 0`
+- `git_ignored_expected = 1`
+- `fixture_is_array_object = 1`
+- `errors_count = 0`
+- `warnings_count = 0`
+
+### Negative checks
+
+Observed:
+
+- path traversal rejected: `loaded = 0`;
+- non-json rejected: `loaded = 0`;
+- SQL/apply-like filename rejected: `loaded = 0`;
+- invalid JSON returned error: `loaded = 0`, `error = json_decode_failed`;
+- invalid JSON fixture was deleted;
+- after negative checks, there were no JSON files in `var/review-fixtures`.
+
+### Default dry-run regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### Git safety
+
+Confirmed after implementation:
+
+- `git status` showed only the new PHP file before commit;
+- docs did not change during implementation;
+- `.gitignore` did not change during implementation;
+- pipeline did not change;
+- runners did not change;
+- jobs did not change;
+- config did not change;
+- parser did not change;
+- generator did not change;
+- writer did not change;
+- bridge did not change;
+- approval flow did not change;
+- SQL preview did not change;
+- report did not change;
+- framework result did not change;
+- generated fixture JSON was deleted;
+- `var/review-fixtures` may remain as local directory, but without tracked files.
+
+The loader remains a standalone local JSON review artifact reader only.
