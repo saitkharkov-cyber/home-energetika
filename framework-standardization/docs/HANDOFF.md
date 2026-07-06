@@ -8,25 +8,21 @@
 
 Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling layer для инженерной стандартизации характеристик.
 
-Проект работает только с default no-DB dry-run path и отдельным DB-readonly path на локальном dump/local DB. Live DB, SQL apply и OpenCart module runtime не подключены.
+Проект работает с default no-DB dry-run path и отдельным DB-readonly path на локальном dump/local DB. Live DB, SQL apply и OpenCart module runtime не подключены.
 
 ## Текущий статус
 
 Текущая стабильная точка:
 
 ```text
-default dry-run path остаётся no-DB fixture path
-DB-readonly path работает только с local dump DB через read-only connection
-SQL apply не подключён
+196fc0b Add DB readonly report output spec
 ```
 
-Последний закрытый инженерный шаг:
+Последний закрытый инженерный блок:
 
-`DB readonly scope/export path paired wiring + compatibility adapters`
-
-Последний инженерный коммит перед handoff update:
-
-`9948721 Document DB readonly compatibility adapters decision`
+```text
+DB-readonly value profiling + SQL preview raw_profile diagnostics + report output spec
+```
 
 Ожидаемое состояние репозитория:
 
@@ -42,10 +38,14 @@ origin/main = main
 - `docs/IMPLEMENTATION_STRUCTURE.md`
 - `docs/STAGE_BOUNDARIES.md`
 - `docs/DUMP_LOCAL_DB_CHECKLIST.md`
-- `docs/RUNTIME_CHECKS.md`
 - `docs/DECISIONS.md`
+- `docs/RUNTIME_CHECKS.md`
 - `docs/DB_READONLY_SCOPE_EXPORT_MINI_SPEC.md`
 - `docs/DB_READONLY_PAIRED_WIRING_PLAN.md`
+- `docs/DB_READONLY_ANALYZE_PREVIEW_NEXT_STEP_SPEC.md`
+- `docs/DB_READONLY_VALUE_PROFILING_SPEC.md`
+- `docs/DB_READONLY_SQL_PREVIEW_BOUNDARY_SPEC.md`
+- `docs/DB_READONLY_REPORT_OUTPUT_SPEC.md`
 
 Оперативный статус находится в этом документе.
 
@@ -143,9 +143,9 @@ resolve_canonical       -> DB-backed
 resolve_scope           -> DB-backed
 export_attributes       -> DB-backed
 analyze_names           -> DB-readonly-compatible adapter
-analyze_values          -> DB-readonly-compatible adapter
-build_sql_preview       -> DB-readonly-compatible blocked preview
-build_report            -> dry-run
+analyze_values          -> DB-readonly-compatible profiling adapter
+build_sql_preview       -> DB-readonly-compatible blocked preview with raw_profile diagnostics summary
+build_report            -> dry-run/reporting-only, spec exists for future DB-readonly diagnostics output
 build_framework_result  -> dry-run
 ```
 
@@ -153,7 +153,9 @@ DB-backed stages используют local dump DB только через read
 
 `DbReadOnlyScopeResolver` и `DbReadOnlyAttributeExporter` подключены только парой. Запрещённое состояние `DbReadOnlyScopeResolver + DryRunAttributeExporter` не должно возвращаться.
 
-`DbReadOnlySqlPreviewBuilder` остаётся blocked preview: без executable SQL statements и без safe-to-apply режима.
+`DbReadOnlyAttributeValueAnalyzer` выполняет только read-only profiling raw values. `attribute_value_structure.diagnostics.raw_profile` является diagnostics-only output и не является normalization.
+
+`DbReadOnlySqlPreviewBuilder` остаётся blocked preview. Он может отображать summary из `raw_profile` только как diagnostics, без SQL generation и без safe-to-apply режима.
 
 DB-readonly-compatible adapters не являются production implementation.
 
@@ -164,9 +166,20 @@ DB-readonly-compatible adapters не являются production implementation.
 - Поток: `Attribute Job -> AttributeContext -> Pipeline -> FrameworkResult`.
 - DB-readonly path ограничен `pump_diameter`, `category_id = 11900213`, `language_id = 1`.
 - Default dry-run path остаётся no-DB fixture path.
-- DB-readonly path работает только с local dump DB.
-- SQL apply не выполняется.
-- Executable SQL не добавлять.
+- DB-readonly path работает только с local dump DB через read-only connection.
+- `raw_profile` является diagnostics-only.
+- Profiling не является normalization.
+- `suspicious_*` diagnostics не являются reject / approve decisions.
+- `normalized_values` не являются apply-ready data.
+- `build_sql_preview` остаётся blocked preview.
+- `generated = 0`.
+- `safe_to_apply = 0`.
+- `statements = array()`.
+- `blocked_by` содержит `db_readonly_sql_preview_not_implemented`.
+- SQL generation запрещён.
+- SQL files не создавать.
+- Apply plan не создавать.
+- SQL apply не выполнять.
 - Live DB запрещена.
 - Production normalization пока не делать.
 - OpenCart module paths не создавать.
@@ -203,24 +216,25 @@ language
 
 ## Следующий инженерный шаг
 
-Следующий шаг должен быть анализом / mini-spec, а не production implementation:
+Следующий шаг для новой Codex-сессии:
 
 ```text
-mini-spec для следующего перехода после scope/export:
-что делать с analyze_names / analyze_values / build_sql_preview
+реализация DB-readonly diagnostics output в build_report по docs/DB_READONLY_REPORT_OUTPUT_SPEC.md
 ```
 
-Цель mini-spec:
+Границы следующего шага:
 
-- определить, остаются ли текущие DB-readonly-compatible adapters временными;
-- определить, какой stage следующим можно переводить из compatibility adapter в полноценную DB-readonly инженерную реализацию;
-- определить data contract для следующего stage;
-- сохранить default dry-run path без изменений;
-- не переходить к production normalization;
+- менять только report-related component;
+- не менять SQL preview;
+- не менять analyze_values;
+- не менять wiring;
+- не менять runners;
+- не менять default dry-run path;
+- не делать normalization;
+- не делать SQL generation;
 - не делать SQL apply;
-- не генерировать executable SQL.
-
-До отдельного решения не начинать кодовую реализацию следующего stage.
+- не создавать apply plan;
+- сохранить reporting-only behavior.
 
 ## Старт в новом чате
 
@@ -229,6 +243,7 @@ mini-spec для следующего перехода после scope/export:
 - `framework-standardization/docs/HANDOFF.md`
 - `framework-standardization/docs/DECISIONS.md`
 - `framework-standardization/docs/RUNTIME_CHECKS.md`
+- `framework-standardization/docs/DB_READONLY_REPORT_OUTPUT_SPEC.md`
 
 Затем проверить:
 
@@ -239,9 +254,10 @@ git log --oneline -5
 
 Ожидаемая точка:
 
-`HEAD/main/origin/main = последний коммит с обновлённым HANDOFF после 9948721`
-
-`working tree clean`
+```text
+HEAD/main/origin/main = 196fc0b Add DB readonly report output spec
+working tree clean
+```
 
 ## Правило работы
 
