@@ -35,3 +35,69 @@ DB-readonly runner должен оставаться отдельным manual p
 ### Ссылка
 
 Подробности: `docs/DB_READONLY_SCOPE_EXPORT_MINI_SPEC.md`.
+
+## 2026-07-06 — DB-readonly-compatible adapters допустимы после scope/export wiring
+
+### Решение
+
+После подключения DB-backed пары `resolve_scope` / `export_attributes` в DB-readonly path допустимо использовать отдельные DB-readonly-compatible adapters для downstream stages.
+
+На текущем этапе такими adapters являются:
+
+`DbReadOnlyAttributeNameAnalyzer`
+
+`DbReadOnlyAttributeValueAnalyzer`
+
+`DbReadOnlySqlPreviewBuilder`
+
+### Причина
+
+После перехода `resolve_scope` и `export_attributes` на реальные DB IDs downstream dry-run components оказались fixture-only и не были совместимы с real DB facts.
+
+Чтобы сохранить прохождение pipeline без перехода к production normalization и SQL apply, downstream stages были переведены на read-only-compatible adapters.
+
+### Последствие
+
+DB-readonly path теперь разделяется на три типа stages:
+
+DB-backed stages:
+
+`resolve_canonical`
+
+`resolve_scope`
+
+`export_attributes`
+
+DB-readonly-compatible stages:
+
+`analyze_names`
+
+`analyze_values`
+
+`build_sql_preview`
+
+Dry-run stages:
+
+`build_report`
+
+`build_framework_result`
+
+DB-readonly-compatible adapters не считаются production implementation.
+
+Они не должны:
+
+- выполнять production normalization;
+- генерировать executable SQL;
+- выполнять SQL apply;
+- использовать live DB;
+- выполнять write/schema operations.
+
+`DbReadOnlySqlPreviewBuilder` должен оставаться preview-only / blocked builder: без SQL statements и без safe-to-apply режима.
+
+### Ссылка
+
+Runtime-проверки зафиксированы в `docs/RUNTIME_CHECKS.md`.
+
+Paired wiring commit:
+
+`cb54135 Wire DB readonly scope export path`
