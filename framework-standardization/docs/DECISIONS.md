@@ -1611,3 +1611,185 @@ Future implementation должен подтвердить:
 
 Нельзя реализовывать запись review fixture JSON files на диск до явной проверки/настройки git-ignore boundary.
 
+## 2026-07-06 — Local review fixture writer является только standalone local file writer
+
+### Решение
+
+Local review fixture writer может использоваться только как standalone local file writer для human review fixture artifacts.
+
+Рекомендуемый future class:
+
+- `src/Approval/DbReadOnlyLocalReviewFixtureWriter.php`
+
+Минимальный future API:
+
+- `write($fixture, $filename = null)`
+
+Writer может писать только в local ignored path:
+
+- `framework-standardization/var/review-fixtures/*.json`
+
+Writer не является:
+
+- production storage;
+- DB storage;
+- pipeline stage;
+- SQL preview input;
+- SQL file generator;
+- SQL diff generator;
+- apply plan;
+- apply layer.
+
+### Причина
+
+Standalone generator уже создаёт JSON-ready PHP array fixture.
+
+`.gitignore` уже защищает future local review fixture JSON files:
+
+- `framework-standardization/var/review-fixtures/*.json`
+
+Теперь можно проектировать writer, но только как локальную запись review artifact для человека.
+
+Writer не должен принимать review decisions, менять statuses или приближать систему к SQL/apply.
+
+### Разрешено в future implementation step
+
+Writer может:
+
+- принимать JSON-ready fixture array;
+- принимать optional local filename;
+- создавать directory `framework-standardization/var/review-fixtures`, если её нет;
+- записывать `.json` file локально;
+- возвращать writer diagnostics:
+  - `writer_mode = standalone_local_review_fixture_writer`;
+  - `target_dir`;
+  - `target_file`;
+  - `wrote_file`;
+  - `bytes_written`;
+  - `fixture_type`;
+  - `proposals_count`;
+  - `writes_files`;
+  - `sql_generated = 0`;
+  - `apply_plan_created = 0`;
+  - `safe_to_apply = 0`;
+  - `git_ignored_expected = 1`.
+
+### Path boundary
+
+Writer должен писать только внутрь:
+
+- `framework-standardization/var/review-fixtures/`
+
+Writer не должен:
+
+- принимать absolute paths;
+- принимать path traversal;
+- писать за пределы allowed directory;
+- перезаписывать существующие files по умолчанию без отдельной explicit future option.
+
+### Filename boundary
+
+Разрешены только safe `.json` filenames.
+
+Пример safe filename:
+
+- `pump_diameter_YYYYMMDD_HHMMSS.review.json`
+
+Filename не должен содержать executable/apply naming:
+
+- `.sql`;
+- `apply`;
+- `production`;
+- `migration`;
+- `patch`.
+
+Executable extensions запрещены.
+
+### Git boundary
+
+Generated fixture JSON files не должны попадать в git по умолчанию.
+
+Future implementation должен подтвердить:
+
+- generated fixture file существует локально;
+- generated fixture file не staged;
+- generated fixture file не tracked;
+- `.gitignore` защищает `framework-standardization/var/review-fixtures/*.json`.
+
+Actual fixture JSON files нельзя коммитить по умолчанию.
+
+Если понадобится sanitized sample fixture, это должен быть отдельный spec и отдельный explicit commit.
+
+### Запрещено
+
+Local review fixture writer не должен:
+
+- генерировать fixture content;
+- менять `approval_status`;
+- создавать `approved`;
+- создавать `rejected`;
+- выполнять approval flow;
+- вызывать `DbReadOnlyLocalApprovalFixtureBridge`;
+- вызывать SQL preview;
+- менять `safe_to_apply`;
+- менять `statements`;
+- подключаться к pipeline;
+- менять runners;
+- использовать DB;
+- использовать live DB;
+- менять DB/schema;
+- выполнять write/schema operations;
+- генерировать executable SQL;
+- создавать SQL files;
+- создавать SQL diff;
+- создавать apply plan;
+- выполнять SQL apply.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Verification boundary
+
+Future implementation должен проверить:
+
+- syntax check writer class через PHP 5.6;
+- small fixture array written to local ignored path;
+- generated file has `.json` extension;
+- generated file contains no SQL content;
+- generated file is ignored / not staged / not tracked;
+- default dry-run remains ok;
+- DB-readonly runner remains ok;
+- SQL/apply artifacts are not created.
+
+### Контекст
+
+Связанные документы:
+
+- `docs/DB_READONLY_LOCAL_REVIEW_FIXTURE_WRITER_SPEC.md`;
+- `docs/DB_READONLY_LOCAL_REVIEW_ARTIFACT_STORAGE_SPEC.md`;
+- `docs/DB_READONLY_LOCAL_REVIEW_FIXTURE_GENERATION_SPEC.md`;
+- `docs/DB_READONLY_LOCAL_APPROVAL_FIXTURE_SPEC.md`;
+- `docs/DB_READONLY_STANDALONE_REVIEW_FLOW_CHECK_SPEC.md`;
+- `docs/RUNTIME_CHECKS.md`.
+
+Связанные коммиты:
+
+- `1886a40 Add DB readonly local review fixture writer spec`;
+- `668f9ba Ignore local review fixture artifacts`.
+
+### Последствие
+
+Следующий безопасный engineering step может быть standalone implementation local review fixture writer.
+
+Implementation должен оставаться local file writer only.
+
+Нельзя подключать writer к pipeline, SQL preview или SQL/apply path без отдельного architecture decision.
+
