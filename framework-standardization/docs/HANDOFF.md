@@ -15,13 +15,13 @@ Framework Standardization - отдельный PHP 5.6-compatible CLI/tooling la
 Текущая стабильная точка:
 
 ```text
-196fc0b Add DB readonly report output spec
+abab5ff Document DB readonly normalization approval flow checks
 ```
 
 Последний закрытый инженерный блок:
 
 ```text
-DB-readonly value profiling + SQL preview raw_profile diagnostics + report output spec
+DB-readonly diagnostics propagation + standalone normalization proposal parser + standalone approval flow skeleton
 ```
 
 Ожидаемое состояние репозитория:
@@ -46,6 +46,10 @@ origin/main = main
 - `docs/DB_READONLY_VALUE_PROFILING_SPEC.md`
 - `docs/DB_READONLY_SQL_PREVIEW_BOUNDARY_SPEC.md`
 - `docs/DB_READONLY_REPORT_OUTPUT_SPEC.md`
+- `docs/DB_READONLY_FRAMEWORK_RESULT_SPEC.md`
+- `docs/DB_READONLY_NORMALIZATION_APPROVAL_SPEC.md`
+- `docs/DB_READONLY_NORMALIZATION_PARSER_SKELETON_SPEC.md`
+- `docs/DB_READONLY_NORMALIZATION_APPROVAL_FLOW_SPEC.md`
 
 Оперативный статус находится в этом документе.
 
@@ -145,19 +149,47 @@ export_attributes       -> DB-backed
 analyze_names           -> DB-readonly-compatible adapter
 analyze_values          -> DB-readonly-compatible profiling adapter
 build_sql_preview       -> DB-readonly-compatible blocked preview with raw_profile diagnostics summary
-build_report            -> dry-run/reporting-only, spec exists for future DB-readonly diagnostics output
-build_framework_result  -> dry-run
+build_report            -> dry-run/reporting-only with raw_profile_summary and sql_preview_safety_summary
+build_framework_result  -> dry-run/result-packaging with diagnostics_summary and safety_summary
 ```
 
 DB-backed stages используют local dump DB только через read-only connection.
 
 `DbReadOnlyScopeResolver` и `DbReadOnlyAttributeExporter` подключены только парой. Запрещённое состояние `DbReadOnlyScopeResolver + DryRunAttributeExporter` не должно возвращаться.
 
-`DbReadOnlyAttributeValueAnalyzer` выполняет только read-only profiling raw values. `attribute_value_structure.diagnostics.raw_profile` является diagnostics-only output и не является normalization.
+DB-readonly-compatible stages не являются production implementation.
 
-`DbReadOnlySqlPreviewBuilder` остаётся blocked preview. Он может отображать summary из `raw_profile` только как diagnostics, без SQL generation и без safe-to-apply режима.
+## Standalone components
 
-DB-readonly-compatible adapters не являются production implementation.
+`src/Normalizer/DbReadOnlyNormalizationProposalParser.php` существует как standalone parser skeleton.
+
+Parser:
+
+- не подключён к pipeline;
+- не подключён к `analyze_values`;
+- не подключён к `sql_preview`, `build_report` или `build_framework_result`;
+- может создавать только статусы `proposed`, `needs_review`, `unknown`;
+- не должен создавать статусы `approved` или `rejected`;
+- не создаёт SQL/apply output.
+
+`src/Approval/DbReadOnlyNormalizationApprovalFlow.php` существует как standalone approval flow skeleton.
+
+Approval flow:
+
+- не подключён к pipeline;
+- не подключён к parser автоматически;
+- может явно переводить proposals в `approved`, `rejected`, `needs_review`, `unknown`, `proposed`;
+- является единственным текущим standalone component, который может создавать `approved` / `rejected`;
+- не создаёт SQL/apply output.
+
+`approved` означает только future SQL preview candidate eligibility.
+
+`approved` не означает:
+
+- SQL apply;
+- `safe_to_apply = 1`;
+- `production_ready = 1`;
+- apply-ready output.
 
 ## Текущие архитектурные границы
 
@@ -171,13 +203,20 @@ DB-readonly-compatible adapters не являются production implementation.
 - Profiling не является normalization.
 - `suspicious_*` diagnostics не являются reject / approve decisions.
 - `normalized_values` не являются apply-ready data.
+- Parser proposals не являются apply-ready data.
+- Parser не может создавать `approved` / `rejected`.
+- Только approval flow может создавать `approved` / `rejected`.
+- `approved` не означает SQL apply.
 - `build_sql_preview` остаётся blocked preview.
 - `generated = 0`.
 - `safe_to_apply = 0`.
 - `statements = array()`.
+- `sql_apply_allowed = 0`.
+- `production_ready = 0`.
 - `blocked_by` содержит `db_readonly_sql_preview_not_implemented`.
 - SQL generation запрещён.
 - SQL files не создавать.
+- SQL diff не создавать.
 - Apply plan не создавать.
 - SQL apply не выполнять.
 - Live DB запрещена.
@@ -219,22 +258,22 @@ language
 Следующий шаг для новой Codex-сессии:
 
 ```text
-реализация DB-readonly diagnostics output в build_report по docs/DB_READONLY_REPORT_OUTPUT_SPEC.md
+создать mini-spec для local approval fixture / manual review bridge между standalone parser и standalone approval flow
 ```
 
 Границы следующего шага:
 
-- менять только report-related component;
-- не менять SQL preview;
-- не менять analyze_values;
-- не менять wiring;
-- не менять runners;
-- не менять default dry-run path;
-- не делать normalization;
+- не делать pipeline wiring;
+- не подключать parser к `analyze_values`;
+- не подключать approval flow к SQL preview;
 - не делать SQL generation;
 - не делать SQL apply;
+- не создавать SQL files;
+- не создавать SQL diff;
 - не создавать apply plan;
-- сохранить reporting-only behavior.
+- не использовать live DB;
+- не менять default dry-run path;
+- storage рассматривать только как future/local fixture discussion, без DB/schema changes.
 
 ## Старт в новом чате
 
@@ -243,7 +282,9 @@ language
 - `framework-standardization/docs/HANDOFF.md`
 - `framework-standardization/docs/DECISIONS.md`
 - `framework-standardization/docs/RUNTIME_CHECKS.md`
-- `framework-standardization/docs/DB_READONLY_REPORT_OUTPUT_SPEC.md`
+- `framework-standardization/docs/DB_READONLY_NORMALIZATION_APPROVAL_SPEC.md`
+- `framework-standardization/docs/DB_READONLY_NORMALIZATION_PARSER_SKELETON_SPEC.md`
+- `framework-standardization/docs/DB_READONLY_NORMALIZATION_APPROVAL_FLOW_SPEC.md`
 
 Затем проверить:
 
@@ -255,7 +296,7 @@ git log --oneline -5
 Ожидаемая точка:
 
 ```text
-HEAD/main/origin/main = 196fc0b Add DB readonly report output spec
+HEAD/main/origin/main = abab5ff Document DB readonly normalization approval flow checks
 working tree clean
 ```
 
