@@ -2849,3 +2849,120 @@ Implementation не должен:
 Связанный документ:
 
 - `docs/DB_READONLY_PREPARED_FIXTURE_EXPANSION_SPEC.md`.
+
+## 2026-07-07 — Prepared fixture full batch check должен оставаться standalone manual readonly check
+
+### Решение
+
+Prepared fixture full batch check допустим только для текущего prepared fixture set.
+
+Context:
+
+```text
+pump_diameter
+```
+
+Current prepared fixture rows count:
+
+```text
+8
+```
+
+Full batch check должен брать весь текущий prepared fixture set.
+
+Expected input:
+
+```text
+input_rows_count = 8
+input_rows_count > 4
+input_rows_count <= 12
+```
+
+Future command допустим только как standalone manual entrypoint:
+
+```text
+bin/db-readonly-prepared-fixture-full-batch-check.php
+```
+
+Command не является:
+
+- pipeline stage;
+- runner integration;
+- SQL preview input;
+- production output.
+
+Command не должен:
+
+- принимать arbitrary input;
+- принимать filenames, paths или URLs;
+- использовать live DB / production DB;
+- делать SQL/apply;
+- создавать production output;
+- менять default dry-run path.
+
+`approved` остаётся только review-chain status.
+
+`approved` не означает SQL/apply permission.
+
+### Запрещено
+
+Для prepared fixture full batch manual check запрещено:
+
+- pipeline wiring;
+- runner integration;
+- live DB / production DB;
+- full category batch;
+- arbitrary input;
+- filenames/paths/URLs input;
+- SQL preview;
+- SQL generation/files/diff;
+- apply plan;
+- SQL apply;
+- DB/schema changes;
+- write/schema operations;
+- production output;
+- committed runtime artifacts;
+- default dry-run path changes.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+После расширения prepared fixture до 8 rows и successful checks на 2-row и 4-row manual commands следующий осторожный шаг может проверить весь текущий prepared fixture set.
+
+Такой check должен оставаться manual, standalone и readonly. Он не должен превращаться в full category batch, pipeline/runner integration, production workflow, SQL preview или apply path.
+
+### Next-step boundary
+
+Implementation допустима только после explicit `+`.
+
+Implementation должна быть standalone manual command only.
+
+Не добавлять постоянный runner.
+
+Не подключать к pipeline.
+
+Implementation не должен:
+
+- принимать arbitrary input;
+- принимать filenames/paths/URLs;
+- использовать live DB;
+- использовать production DB;
+- генерировать SQL/apply;
+- создавать production output;
+- менять default dry-run path.
+
+### Контекст
+
+Связанный документ:
+
+- `docs/DB_READONLY_PREPARED_FIXTURE_FULL_BATCH_CHECK_SPEC.md`.
