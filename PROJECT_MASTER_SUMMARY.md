@@ -14,7 +14,7 @@
 
 # Архитектура проекта
 
-На текущий момент проект состоит из двух основных подсистем.
+На текущий момент проект состоит из нескольких основных подсистем.
 
 ## Pump Selector
 
@@ -48,6 +48,39 @@
 * поддержку единого стандарта хранения данных.
 
 Результатом работы подсистемы является каталог, пригодный для использования всеми остальными подсистемами проекта.
+
+---
+
+## Framework Standardization
+
+Назначение:
+
+Безопасная стандартизация характеристик как controlled attribute consolidation workflow.
+
+Подсистема отвечает за:
+
+* DB-readonly discovery характеристик;
+* подготовку списка кандидатов по реальным `attribute_id` и `attribute_name`;
+* human canonical selection;
+* explicit include/exclude alias decision;
+* raw values inventory;
+* canonical unit / `normalized_value` contract;
+* normalization proposals;
+* standalone review-chain before any apply-plan.
+
+Framework Standardization не является fully automatic normalizer.
+
+Похожие `attribute_name` не объединяются автоматически. Canonical attribute selection делает пользователь.
+
+`config/jobs` не является стартовой точкой угадывания характеристики. `config/jobs` должен быть результатом accepted canonical decision/contract.
+
+`approved` в review-chain не означает SQL apply permission.
+
+Новый ChatGPT-чат или новый участник проекта должен начинать с:
+
+```text
+framework-standardization/docs/START_HERE.md
+```
 
 ---
 
@@ -127,6 +160,15 @@ PROJECT_MASTER_SUMMARY.md выбранной подсистемы
 ```
 
 Каждая подсистема самостоятельно определяет набор специализированных документов, необходимых для своей работы.
+
+Для активных подсистем дополнительно могут использоваться:
+
+* `docs/START_HERE.md` — быстрый onboarding entrypoint;
+* `docs/HANDOFF.md` — оперативное состояние активной разработки;
+* `docs/DECISIONS.md` — зафиксированные архитектурные решения;
+* `docs/RUNTIME_CHECKS.md` — история ручных проверок и runtime checks;
+* `docs/RULES.md` — правила процесса, если подсистема их использует;
+* specialized specs — документы по отдельным boundaries, components и workflow steps.
 
 ---
 

@@ -1,5 +1,7 @@
 # Framework Standardization
 
+> Новый ChatGPT-чат / onboarding: начинать с `docs/START_HERE.md`.
+
 Проект предназначен для стандартизации характеристик каталога Home Energetika.
 
 Старт проекта выполняется не с этого файла, а с технического задания:
