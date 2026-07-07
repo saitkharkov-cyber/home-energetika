@@ -3075,3 +3075,132 @@ Implementation не должен:
 Связанный документ:
 
 - `docs/DB_READONLY_NEXT_CONTROLLED_SOURCE_SELECTION_SPEC.md`.
+
+## 2026-07-07 — Pump diameter controlled sources stability criteria должны быть gate перед новой характеристикой
+
+### Решение
+
+Перед переходом к новой характеристике нужно сравнить два controlled readonly sample sources для одной характеристики:
+
+```text
+pump_diameter
+```
+
+Первый source:
+
+```text
+DbReadOnlyFirstRealDataUsageInputFixture
+```
+
+Prepared rows count:
+
+```text
+8
+```
+
+Второй source:
+
+```text
+DbReadOnlySecondPumpDiameterUsageInputFixture
+```
+
+Prepared rows count:
+
+```text
+8
+```
+
+Оба source уже проверяются через standalone readonly review-chain.
+
+Full batch checks используют bounded chunking из-за текущего лимита usage checker:
+
+```text
+MAX_ROWS = 5
+```
+
+Stability gate считается пройденным только если:
+
+- оба source дают `used = 1`;
+- оба source дают `review_ready = 1`;
+- оба source дают `e2e_checked = 1`;
+- full batch по обоим source проходит без errors;
+- bounded chunking не ломает aggregate result;
+- SQL/apply markers all `0`;
+- runtime artifacts не остаются;
+- default dry-run и DB-readonly runner остаются ok;
+- diagnostics достаточно понятны для manual review.
+
+Только после подтверждения этих criteria можно переходить к spec для первой новой характеристики.
+
+Comparison command не реализовывать без отдельного explicit `+`.
+
+`approved` остаётся только review-chain status.
+
+`approved` не означает SQL/apply permission.
+
+### Запрещено
+
+Для pump diameter controlled sources stability gate запрещено:
+
+- pipeline wiring;
+- runner integration;
+- live DB / production DB;
+- full category batch;
+- arbitrary input;
+- filenames/paths/URLs input;
+- SQL preview;
+- SQL generation/files/diff;
+- apply plan;
+- SQL apply;
+- DB/schema changes;
+- write/schema operations;
+- production output;
+- committed runtime artifacts;
+- default dry-run path changes.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+Два controlled `pump_diameter` sources дают минимальную проверку устойчивости внутри одной уже проверенной характеристики.
+
+Gate нужен, чтобы не переходить к новой характеристике на основании одного source и не расширяться автоматически до full category batch, pipeline/runners, SQL preview или production workflow.
+
+### Последствие
+
+Следующий engineering step должен сначала подтвердить или задокументировать stability criteria.
+
+Если criteria подтверждены, следующий безопасный шаг:
+
+```text
+spec для первой новой характеристики
+```
+
+Implementation comparison command допустима только после отдельного explicit `+`.
+
+Implementation не должен:
+
+- подключаться к pipeline;
+- подключаться к runners;
+- принимать arbitrary input;
+- принимать filenames/paths/URLs;
+- использовать live DB;
+- использовать production DB;
+- генерировать SQL/apply;
+- создавать production output;
+- менять default dry-run path.
+
+### Контекст
+
+Связанный документ:
+
+- `docs/DB_READONLY_PUMP_DIAMETER_CONTROLLED_SOURCES_STABILITY_SPEC.md`.
