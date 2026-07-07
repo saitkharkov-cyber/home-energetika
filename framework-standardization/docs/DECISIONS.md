@@ -3476,3 +3476,135 @@ Production/cache actions требуют отдельного explicit approval.
 Только после этого standalone review-chain должна использоваться для normalization proposals and human review.
 
 SQL/apply и production/cache actions остаются отдельными future decisions.
+
+## 2026-07-07 — Attribute name discovery and canonical selection as first pre-review gate
+
+### Решение
+
+Первый обязательный недостающий блок workflow перед raw values inventory:
+
+```text
+target attribute meaning
+-> DB-readonly attribute name discovery
+-> candidate list
+-> human canonical selection
+-> explicit include/exclude alias decision
+```
+
+Raw values inventory нельзя запускать до выбора canonical `attribute_id` и явного include/exclude decision.
+
+System не должна автоматически объединять похожие `attribute_name`.
+
+Похожие названия могут быть:
+
+- alias / duplicate;
+- similar but different;
+- unsafe / unresolved.
+
+User должен явно выбрать:
+
+- canonical `attribute_id`;
+- included alias `attribute_ids`;
+- excluded similar-but-different `attribute_ids`;
+- unresolved candidates, если нужно.
+
+Discovery output должен показывать:
+
+- `attribute_id`;
+- `attribute_name`;
+- `usage_count`;
+- optional category coverage;
+- short raw samples as preview;
+- warnings;
+- reason found;
+- possible role.
+
+### Relationship to config/jobs
+
+`config/jobs` не является стартовой точкой угадывания характеристики.
+
+`config/jobs` должен появляться только после accepted canonical decision/contract.
+
+Архитектурная модель:
+
+- одна характеристика = один job/contract;
+- один тип значений = один parser/normalizer family;
+- новая характеристика не обязательно означает новый уникальный PHP-обработчик.
+
+### Relationship to review-chain
+
+Standalone review-chain остаётся второй половиной workflow.
+
+Она должна получать normalization proposals только после:
+
+- canonical attribute group selected;
+- raw values inventory completed;
+- canonical unit / `normalized_value` contract approved.
+
+`approved` в review-chain не означает SQL apply permission.
+
+Apply plan возможен только отдельным explicit step.
+
+### Production safety
+
+Характеристики, которые могут попасть в selector/cache, требуют explicit canonical unit contract до implementation.
+
+No production cache rebuild without separate explicit approval.
+
+Production incident с `max_flow_l_min` остаётся примером риска неправильной unit semantics.
+
+### Границы
+
+Это решение фиксирует DB-readonly discovery only.
+
+Запрещено:
+
+- auto-merge;
+- auto-canonical selection;
+- PHP implementation;
+- config/jobs changes;
+- parser/normalizer implementation;
+- raw values inventory implementation in this step;
+- normalization proposals in this step;
+- SQL preview;
+- SQL generation;
+- SQL files;
+- SQL diff;
+- apply plan;
+- SQL apply;
+- live DB / production DB;
+- DB/schema changes;
+- write/schema operations;
+- production/cache changes;
+- cache rebuild;
+- runtime artifacts;
+- pipeline/runners integration.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+Readonly discovery показал, что похожие `attribute_name` могут обозначать разные business/domain meanings.
+
+Поэтому discovery должен готовить candidate list для human canonical selection, а не выполнять automatic consolidation.
+
+Canonical selection является pre-review gate, потому что review-chain и normalization proposals должны работать только с уже утверждённой группой `attribute_id` и утверждённым canonical unit contract.
+
+### Последствие
+
+Следующий safe step после этого gate:
+
+```text
+raw values inventory after canonical selection
+```
+
+Он должен быть отдельным spec/decision step и не должен начинаться до accepted canonical selection / include-exclude decision.
