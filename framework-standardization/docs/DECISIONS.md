@@ -2404,3 +2404,110 @@ Implementation допустима только после отдельного e
 Связанный документ:
 
 - `docs/DB_READONLY_REAL_DATA_REVIEW_CHAIN_USAGE_SCENARIO_SPEC.md`.
+
+## 2026-07-07 — First real-data usage input source должен быть small local readonly fixture/snapshot
+
+### Решение
+
+Первый concrete input source для `DbReadOnlyRealDataReviewChainUsageChecker` должен быть маленьким local readonly dump-derived/test fixture.
+
+Preferred context:
+
+- `pump_diameter`.
+
+Prepared fixture может содержать:
+
+- до 12 controlled rows.
+
+Первый actual run должен брать только маленький slice:
+
+- `input_rows_count <= 2`.
+
+Формат rows:
+
+- `product_id`;
+- `attribute_id`;
+- `attribute_name`;
+- `raw_value`;
+- `normalized_value`;
+- `confidence`.
+
+Input должен быть readonly и local.
+
+### Границы input
+
+Запрещено:
+
+- live DB;
+- production DB;
+- full category batch;
+- arbitrary uploaded data;
+- OpenCart runtime paths;
+- production data changes.
+
+`approved` остаётся только review-chain status.
+
+`approved` не означает SQL/apply permission.
+
+### Запрещено
+
+Для first real-data usage input source запрещено:
+
+- pipeline wiring;
+- runner integration;
+- SQL preview integration;
+- SQL generation;
+- SQL files;
+- SQL diff;
+- apply plan;
+- SQL apply;
+- DB/live DB;
+- DB/schema changes;
+- write/schema operations;
+- production output;
+- committed runtime artifacts;
+- default dry-run path changes.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+Первый real-data-like check должен быть максимально малым и controlled.
+
+Prepared fixture до 12 rows даёт достаточно examples для ручной подготовки, но first actual run остаётся ограниченным `input_rows_count <= 2`, чтобы не перейти к batch-like behavior.
+
+Такой input source проверяет usage checker и standalone review-chain без live DB, без pipeline/runners, без SQL/apply и без production semantics.
+
+### Next-step boundary
+
+После decision implementation допустима только после explicit `+`.
+
+Если implementation будет подтверждена, она должна быть минимальной standalone local fixture / manual check path.
+
+Не добавлять постоянный runner.
+
+Не подключать к pipeline.
+
+Implementation не должен:
+
+- менять pipeline;
+- менять runners;
+- менять default dry-run path;
+- использовать live DB;
+- генерировать SQL/apply;
+- создавать production output.
+
+### Контекст
+
+Связанный документ:
+
+- `docs/DB_READONLY_FIRST_REAL_DATA_USAGE_INPUT_SOURCE_SPEC.md`.
