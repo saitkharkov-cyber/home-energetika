@@ -11,20 +11,12 @@
 
 Текущая стабильная точка:
 
-`b1c5148 Document DB readonly standalone review chain E2E checker checks`
+`a8396a3 Document normalization proposals review-chain bridge decision`
 
-Актуальный git log:
+Ожидаемое состояние для следующего чата:
 
-* `b1c5148 Document DB readonly standalone review chain E2E checker checks`
-* `0dab23a Add DB readonly standalone review chain E2E checker`
-* `ab7b057 Document standalone review chain E2E check decision`
-* `64ec4d5 Add DB readonly standalone review chain E2E check spec`
-* `4b084d4 Update framework standardization evening handoff`
-
-Ожидаемое состояние репозитория:
-
-* `HEAD/main/origin/main = b1c5148 Document DB readonly standalone review chain E2E checker checks`
-* working tree clean
+* HEAD/main/origin/main соответствует `a8396a3`;
+* working tree clean.
 
 В новом чате сначала проверить:
 
@@ -33,290 +25,174 @@ git status --short
 git log --oneline --decorate -5
 ```
 
-Если HEAD отличается от `b1c5148`, сначала разобраться с фактической рабочей точкой и не начинать новый engineering step.
+Если HEAD отличается от `a8396a3`, сначала сверить фактическую рабочую точку с `docs/DECISIONS.md` и `docs/RUNTIME_CHECKS.md`.
 
-## 2. Закрытый инженерный блок
+## 2. Главный архитектурный разворот
 
-Последний закрытый инженерный блок:
-
-`standalone review chain E2E checker`
-
-Закрыто:
-
-* E2E check spec создан;
-* E2E check standalone diagnostic-only decision зафиксирован;
-* `DbReadOnlyStandaloneReviewChainE2EChecker` реализован;
-* runtime checks E2E checker-а задокументированы.
-
-## 3. Актуальная standalone review chain
-
-Актуальная standalone review chain:
+Framework standardization теперь зафиксирован как:
 
 ```text
-parser output
--> DbReadOnlyLocalReviewFixtureGenerator
--> JSON-ready review fixture array
--> DbReadOnlyLocalReviewFixtureWriter
--> local ignored review JSON file
--> manual/synthetic review blocks
--> DbReadOnlyLocalReviewFixtureLoader
--> PHP array fixture
--> DbReadOnlyLocalApprovalFixtureBridge
--> DbReadOnlyNormalizationApprovalFlow
--> DbReadOnlyReviewChainResultReporter
+controlled attribute consolidation workflow
 ```
 
-`DbReadOnlyStandaloneReviewChainE2EChecker` прогоняет эту chain как standalone diagnostic-only check.
-
-Вся chain остаётся standalone-only:
-
-* не pipeline stage;
-* не runner integration;
-* не SQL preview input by default;
-* не production storage;
-* не SQL/apply layer.
-
-## 4. Component status
-
-### Parser
-
-`src/Normalizer/DbReadOnlyNormalizationProposalParser.php`
-
-Status:
-
-* standalone parser skeleton;
-* не подключён к pipeline;
-* не подключён к `analyze_values`;
-* не создаёт `approved/rejected`;
-* не создаёт SQL/apply output.
-
-### Local review fixture generator
-
-`src/Approval/DbReadOnlyLocalReviewFixtureGenerator.php`
-
-Status:
-
-* implemented;
-* принимает standalone parser output;
-* возвращает JSON-ready review fixture array;
-* создаёт empty reviewer-owned `review` block;
-* не пишет fixture JSON files;
-* не вызывает bridge или approval flow;
-* не подключён к pipeline.
-
-### Local review fixture writer
-
-`src/Approval/DbReadOnlyLocalReviewFixtureWriter.php`
-
-Status:
-
-* implemented;
-* checks documented;
-* standalone-only decision documented.
-
-Boundary:
-
-* пишет только local ignored JSON review artifacts в `framework-standardization/var/review-fixtures/*.json`;
-* не подключён к pipeline/runners;
-* не вызывает bridge/approval flow/SQL preview;
-* не использует DB/live DB;
-* не создаёт SQL/apply artifacts;
-* не меняет `approval_status`;
-* не создаёт `approved/rejected`.
-
-### Local review fixture loader
-
-`src/Approval/DbReadOnlyLocalReviewFixtureLoader.php`
-
-Status:
-
-* implemented;
-* checks documented;
-* standalone-only decision documented.
-
-Boundary:
-
-* читает только local `.json` fixture files из `framework-standardization/var/review-fixtures/`;
-* принимает только local filename, не arbitrary path;
-* запрещает absolute paths, path traversal, path separators, unsafe filename tokens;
-* декодирует JSON в PHP array;
-* не вызывает bridge/approval flow;
-* не меняет `review.action`;
-* не меняет `approval_status`;
-* не создаёт `approved/rejected`;
-* не создаёт SQL/apply artifacts;
-* не использует DB/live DB.
-
-### Local approval fixture bridge
-
-`src/Approval/DbReadOnlyLocalApprovalFixtureBridge.php`
-
-Status:
-
-* implemented;
-* standalone bridge;
-* принимает JSON-shaped fixture как PHP array;
-* отделяет parser-owned proposal rows от reviewer-owned `review.action`;
-* передаёт review actions в standalone approval flow;
-* не выставляет statuses напрямую;
-* не подключён к pipeline.
-
-### Normalization approval flow
-
-`src/Approval/DbReadOnlyNormalizationApprovalFlow.php`
-
-Status:
-
-* implemented as standalone approval flow skeleton;
-* единственный текущий standalone component, который может создавать `approved/rejected`;
-* не подключён к pipeline;
-* не подключён к parser автоматически;
-* не создаёт SQL/apply output.
-
-### Review chain result reporter
-
-`src/Approval/DbReadOnlyReviewChainResultReporter.php`
-
-Status:
-
-* implemented;
-* checks documented;
-* standalone reporting-only decision documented.
-
-Boundary:
-
-* standalone reporting/diagnostics only;
-* расположен после approval flow;
-* принимает result standalone approval flow;
-* считает summary counts по statuses;
-* показывает unsupported statuses как diagnostics;
-* явно фиксирует, что SQL/apply still blocked;
-* не меняет statuses;
-* не создаёт `approved/rejected`;
-* не принимает review decisions;
-* не вызывает bridge;
-* не вызывает approval flow;
-* не вызывает SQL preview;
-* не генерирует SQL;
-* не создаёт SQL files/diff/apply plan;
-* не выполняет SQL apply;
-* не использует DB/live DB;
-* не меняет DB/schema;
-* не подключается к pipeline/runners;
-* не меняет default dry-run path.
-
-### Standalone review chain E2E checker
-
-`src/Approval/DbReadOnlyStandaloneReviewChainE2EChecker.php`
-
-Status:
-
-* implemented;
-* checks documented;
-* standalone diagnostic-only decision documented.
-
-Boundary:
-
-* standalone diagnostic-only;
-* не pipeline stage;
-* не runner integration;
-* не SQL preview input;
-* не production output;
-* не меняет default dry-run path;
-* не использует DB/live DB;
-* не делает DB/schema changes;
-* не создаёт SQL/apply artifacts;
-* временный fixture JSON создаётся только в `framework-standardization/var/review-fixtures/`;
-* временный fixture JSON удаляется после successful check;
-* `approved` остаётся только review-chain status, не SQL/apply permission.
-
-## 5. Runtime checks status
-
-Runtime checks зафиксированы в:
-
-`docs/RUNTIME_CHECKS.md`
-
-E2E checker checks commit:
-
-`b1c5148 Document DB readonly standalone review chain E2E checker checks`
-
-E2E checker implementation commit:
-
-`0dab23a Add DB readonly standalone review chain E2E checker`
-
-E2E checker checks по отчёту:
-
-Syntax:
+а не как:
 
 ```text
-C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyStandaloneReviewChainE2EChecker.php
+fully automatic normalizer
 ```
 
-Result:
+Framework не должен сам автоматически объединять похожие характеристики только по названию.
+
+Human canonical selection обязательна.
+
+`config/jobs` не является стартовой точкой угадывания характеристики. `config/jobs` должен быть результатом accepted canonical decision/contract.
+
+## 3. Актуальная workflow-модель
+
+Актуальная модель:
 
 ```text
-No syntax errors detected
+target attribute meaning
+-> DB-readonly attribute name discovery
+-> candidate list
+-> human canonical selection
+-> explicit include/exclude alias decision
+-> raw values inventory
+-> canonical unit / normalized_value contract
+-> normalization proposals generation
+-> standalone review-chain
+-> отдельный explicit apply-plan
 ```
 
-Standalone manual check:
+Каждый переход является gate. Нельзя перескакивать сразу к fixture/source/job, parser implementation, SQL preview или apply plan.
 
-* `checked = 1`
-* `generator_ok = 1`
-* `writer_ok = 1`
-* `loader_ok = 1`
-* `bridge_ok = 1`
-* `approval_flow_ok = 1`
-* `reporter_ok = 1`
-* `temp_fixture_created = 1`
-* `temp_fixture_removed = 1`
-* `sql_generated = 0`
-* `apply_plan_created = 0`
-* `safe_to_apply = 0`
-* `sql_apply_allowed = 0`
-* `production_ready = 0`
-* `errors_count = 0`
-* `warnings_count = 0`
-* `fixture_exists_after_run = 0`
-* `json_files_count_after_run = 0`
+## 4. Уже реализованная вторая половина workflow
 
-Default dry-run:
+Ранее уже построена и остаётся полезной standalone review-chain:
 
-* `result_status: ok`
-* `warnings_count: 0`
-* `errors_count: 0`
-* all 9 stages ok
+```text
+raw values / proposals
+-> review fixture generator
+-> writer
+-> manual review
+-> loader
+-> bridge
+-> approval flow
+-> result reporter
+```
 
-DB-readonly runner:
+Эта chain остаётся standalone-only и должна получать proposals только после:
 
-* `result_status: ok`
-* `warnings_count: 0`
-* `errors_count: 0`
-* all 9 stages ok
+* canonical attribute group selected;
+* raw values inventory completed;
+* canonical unit / `normalized_value` contract approved;
+* normalization proposals generation completed.
 
-## 6. Главные запреты
+`approved` в review-chain означает только review status.
 
-Запрещено:
+`approved` не означает SQL apply permission.
 
-* pipeline wiring без отдельного explicit step;
-* подключать writer/loader/generator/bridge/approval flow/reporter/E2E checker к pipeline/runners;
-* коммитить fixture JSON files;
-* использовать fixture JSON как production storage;
-* использовать fixture JSON как DB storage;
-* использовать review-chain output как SQL preview input by default;
-* считать `approved` разрешением на SQL apply;
-* делать `safe_to_apply = 1`;
-* делать `production_ready = 1`;
-* создавать apply-ready output;
-* генерировать SQL;
-* создавать SQL files;
-* создавать SQL diff;
-* создавать apply plan;
-* выполнять SQL apply;
-* использовать live DB;
-* делать DB/schema changes;
-* делать write/schema operations;
-* менять default dry-run path;
-* создавать OpenCart module runtime paths.
+Apply plan возможен только отдельным explicit step после review.
+
+## 5. Что зафиксировано сегодня
+
+Сегодняшний блок документов/decisions:
+
+* `c185c76` — controlled attribute consolidation workflow decision;
+* `c51dc21` — spec для attribute name discovery / canonical selection;
+* `a11f123` — decision: attribute discovery/canonical selection as first pre-review gate;
+* `3809b47` — spec для raw values inventory;
+* `56c5967` — decision: raw values inventory as pre-contract gate;
+* `9828fb1` — spec для canonical unit / normalized_value contract;
+* `befef6d` — decision: canonical unit contract as pre-proposal gate;
+* `b9a78de` — spec для normalization proposals generation;
+* `a8396a3` — decision: normalization proposals generation as bridge to standalone review-chain.
+
+Смысл блока:
+
+* сначала target meaning и DB-readonly discovery;
+* затем human canonical selection и explicit include/exclude aliases;
+* затем raw values inventory;
+* затем approved canonical unit / `normalized_value` contract;
+* затем deterministic diagnostic-only proposals;
+* только после этого standalone review-chain.
+
+## 6. Важный rejected/paused path
+
+Не продолжать прежнюю ветку как немедленное создание fixture/source/job для `pump_max_head`.
+
+`pump_max_head` остаётся полезным candidate/example:
+
+* `attribute_id = 12`;
+* `attribute_name = Максимальный напор`;
+* canonical key: `pump_max_head`;
+* canonical unit example: `m`;
+* `normalized_value` example: decimal meters.
+
+Но implementation для `pump_max_head` сейчас не следующий шаг.
+
+Перед любыми fixture/config/jobs нужна первая половина workflow:
+
+* discovery;
+* canonical selection;
+* raw values inventory;
+* approved unit/contract;
+* proposals generation.
+
+## 7. Production safety note
+
+На production был временный cache hotfix для Belamos/Pedrollo `max_flow_l_min`.
+
+Production rebuild восстановил старые flow values в шкале `m/h`.
+
+Следствия:
+
+* flow/performance attributes не трогать без permanent flow normalization;
+* не запускать cache rebuild без отдельного explicit approval;
+* любые selector/cache-related attributes требуют explicit canonical unit contract before implementation;
+* unit semantics нельзя угадывать автоматически;
+* approved proposals не должны автоматически менять DB/cache.
+
+## 8. Главные правила и границы
+
+Обязательные правила:
+
+* `config/jobs` не стартовая точка угадывания характеристики;
+* `config/jobs` должен быть результатом accepted canonical decision/contract;
+* одна характеристика = один job/contract;
+* один тип значений = один parser/normalizer family;
+* новая характеристика не обязательно требует новый PHP handler;
+* human canonical selection обязательна;
+* explicit include/exclude alias decision обязателен;
+* raw values inventory обязателен перед unit/contract;
+* canonical unit / `normalized_value` contract обязателен перед proposals;
+* proposal generation является bridge к review-chain;
+* `approved` в review-chain не означает SQL apply permission;
+* no auto-apply;
+* apply-plan только отдельным explicit step;
+* no production/cache changes;
+* no cache rebuild.
+
+Запрещено без отдельного explicit step:
+
+* PHP implementation;
+* config/jobs changes;
+* pipeline wiring;
+* runner integration;
+* SQL preview;
+* SQL generation;
+* SQL files;
+* SQL diff;
+* apply plan;
+* SQL apply;
+* live DB / production DB;
+* DB/schema changes;
+* write/schema operations;
+* production output;
+* production/cache changes;
+* runtime artifacts;
+* committed runtime artifacts;
+* default dry-run path changes.
 
 Запрещённые operation families:
 
@@ -329,72 +205,49 @@ DB-readonly runner:
 * `TRUNCATE`
 * `CREATE`
 
-## 7. Следующий инженерный шаг
+## 9. Рекомендованный следующий шаг
 
-Следующий маленький шаг по процессу:
+Следующий шаг в новом чате должен быть не implementation, а выбор следующего маленького spec/decision/implementation в новой архитектуре.
 
-`spec / decision analysis`
+Рекомендуемое направление:
 
-Рекомендуемый следующий engineering step:
+```text
+implementation spec для первого DB-readonly attribute name discovery command/tool
+```
 
-создать spec для standalone review-chain result export/report artifact boundary.
+Только после отдельного explicit `+`.
 
-Цель будущего spec:
+Будущий tool должен принимать target meaning / controlled scope и показывать candidates:
 
-* определить, нужен ли отдельный standalone export/report artifact после E2E checker;
-* зафиксировать, что это не SQL/apply, не production output и не pipeline integration;
-* если отдельный artifact layer не нужен, явно зафиксировать решение не добавлять новый слой.
+* `attribute_id`;
+* `attribute_name`;
+* `usage_count`;
+* optional category coverage;
+* short raw samples preview;
+* warnings;
+* reason found;
+* possible role:
+  * canonical candidate;
+  * possible alias / duplicate;
+  * similar but different;
+  * unsafe / unresolved.
 
-В следующем шаге не делать:
+В HANDOFF это только направление. Готовый implementation prompt здесь намеренно не фиксируется.
 
-* implementation;
+## 10. Не делать следующим шагом
+
+Не делать:
+
+* сразу fixture/source/job для `pump_max_head`;
+* implementation без отдельного explicit `+`;
+* parser/normalizer implementation;
+* config/jobs changes;
 * pipeline wiring;
 * runner integration;
 * SQL preview integration;
 * SQL generation/apply;
 * live DB;
+* production/cache changes;
+* cache rebuild;
 * DB/schema changes;
-* изменение default dry-run path.
-
-## 8. Первый prompt для следующего шага
-
-После проверки `git status --short` и `git log --oneline --decorate -5`, если working tree clean и HEAD = `b1c5148`, можно дать Codex задачу:
-
-создать только новый spec для standalone review-chain result export/report artifact boundary.
-
-Codex должен читать только те документы, которые явно указаны в конкретном задании.
-
-Обязательные границы для Codex:
-
-Не менять:
-
-* PHP-код;
-* `docs/HANDOFF.md`;
-* `docs/DECISIONS.md`;
-* `docs/RUNTIME_CHECKS.md`;
-* существующие specs;
-* `.gitignore`;
-* pipeline;
-* runners;
-* jobs;
-* config.
-
-Codex не должен:
-
-* реализовывать export/report artifact;
-* запускать новые проверки;
-* делать commit;
-* спрашивать, что дальше.
-
-## 9. Не делать следующим шагом
-
-Не делать:
-
-* roadmap-анализ вместо маленького spec/decision шага;
-* implementation без отдельного подтверждения;
-* pipeline wiring;
-* SQL preview integration;
-* SQL generation/apply;
-* live DB;
-* DB/schema changes;
-* обновлять `HANDOFF.md` сразу после следующего маленького шага.
+* обновлять другие документы без отдельного задания.
