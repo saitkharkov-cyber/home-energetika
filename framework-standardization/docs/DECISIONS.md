@@ -2966,3 +2966,112 @@ Implementation не должен:
 Связанный документ:
 
 - `docs/DB_READONLY_PREPARED_FIXTURE_FULL_BATCH_CHECK_SPEC.md`.
+
+## 2026-07-07 — Next controlled source должен быть second pump_diameter sample source
+
+### Решение
+
+Текущий verified baseline:
+
+- context: `pump_diameter`;
+- prepared fixture: `8` controlled readonly rows;
+- full batch command successful.
+
+Следующий controlled source выбирается внутри той же характеристики:
+
+```text
+pump_diameter
+```
+
+Следующий source должен быть second small local readonly sample source.
+
+Сейчас не переходить к новой характеристике.
+
+Сейчас не расширять до full category batch.
+
+Цель следующего source:
+
+- проверить устойчивость standalone review-chain на другом controlled sample source внутри той же характеристики;
+- сохранить уже проверенную characteristic boundary;
+- не смешивать разные характеристики в одном шаге;
+- сохранить простые runtime checks.
+
+Source должен оставаться:
+
+- local;
+- readonly;
+- dump-derived/test-like;
+- controlled.
+
+`approved` остаётся только review-chain status.
+
+`approved` не означает SQL/apply permission.
+
+### Запрещено
+
+Для next controlled source запрещено:
+
+- pipeline wiring;
+- runner integration;
+- live DB / production DB;
+- full category batch;
+- arbitrary input;
+- filenames/paths/URLs input;
+- SQL preview;
+- SQL generation/files/diff;
+- apply plan;
+- SQL apply;
+- DB/schema changes;
+- write/schema operations;
+- production output;
+- committed runtime artifacts;
+- default dry-run path changes.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+Prepared `pump_diameter` fixture уже успешно прошёл:
+
+- first manual command на `2` rows;
+- review batch command на `4` rows;
+- full batch command на `8` rows.
+
+Следующий полезный шаг — проверить устойчивость той же standalone review-chain внутри той же характеристики на другом controlled source, а не увеличивать batch автоматически и не переходить сразу к новой характеристике.
+
+Это минимизирует scope creep, снижает риск смешивания характеристик и сохраняет текущую standalone/manual/readonly модель.
+
+### Next-step boundary
+
+Implementation допустима только после explicit `+`.
+
+Implementation должна быть minimal controlled local fixture/source.
+
+Не добавлять постоянный runner.
+
+Не подключать к pipeline.
+
+Implementation не должен:
+
+- принимать arbitrary input;
+- принимать filenames/paths/URLs;
+- использовать live DB;
+- использовать production DB;
+- генерировать SQL/apply;
+- создавать production output;
+- менять default dry-run path.
+
+### Контекст
+
+Связанный документ:
+
+- `docs/DB_READONLY_NEXT_CONTROLLED_SOURCE_SELECTION_SPEC.md`.
