@@ -2884,3 +2884,161 @@ Result:
 - `all 9 stages ok`
 
 The full prepared fixture batch command remains a standalone manual readonly usage-check entrypoint only.
+
+## 2026-07-07  DbReadOnlySecondPumpDiameterUsageInputFixture implementation check
+
+### Context
+
+Implementation commit:
+
+`f5c87ac Add DB readonly second pump diameter usage input fixture`
+
+Created standalone class:
+
+`framework-standardization/src/Approval/DbReadOnlySecondPumpDiameterUsageInputFixture.php`
+
+Purpose:
+
+- second controlled sample source inside the same `pump_diameter` characteristic;
+- standalone local readonly fixture provider;
+- source marker: `second_pump_diameter_controlled_sample`;
+- prepared fixture contains `8` controlled readonly rows;
+- first run slice remains limited to `2` rows;
+- full batch contains `8` rows.
+
+### Boundary
+
+Confirmed boundaries:
+
+- second controlled sample source inside the same `pump_diameter` characteristic;
+- standalone local readonly fixture provider only;
+- no new characteristic;
+- no full category batch;
+- not connected to pipeline;
+- not connected to runners;
+- no live DB;
+- no production DB;
+- no arbitrary input;
+- no filenames/paths/URLs input;
+- no SQL preview;
+- no SQL generation/files/diff/apply plan/apply;
+- no DB/schema changes;
+- no production output;
+- no committed runtime artifacts;
+- default dry-run path does not change;
+- `approved` remains only a review-chain status, not SQL/apply permission.
+
+### Syntax check
+
+Command:
+
+```text
+C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlySecondPumpDiameterUsageInputFixture.php
+```
+
+Result:
+
+```text
+No syntax errors detected
+```
+
+### Standalone fixture check
+
+Observed:
+
+- `context = pump_diameter`
+- `source_marker = second_pump_diameter_controlled_sample`
+- `prepared_rows_count = 8`
+- `prepared_rows_lte_12 = 1`
+- `first_run_rows_count = 2`
+- `full_batch_rows_count = 8`
+- `readonly = 1`
+- `all_required_row_fields_exist = 1`
+- SQL/apply markers are all `0`
+
+Non-apply markers:
+
+- `sql_generated = 0`
+- `apply_plan_created = 0`
+- `safe_to_apply = 0`
+- `sql_apply_allowed = 0`
+- `production_ready = 0`
+
+### Integration check with DbReadOnlyRealDataReviewChainUsageChecker
+
+Manual check setup:
+
+- `getFirstRunSlice()` result was passed to `DbReadOnlyRealDataReviewChainUsageChecker->run($readonlyInput)`;
+- usage checker created parser-like output;
+- usage checker called the standalone E2E checker;
+- runtime fixture JSON did not remain after check;
+- SQL/apply artifacts were not created.
+
+Observed:
+
+- `used = 1`
+- `parser_like_output_created = 1`
+- `e2e_checker_called = 1`
+- `e2e_checked = 1`
+- `review_ready = 1`
+- `errors_count = 0`
+
+### Full batch check through bounded chunks
+
+Because the current usage checker safety limit is `MAX_ROWS = 5`, full batch was checked through bounded chunks without changing existing classes.
+
+Observed:
+
+- `full_batch_rows_count = 8`
+- `chunks_used = 2`
+- all chunks `used/review_ready/e2e_checked = 1`
+- aggregate `errors_count = 0`
+- SQL/apply markers are all `0`
+
+Aggregate non-apply markers:
+
+- `sql_generated = 0`
+- `apply_plan_created = 0`
+- `safe_to_apply = 0`
+- `sql_apply_allowed = 0`
+- `production_ready = 0`
+
+### Runtime artifact safety
+
+Observed:
+
+- temporary check file was removed;
+- `framework-standardization/var/review-fixtures/*.json: 0`;
+- SQL/apply artifacts were not created.
+
+### Default dry-run regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+The second pump diameter usage input fixture remains a standalone local readonly controlled source only.
