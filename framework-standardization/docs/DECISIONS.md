@@ -2511,3 +2511,111 @@ Implementation не должен:
 Связанный документ:
 
 - `docs/DB_READONLY_FIRST_REAL_DATA_USAGE_INPUT_SOURCE_SPEC.md`.
+
+## 2026-07-07 — First real-data usage manual command должен оставаться standalone manual entrypoint
+
+### Решение
+
+Future command:
+
+```text
+bin/db-readonly-first-real-data-usage-check.php
+```
+
+допустим только как standalone manual command для первого controlled real-data-like usage check.
+
+Command должен связывать:
+
+```text
+DbReadOnlyFirstRealDataUsageInputFixture::getFirstRunSlice(2)
+-> DbReadOnlyRealDataReviewChainUsageChecker::run($readonlyInput)
+```
+
+Command может печатать только concise diagnostics:
+
+- `used`;
+- `review_ready`;
+- `input_rows_count`;
+- `e2e_checked`;
+- SQL/apply markers;
+- `errors_count`;
+- `warnings_count`.
+
+Command не является:
+
+- pipeline stage;
+- runner integration;
+- SQL preview input;
+- production output.
+
+Command не должен принимать arbitrary input, filenames, paths или URLs.
+
+Command не должен использовать live DB или production DB.
+
+Command не должен делать SQL/apply.
+
+Command не должен менять default dry-run path.
+
+Implementation допустима только после explicit `+`.
+
+### Запрещено
+
+Для first real-data usage manual command запрещено:
+
+- pipeline wiring;
+- runner integration;
+- live DB / production DB;
+- full category batch;
+- arbitrary input;
+- filenames/paths/URLs input;
+- SQL preview;
+- SQL generation/files/diff;
+- apply plan;
+- SQL apply;
+- DB/schema changes;
+- write/schema operations;
+- production output;
+- committed runtime artifacts;
+- default dry-run path changes.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+`approved` остаётся только review-chain status.
+
+`approved` не означает SQL/apply permission.
+
+### Причина
+
+Manual command может дать безопасный локальный entrypoint для already implemented controlled fixture provider and usage checker.
+
+Но такой entrypoint не должен расширять архитектурную поверхность до pipeline/runners, arbitrary input, live DB или SQL/apply.
+
+Первый real-data-like check должен оставаться минимальным, readonly и diagnostic-only.
+
+### Последствие
+
+Следующий implementation step, если будет явно разрешён, должен создать только минимальный standalone manual command.
+
+Он не должен:
+
+- добавлять постоянный runner;
+- подключаться к pipeline;
+- принимать external input;
+- использовать live DB;
+- генерировать SQL/apply;
+- создавать production output.
+
+### Контекст
+
+Связанный документ:
+
+- `docs/DB_READONLY_FIRST_REAL_DATA_USAGE_MANUAL_COMMAND_SPEC.md`.
