@@ -39,6 +39,38 @@ class DbReadOnlyFirstRealDataUsageInputFixture
                 'normalized_value' => '125',
                 'confidence' => 'medium',
             ),
+            array(
+                'product_id' => 10005,
+                'attribute_id' => 301,
+                'attribute_name' => 'pump_diameter',
+                'raw_value' => '140 mm',
+                'normalized_value' => '140',
+                'confidence' => 'medium',
+            ),
+            array(
+                'product_id' => 10006,
+                'attribute_id' => 301,
+                'attribute_name' => 'pump_diameter',
+                'raw_value' => '150 mm',
+                'normalized_value' => '150',
+                'confidence' => 'medium',
+            ),
+            array(
+                'product_id' => 10007,
+                'attribute_id' => 301,
+                'attribute_name' => 'pump_diameter',
+                'raw_value' => '160 mm',
+                'normalized_value' => '160',
+                'confidence' => 'low',
+            ),
+            array(
+                'product_id' => 10008,
+                'attribute_id' => 301,
+                'attribute_name' => 'pump_diameter',
+                'raw_value' => '180 mm',
+                'normalized_value' => '180',
+                'confidence' => 'low',
+            ),
         );
 
         return array(
