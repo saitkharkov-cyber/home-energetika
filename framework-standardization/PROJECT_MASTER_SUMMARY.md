@@ -8,464 +8,211 @@
 
 ## Назначение проекта
 
-Проект предназначен для безопасной стандартизации характеристик каталога Home Energetika.
+Framework Standardization — это controlled attribute consolidation workflow для безопасной стандартизации характеристик каталога Home Energetika.
 
-Основная задача:
+Framework Standardization не является fully automatic normalizer.
 
-```text
-найти разные варианты одной характеристики
-и привести их к утверждённому каноническому атрибуту OpenCart
-````
+Основная цель:
 
-Пример:
+* принимать target attribute meaning;
+* выполнять DB-readonly attribute name discovery;
+* показывать candidate list;
+* требовать human canonical selection;
+* требовать explicit include/exclude alias decision;
+* собирать raw values inventory;
+* фиксировать canonical unit / `normalized_value` contract;
+* генерировать normalization proposals;
+* передавать proposals в standalone review-chain;
+* готовить apply-plan только отдельным explicit step после review.
 
-```text
-Диаметр насоса (мм)
-Диаметр корпуса
-Диаметр, мм
-Ø насоса
-```
-
-могут быть проанализированы как кандидаты на приведение к одному каноническому атрибуту.
+Framework не объединяет похожие `attribute_name` автоматически. Похожие названия могут быть aliases, duplicates, similar-but-different или unsafe/unresolved candidates.
 
 ---
 
 ## Стартовые документы
 
-| Документ                     | Назначение                                           |
-| ---------------------------- | ---------------------------------------------------- |
-| `TECHNICAL_SPECIFICATION.md` | Техническое задание проекта                          |
-| `README.md`                  | Навигация по проекту                                 |
-| `PROJECT_MASTER_SUMMARY.md`  | Сводка архитектуры и текущего состояния              |
-| `docs/ATTRIBUTE_PIPELINE.md` | Архитектурный контракт конвейера обработки атрибутов |
-| `docs/STAGES_PIPELINE.md`    | Контракт stage pipeline: порядок stages, входы/выходы, ошибки и правила остановки |
-| `docs/CANONICAL_ATTRIBUTE_REGISTRATION.md` | Контракт регистрации канонического атрибута |
-| `docs/ATTRIBUTE_JOB.md`      | Контракт одной задачи обработки характеристики       |
-| `docs/ATTRIBUTE_EXPORTER.md` | Контракт для чтения фактов из OpenCart для Framework Standardization. |
-| `docs/ATTRIBUTE_CONTEXT.md`  | Контракт рабочего состояния Framework                |
-| `docs/FRAMEWORK_RESULT.md`   | Контракт финального результата Framework             |
-| `docs/VALUE_PARSER.md`       | Контракт компонента нормализации одного значения характеристики |
-| `sql/CREATE_TABLE_canonical_attributes.sql` | SQL-драфт таблицы canonical attributes |
-| `docs/ANALYZE_NAMES_STAGE.md` | Контракт stage анализа имён атрибутов и формирования кандидатов в синонимы |
-| `docs/ANALYZE_VALUES_STAGE.md` | Контракт stage анализа и нормализации значений атрибутов |
-| `docs/BUILD_SQL_PREVIEW_STAGE.md` | Контракт stage формирования безопасного SQL preview |
-| `docs/BUILD_REPORT_STAGE.md` | Контракт stage формирования человекочитаемого отчёта для инженера |
-| `docs/BUILD_FRAMEWORK_RESULT_STAGE.md` | Контракт финальной stage сборки FrameworkResult из AttributeContext |
-| `docs/IMPLEMENTATION_STRUCTURE.md` | Архитектурный план структуры будущей реализации Framework |
+Новый ChatGPT-чат / onboarding должен начинать с:
+
+* `docs/START_HERE.md` — входной документ для нового ChatGPT-чата / onboarding.
+
+Основные документы:
+
+| Документ | Назначение |
+| --- | --- |
+| `docs/START_HERE.md` | Быстрый вход для нового ChatGPT-чата |
+| `README.md` | Навигация по проекту |
+| `PROJECT_MASTER_SUMMARY.md` | Сводка актуальной архитектурной модели |
+| `docs/HANDOFF.md` | Оперативное состояние активной разработки |
+| `docs/DECISIONS.md` | Архитектурные решения |
+| `docs/RUNTIME_CHECKS.md` | История ручных проверок |
+| `TECHNICAL_SPECIFICATION.md` | Исходное техническое задание |
+
+Specialized specs в `docs/` описывают отдельные workflow gates, boundaries и standalone components.
 
 ---
 
-## Текущая архитектурная модель
+## Актуальная workflow-модель
 
-Framework работает с одной задачей обработки характеристики:
+Актуальная цепочка:
 
-```text
-Attribute Job
-```
+* target attribute meaning;
+* DB-readonly attribute name discovery;
+* candidate list;
+* human canonical selection;
+* explicit include/exclude alias decision;
+* raw values inventory;
+* canonical unit / `normalized_value` contract;
+* normalization proposals generation;
+* standalone review-chain;
+* separate explicit apply-plan.
 
-`Attribute Job` описывает:
-
-* какую характеристику обрабатываем;
-* какой канонический атрибут выбран;
-* в какой области выполняем анализ;
-* какой parser / тип / правила применяются;
-* какой результат нужно подготовить.
-
-Framework не выбирает характеристику сам.
-Характеристика выбирается инженером вручную.
+Каждый переход является gate. Нельзя перескакивать сразу к fixture/source/job, parser implementation, SQL preview или apply plan.
 
 ---
 
-## Канонический атрибут
+## Human canonical selection
 
-Канонический атрибут — это глобальный целевой атрибут OpenCart.
+User/engineer вручную:
 
-Ключевое решение:
+* задаёт target attribute meaning;
+* выбирает canonical `attribute_id`;
+* явно подтверждает included alias `attribute_ids`;
+* явно исключает similar-but-different `attribute_ids`;
+* просматривает unresolved/unsafe candidates;
+* утверждает canonical unit / `normalized_value` contract;
+* reviews proposals в standalone review-chain.
 
-```text
-Канонический атрибут = глобальная сущность OpenCart.
-Категория = область анализа и применения.
-```
+Framework не принимает canonical decision автоматически.
 
-Категория не является частью идентичности канона.
+`approved` в review-chain означает только review status.
 
-Перед стандартизацией характеристики в категории нужно сначала проверить, существует ли уже подходящий глобальный канон по смыслу.
+`approved` не означает SQL apply permission.
 
----
-
-## Что выносится в БД
-
-На текущем этапе в БД выносится только одна таблица:
-
-```text
-{DB_PREFIX}canonical_attributes
-```
-
-Ответственность таблицы:
-
-```text
-какой реальный attribute_id OpenCart считается глобальным каноном
-```
-
-Утверждённая структура:
-
-```text
-{DB_PREFIX}canonical_attributes
-├─ canonical_id
-├─ canonical_code              UNIQUE
-├─ target_attribute_id         UNIQUE
-├─ target_attribute_name
-├─ target_attribute_group_id
-├─ target_attribute_group_name
-├─ status                      draft / active
-├─ locked                      0 / 1
-├─ comment
-├─ created_at
-└─ updated_at
-```
-
-Типы полей:
-
-```text
-canonical_id
-→ INT UNSIGNED AUTO_INCREMENT PRIMARY KEY
-
-canonical_code
-→ VARCHAR(64) NOT NULL UNIQUE
-
-target_attribute_id
-→ INT UNSIGNED NOT NULL UNIQUE
-
-target_attribute_name
-→ VARCHAR(255) NOT NULL
-
-target_attribute_group_id
-→ INT UNSIGNED NOT NULL
-
-target_attribute_group_name
-→ VARCHAR(255) NOT NULL
-
-status
-→ ENUM('draft', 'active') NOT NULL DEFAULT 'draft'
-
-locked
-→ TINYINT(1) NOT NULL DEFAULT 0
-
-comment
-→ TEXT NULL
-
-created_at
-→ DATETIME NOT NULL
-
-updated_at
-→ DATETIME NOT NULL
-```
+No auto-apply.
 
 ---
 
-## Что не выносится в БД
+## Отношение к config/jobs
 
-На текущем этапе в БД не выносятся:
+`config/jobs` не является стартовой точкой угадывания характеристики.
 
-* `scope` / `category_id`;
-* `value_parser`;
-* `value_type`;
-* `allow_empty`;
-* правила нормализации;
-* правила валидации;
-* синонимы;
-* результаты анализа;
-* найденные кандидаты.
+`config/jobs` может появляться только после:
 
-Эти данные остаются внутри:
+* accepted canonical decision;
+* completed raw values inventory;
+* approved canonical unit / `normalized_value` contract;
+* proposal generation model/spec.
 
-```text
-Framework / Attribute Job / конфигурации запуска
-```
+Архитектурная модель:
 
----
+* одна характеристика = один job/contract;
+* один тип значений = один parser/normalizer family;
+* новая характеристика не обязательно требует новый PHP handler.
 
-## Scope
-
-`scope` — это область анализа и применения.
-
-На текущем этапе `scope` не хранится в БД.
-
-Он передаётся через:
-
-```text
-Attribute Job
-```
-
-или конфигурацию запуска.
-
-Пример:
-
-```text
-canonical_code: pump_diameter
-category_id: 11900213
-```
+Если value semantics уже покрыта существующим parser/normalizer family, отдельный обработчик под конкретный `attribute_id` не нужен.
 
 ---
 
-## Статусы и блокировка канона
+## Standalone review-chain
 
-Используются только два статуса:
+Уже построена и остаётся полезной вторая половина workflow:
 
-```text
-draft
-active
-```
+* raw values / proposals;
+* review fixture generator;
+* writer;
+* manual review;
+* loader;
+* bridge;
+* approval flow;
+* result reporter.
 
-`disabled` не используется.
+Standalone review-chain должна получать proposals только после approved canonical unit / `normalized_value` contract.
 
-`locked` — отдельный булев флаг:
-
-```text
-locked = 1
-```
-
-означает, что канон утверждён и не должен изменяться автоматически.
-
-Изменение утверждённого канона возможно только вручную как отдельный инженерный процесс.
+Review-chain output не является SQL preview input by default и не является apply-ready output.
 
 ---
 
-## Ограничения таблицы
+## Legacy / historical context
 
-Используются уникальные ограничения:
+Ранние документы про `Attribute Job`, `AttributeContext`, `Attribute Pipeline`, `FrameworkResult`, stage contracts и SQL preview остаются historical/legacy context.
 
-```text
-UNIQUE(canonical_code)
-UNIQUE(target_attribute_id)
-```
+Они полезны как источник терминов и некоторых компонентных границ, но не являются актуальным next step.
 
-`FOREIGN KEY` не используется.
-
-Причина: не связывать служебную таблицу жёстко с таблицами OpenCart и не создавать риски для импортов, миграций и модулей.
-
-Проверка канона выполняется перед добавлением записи:
-
-* `target_attribute_id` существует;
-* `target_attribute_group_id` существует;
-* атрибут относится к указанной группе;
-* имя атрибута совпадает;
-* имя группы совпадает;
-* `canonical_code` свободен;
-* `target_attribute_id` ещё не используется как канон.
+Актуальная модель больше не начинается с Attribute Pipeline skeleton или `config/jobs`. Она начинается с target attribute meaning, DB-readonly discovery и human canonical selection.
 
 ---
 
-## AttributeExporter
+## SQL / apply / production safety
 
-`AttributeExporter` — read-only слой чтения фактов из БД.
+Без отдельного explicit step запрещено:
 
-Он:
+* SQL preview by default;
+* SQL generation;
+* SQL files;
+* SQL diff;
+* apply plan;
+* SQL apply;
+* live DB / production DB;
+* DB/schema changes;
+* write/schema operations;
+* production/cache changes;
+* cache rebuild;
+* default dry-run path changes.
 
-* читает фактические атрибуты и значения из OpenCart;
-* проверяет наличие целевого атрибута;
-* возвращает найденные сырые атрибуты;
-* считает `usage_count`;
-* собирает `sample_values`.
+Apply-plan возможен только после review и отдельного explicit approval.
 
-Он не:
-
-* нормализует значения;
-* решает, что является синонимом;
-* создаёт атрибуты;
-* изменяет БД;
-* применяет результат.
-
----
-
-## Analyze stages
-
-Анализ разделён на две stage.
-
-`AnalyzeNamesStage` отвечает за анализ имён и кандидатов.
-
-Он:
-
-* смотрит на найденные атрибуты;
-* анализирует частотность;
-* выявляет потенциальные синонимы;
-* формирует диагностику;
-* создаёт предупреждения.
-
-Частотность — диагностический сигнал, а не автоматический выбор канона.
-
-`AnalyzeValuesStage` отвечает за анализ значений через `ValueParser`.
+Selector/cache-related attributes require explicit canonical unit contract before implementation.
 
 ---
 
-## ValueParser
+## Runtime model
 
-`ValueParser` отвечает только за нормализацию одного значения.
+Framework Standardization остаётся инженерным tooling layer внутри `framework-standardization`.
 
-Он не работает с БД и не принимает решений о синонимах.
+Он не является OpenCart-модулем и не является модулем админки OpenCart.
 
-Пример:
-
-```text
-"96 мм" → 96
-"4\""   → 101.6
-```
-
----
-
-## FrameworkResult
-
-`FrameworkResult` — финальная проекция из `AttributeContext`.
-
-Он не является отдельным независимым состоянием.
-
-Минимально содержит:
-
-```text
-FrameworkResult
-├─ canonical_attribute
-├─ proposed_synonym_candidates[]
-├─ rejected_candidates[]
-├─ value_report
-├─ warnings[]
-├─ sql_preview
-├─ report
-└─ unknown_values
-```
-
-`proposed_synonym_candidates` — это предложения Framework, а не финальное автоматическое решение.
-
-Финальное решение принимает инженер.
-
----
-
-## Связь с импортом
-
-Существующие импорты сейчас не изменяются.
-
-Импорт рассматривается как будущий потребитель canonical layer.
-
-Будущий защитный слой:
-
-```text
-CanonicalAttributeResolver
-```
-
-должен стать границей интеграции с импортами.
-
-Он будет решать задачу:
-
-```text
-category_id
-+ incoming_attribute_name
-+ incoming_attribute_group
-+ source
-→ canonical_id
-→ target_attribute_id / not_found / ambiguous
-```
-
-На текущем этапе это только архитектурный ориентир.
-Правки ExcelPort / Suppler сейчас не выполняются.
-
----
-
-## Ручной контроль
-
-Инженер вручную:
-
-* выбирает характеристику;
-* проверяет наличие глобального канона;
-* утверждает канонический атрибут;
-* задаёт область анализа;
-* проверяет найденные кандидаты;
-* проверяет SQL preview;
-* принимает решение о публикации;
-* вручную применяет результат на продуктиве.
-
-Framework не публикует результат автоматически.
+OpenCart / dump-derived data используются как readonly source для discovery, inventory и diagnostics.
 
 ---
 
 ## Текущий статус
 
-Зафиксированы архитектурные контракты:
+Зафиксирована актуальная архитектура controlled attribute consolidation workflow.
 
-```text
-docs/ATTRIBUTE_PIPELINE.md
-docs/STAGES_PIPELINE.md
-docs/CANONICAL_ATTRIBUTE_REGISTRATION.md
-docs/ATTRIBUTE_JOB.md
-docs/ATTRIBUTE_EXPORTER.md
-docs/ATTRIBUTE_CONTEXT.md
-docs/FRAMEWORK_RESULT.md
-docs/VALUE_PARSER.md
-docs/ANALYZE_NAMES_STAGE.md
-docs/ANALYZE_VALUES_STAGE.md
-docs/BUILD_SQL_PREVIEW_STAGE.md
-docs/BUILD_REPORT_STAGE.md
-docs/BUILD_FRAMEWORK_RESULT_STAGE.md
-docs/IMPLEMENTATION_STRUCTURE.md
-sql/CREATE_TABLE_canonical_attributes.sql
+Уже задокументированы обязательные pre-review/pre-contract/pre-proposal gates:
 
-```
+* attribute name discovery / canonical selection;
+* raw values inventory;
+* canonical unit / `normalized_value` contract;
+* normalization proposals generation;
+* standalone review-chain boundary.
 
-Базовый документ ATTRIBUTE_PIPELINE.md прошёл read-only ревью Codex.
-
-Критичные противоречия закрыты.
-
-Структура будущей реализации Framework зафиксирована в:
-
-```text
-docs/IMPLEMENTATION_STRUCTURE.md
-```
-
-```text
-Attribute Job
-→ AttributeContext
-→ Attribute Pipeline
-→ FrameworkResult
-```
-Последнее зафиксированное решение:
-
-```text
-В БД текущего этапа выносится только {DB_PREFIX}canonical_attributes.
-Scope, правила обработки, синонимы и результаты анализа остаются вне БД.
-```
+Старый next step про минимальный implementation skeleton `StageInterface`, `PipelineEngine`, DTO и 9 пустых stages больше не является актуальным направлением.
 
 ---
 
-## Runtime первого MVP
+## Следующий direction
 
-Implementation skeleton остаётся на PHP.
+Следующий direction:
 
-Целевой runtime первого MVP:
+implementation spec для первого DB-readonly attribute name discovery command/tool.
 
-```text
-PHP 5.6-compatible CLI/tooling layer
-```
+Только после отдельного explicit `+`.
 
-Framework Standardization не является OpenCart-модулем и не является модулем админки OpenCart.
+Future tool должен показывать candidates:
 
-Это отдельный инженерный tooling layer внутри `framework-standardization`.
-
-Он:
-
-* запускается вручную инженером;
-* работает по одному `Attribute Job`;
-* готовит `stage_results`, `report` и `sql_preview`;
-* не применяет SQL автоматически;
-* не создаёт OpenCart module paths: `admin/controller`, `admin/model`, `admin/view`, `catalog/controller`, `catalog/model`, `language`;
-* не подключается к `admin/index.php` или OpenCart MVC как runtime.
-
-OpenCart на текущем этапе является источником данных.
-
-Существующий PHP-импорт товаров является будущим потребителем canonical layer, но не частью первого skeleton.
-
----
-
-## Следующий логичный шаг
-
-Создать минимальный implementation skeleton: StageInterface, PipelineEngine, DTO и 9 пустых stages без бизнес-логики.
+* `attribute_id`;
+* `attribute_name`;
+* `usage_count`;
+* optional category coverage;
+* short raw samples preview;
+* warnings;
+* reason found;
+* possible role:
+  * canonical candidate;
+  * possible alias / duplicate;
+  * similar but different;
+  * unsafe / unresolved.
 
 ---
 
@@ -475,12 +222,11 @@ OpenCart на текущем этапе является источником д
 
 Порядок:
 
-```text
-анализ
-→ рекомендация
-→ решение инженера
-→ фиксация
-→ только потом реализация
-```
+* analysis/spec;
+* architecture decision;
+* explicit approval;
+* bounded implementation;
+* runtime checks only when requested;
+* documentation update when needed.
 
-Код и SQL не выполняются до утверждения архитектурного решения.
+Код, config/jobs, SQL/apply и production/cache actions не выполняются до утверждения соответствующего architecture decision и explicit approval.
