@@ -2098,3 +2098,104 @@ Reporter не должен:
 
 - `docs/DB_READONLY_REVIEW_CHAIN_RESULT_REPORTER_SPEC.md`;
 - `docs/RULES.md`.
+
+## 2026-07-07 — Standalone review chain E2E check должен оставаться diagnostic-only и standalone-only
+
+### Решение
+
+Standalone review chain E2E check нужен только для проверки совместимости standalone review chain components.
+
+Chain под проверкой:
+
+```text
+parser output
+-> generator
+-> writer
+-> local ignored JSON
+-> manual review
+-> loader
+-> bridge
+-> approval flow
+-> reporter
+```
+
+Future checker class допустим только как standalone diagnostic tool:
+
+```text
+src/Approval/DbReadOnlyStandaloneReviewChainE2EChecker.php
+```
+
+E2E checker не является:
+
+- pipeline stage;
+- runner integration;
+- SQL preview input;
+- production output;
+- SQL/apply layer.
+
+### Границы
+
+Generated local fixture JSON должен удаляться после check.
+
+Fixture JSON не коммитится.
+
+`approved` остаётся только review-chain status.
+
+`approved` не означает:
+
+- SQL apply allowed;
+- `safe_to_apply = 1`;
+- `production_ready = 1`;
+- apply-ready output.
+
+### Запрещено
+
+Standalone review chain E2E checker не должен:
+
+- менять pipeline wiring;
+- добавлять runner integration;
+- добавлять SQL preview integration;
+- генерировать SQL;
+- создавать SQL files;
+- создавать SQL diff;
+- создавать apply plan;
+- выполнять SQL apply;
+- использовать DB;
+- использовать live DB;
+- делать DB/schema changes;
+- выполнять write/schema operations;
+- создавать OpenCart module runtime paths;
+- менять default dry-run path.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+После реализации standalone chain до reporter включительно нужен безопасный способ проверить совместимость всей chain целиком.
+
+Такая проверка должна оставаться diagnostic-only: она подтверждает, что standalone components могут пройти через synthetic/manual local review workflow, но не создаёт production output и не приближает систему к SQL/apply.
+
+### Последствие
+
+Дальнейшие шаги должны оставаться разделёнными:
+
+- standalone E2E check = diagnostics/compatibility boundary;
+- generated fixture JSON = temporary local ignored artifact;
+- approval flow statuses = review-chain statuses only;
+- SQL/apply architecture = отдельное future decision;
+- pipeline wiring = отдельное future decision, сейчас запрещено.
+
+### Контекст
+
+Связанный документ:
+
+- `docs/DB_READONLY_STANDALONE_REVIEW_CHAIN_E2E_CHECK_SPEC.md`.
