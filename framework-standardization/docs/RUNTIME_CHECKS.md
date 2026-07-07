@@ -2763,3 +2763,124 @@ Result:
 - `all 9 stages ok`
 
 The prepared fixture provider remains a standalone local readonly fixture source only.
+
+## 2026-07-07  db-readonly-prepared-fixture-full-batch-check manual command implementation check
+
+### Context
+
+Implementation commit:
+
+`0763272 Add DB readonly prepared fixture full batch command`
+
+Created standalone manual command:
+
+`framework-standardization/bin/db-readonly-prepared-fixture-full-batch-check.php`
+
+Purpose:
+
+- standalone manual command;
+- takes the full current prepared fixture set from `DbReadOnlyFirstRealDataUsageInputFixture`;
+- current full set is `8` rows;
+- validates `input_rows_count = 8`;
+- validates `input_rows_count > 4`;
+- validates `input_rows_count <= 12`;
+- runs the data through `DbReadOnlyRealDataReviewChainUsageChecker`;
+- because the current usage checker safety limit is `MAX_ROWS = 5`, the full set is processed inside the command as two bounded chunks;
+- existing classes were not changed.
+
+### Boundary
+
+Confirmed boundaries:
+
+- standalone manual command only;
+- full prepared fixture set is `8` rows;
+- bounded chunking is used only to respect usage checker `MAX_ROWS = 5`;
+- not connected to pipeline;
+- not connected to runners;
+- no arbitrary input;
+- no filenames/paths/URLs input;
+- no live DB;
+- no production DB;
+- no full category batch;
+- no SQL preview;
+- no SQL generation/files/diff/apply plan/apply;
+- no DB/schema changes;
+- no production output;
+- no committed runtime artifacts;
+- default dry-run path does not change;
+- `approved` remains only a review-chain status, not SQL/apply permission.
+
+### Syntax check
+
+Command:
+
+```text
+C:\php56\php.exe -l framework-standardization\bin\db-readonly-prepared-fixture-full-batch-check.php
+```
+
+Result:
+
+```text
+No syntax errors detected
+```
+
+### Manual command run
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-prepared-fixture-full-batch-check.php
+```
+
+Observed:
+
+- `used = 1`
+- `review_ready = 1`
+- `input_rows_count = 8`
+- `e2e_checked = 1`
+- `sql_generated = 0`
+- `apply_plan_created = 0`
+- `safe_to_apply = 0`
+- `sql_apply_allowed = 0`
+- `production_ready = 0`
+- `errors_count = 0`
+- `warnings_count = 0`
+
+### Runtime safety
+
+Observed:
+
+- JSON fixture files did not remain after command;
+- SQL/apply artifacts were not created.
+
+### Default dry-run regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+The full prepared fixture batch command remains a standalone manual readonly usage-check entrypoint only.
