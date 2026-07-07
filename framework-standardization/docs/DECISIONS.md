@@ -2299,3 +2299,108 @@ DbReadOnlyStandaloneReviewChainE2EChecker result
 Связанный документ:
 
 - `docs/DB_READONLY_REVIEW_CHAIN_RESULT_EXPORT_BOUNDARY_SPEC.md`.
+
+## 2026-07-07 — First real-data review-chain usage scenario должен оставаться controlled standalone readonly scenario
+
+### Решение
+
+Первый real-data usage scenario нужен только для controlled проверки уже собранной standalone review-chain.
+
+Допустимый input:
+
+- local readonly snapshot;
+- local readonly fixture;
+- dump-derived test input;
+- маленький контролируемый набор строк.
+
+Real-data rows должны оборачиваться в parser-like output.
+
+Scenario может доводить standalone chain до:
+
+- review-ready diagnostics;
+- reporter summary;
+- E2E diagnostics.
+
+Scenario не является:
+
+- pipeline stage;
+- runner integration;
+- SQL preview input;
+- production output.
+
+### Границы input
+
+Запрещено использовать:
+
+- live DB;
+- production DB;
+- full category batch;
+- arbitrary uploaded data;
+- OpenCart runtime path;
+- production data source.
+
+Scenario не должен менять production data.
+
+`approved` остаётся только review-chain status.
+
+`approved` не означает SQL/apply permission.
+
+### Запрещено
+
+Для первого real-data review-chain usage scenario запрещено:
+
+- pipeline wiring;
+- runner integration;
+- SQL preview integration;
+- SQL generation;
+- SQL files;
+- SQL diff;
+- apply plan;
+- SQL apply;
+- DB/live DB;
+- DB/schema changes;
+- write/schema operations;
+- OpenCart module runtime paths;
+- default dry-run path changes;
+- production output;
+- committed runtime artifacts.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+После synthetic/in-memory E2E checker нужен следующий безопасный шаг: проверить, что standalone review-chain может подготовить review-ready diagnostics на real-data-like input.
+
+Это должно быть сделано на small controlled readonly slice, а не на full category batch и не через pipeline/runners.
+
+SQL preview и SQL/apply преждевременны, потому что review-chain statuses не являются SQL/apply permission.
+
+### Next-step boundary
+
+Implementation допустима только после отдельного explicit `+`.
+
+Если implementation будет подтверждена, она должна быть minimal standalone usage checker/fixture command.
+
+Такой implementation не должен:
+
+- менять pipeline;
+- менять runners;
+- менять default dry-run path;
+- использовать live DB;
+- генерировать SQL/apply;
+- создавать production output.
+
+### Контекст
+
+Связанный документ:
+
+- `docs/DB_READONLY_REAL_DATA_REVIEW_CHAIN_USAGE_SCENARIO_SPEC.md`.
