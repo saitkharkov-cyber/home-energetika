@@ -2619,3 +2619,106 @@ Manual command может дать безопасный локальный entry
 Связанный документ:
 
 - `docs/DB_READONLY_FIRST_REAL_DATA_USAGE_MANUAL_COMMAND_SPEC.md`.
+
+## 2026-07-07 — Real-data usage review batch expansion должен оставаться small standalone readonly batch
+
+### Решение
+
+Controlled review batch expansion допустим только после successful first manual command baseline.
+
+Baseline:
+
+- context: `pump_diameter`;
+- prepared fixture: `4` controlled rows;
+- first manual command использовал `getFirstRunSlice(2)`;
+- first manual command вернул `used = 1`;
+- first manual command вернул `review_ready = 1`;
+- first manual command вернул `e2e_checked = 1`;
+- first manual command вернул `input_rows_count = 2`.
+
+Future expansion может использовать только малый batch из prepared fixture.
+
+Recommended first expanded batch:
+
+```text
+input_rows_count = 4
+```
+
+Expansion не должен превышать documented prepared fixture max:
+
+```text
+input_rows_count <= 12
+```
+
+Expansion остаётся:
+
+- manual;
+- standalone;
+- readonly;
+- diagnostic/review-chain check only.
+
+`approved` остаётся только review-chain status.
+
+`approved` не означает SQL/apply permission.
+
+### Запрещено
+
+Для real-data usage review batch expansion запрещено:
+
+- pipeline wiring;
+- runner integration;
+- live DB / production DB;
+- full category batch;
+- arbitrary input;
+- filenames/paths/URLs input;
+- SQL preview;
+- SQL generation/files/diff;
+- apply plan;
+- SQL apply;
+- DB/schema changes;
+- write/schema operations;
+- production output;
+- committed runtime artifacts;
+- default dry-run path changes.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+Текущий first-run manual command уже подтвердил safe readonly path на `2` rows.
+
+Следующий осторожный шаг может проверить, что standalone review-chain остаётся stable на малом batch из already prepared fixture rows.
+
+Но expansion не должен превращаться в full category batch, pipeline/runner integration, SQL preview или production workflow.
+
+### Next-step boundary
+
+Implementation допустима только после explicit `+`.
+
+Если implementation будет подтверждена, она должна быть minimal standalone manual command/check path.
+
+Implementation не должен:
+
+- добавлять постоянный runner;
+- подключаться к pipeline;
+- принимать arbitrary input;
+- принимать filenames/paths/URLs;
+- использовать live DB;
+- генерировать SQL/apply;
+- создавать production output;
+- менять default dry-run path.
+
+### Контекст
+
+Связанный документ:
+
+- `docs/DB_READONLY_REAL_DATA_USAGE_REVIEW_BATCH_EXPANSION_SPEC.md`.
