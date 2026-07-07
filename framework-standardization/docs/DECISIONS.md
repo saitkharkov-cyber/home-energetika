@@ -3608,3 +3608,147 @@ raw values inventory after canonical selection
 ```
 
 Он должен быть отдельным spec/decision step и не должен начинаться до accepted canonical selection / include-exclude decision.
+
+## 2026-07-07 — Raw values inventory as pre-contract gate
+
+### Решение
+
+Raw values inventory запускается только после:
+
+- target attribute meaning задан;
+- DB-readonly attribute discovery выполнен;
+- canonical `attribute_id` выбран пользователем;
+- included alias `attribute_ids` явно подтверждены пользователем;
+- excluded similar-but-different `attribute_ids` явно исключены пользователем;
+- unresolved candidates зафиксированы, если есть.
+
+Raw values inventory является обязательным gate перед:
+
+- canonical unit decision;
+- `normalized_value` contract;
+- normalization proposals;
+- parser/normalizer implementation;
+- `config/jobs`;
+- selector/cache usage;
+- apply plan.
+
+Inventory должен показывать:
+
+- `raw_value`;
+- `usage_count`;
+- attribute ids/names where value appears;
+- sample `product_ids`;
+- optional sample product names, если доступны readonly;
+- warnings/dirtiness signals;
+- optional empty/unapproved normalized preview placeholders.
+
+Inventory не выбирает canonical attribute.
+
+Inventory не делает auto-merge.
+
+Inventory не утверждает unit.
+
+Inventory не создаёт final `normalized_value`.
+
+Inventory не создаёт normalization proposals.
+
+Inventory не запускает parser/normalizer.
+
+Inventory не пишет `config/jobs`.
+
+Values из excluded `attribute_ids` не смешиваются с canonical group.
+
+Values из included aliases должны сохранять связь с source `attribute_id`.
+
+Dirty/mixed/uncertain values должны попадать в warnings.
+
+### Relationship to canonical unit contract
+
+Canonical unit и `normalized_value` contract должны быть отдельным human-approved step после inventory.
+
+Для selector/cache-related attributes canonical unit contract обязателен до implementation.
+
+Unit semantics нельзя угадывать автоматически.
+
+### Relationship to review-chain
+
+Standalone review-chain получает proposals только после:
+
+- raw values inventory completed;
+- canonical unit approved;
+- `normalized_value` contract approved;
+- proposal generation step completed.
+
+`approved` в review-chain не означает SQL apply permission.
+
+Apply plan возможен только отдельным explicit step после review.
+
+### Production safety
+
+Production/cache changes запрещены.
+
+No cache rebuild.
+
+Production incident with `max_flow_l_min` remains warning example:
+
+- temporary cache hotfix for Belamos/Pedrollo;
+- rebuild restored old flow values in `m/h`;
+- therefore unit semantics must not be guessed.
+
+### Границы
+
+Это решение фиксирует DB-readonly inventory only.
+
+Запрещено:
+
+- canonical selection in this step;
+- auto-merge;
+- unit approval in this step;
+- final `normalized_value` contract in this step;
+- normalization proposals;
+- parser implementation;
+- normalizer implementation;
+- PHP implementation;
+- config/jobs changes;
+- pipeline wiring;
+- runner integration;
+- SQL preview;
+- SQL generation/files/diff;
+- apply plan;
+- SQL apply;
+- live DB / production DB;
+- DB/schema changes;
+- write/schema operations;
+- production output;
+- production/cache changes;
+- cache rebuild;
+- runtime artifacts;
+- committed runtime artifacts;
+- default dry-run path changes.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+Raw values inventory нужен как evidence layer между canonical selection и unit/normalization contract.
+
+Без inventory system рискует угадывать unit semantics, смешивать values из похожих but different attributes или создавать proposals на непроверенной группе values.
+
+### Последствие
+
+Следующий safe step после inventory:
+
+```text
+canonical unit and normalized_value contract after raw values inventory
+```
+
+Этот step должен быть отдельным spec/decision step и не должен начинаться до completed inventory.
