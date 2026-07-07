@@ -2260,3 +2260,121 @@ Result:
 - `all 9 stages ok`
 
 The usage checker remains a standalone controlled readonly real-data-like scenario checker only.
+
+## 2026-07-07  DbReadOnlyFirstRealDataUsageInputFixture implementation check
+
+### Context
+
+Implementation commit:
+
+`941a5b8 Add DB readonly first real data usage input fixture`
+
+Created standalone class:
+
+`framework-standardization/src/Approval/DbReadOnlyFirstRealDataUsageInputFixture.php`
+
+Purpose:
+
+- standalone readonly fixture provider for the first controlled input source;
+- context: `pump_diameter`;
+- prepared fixture contains controlled readonly rows;
+- first run slice is limited to `<= 2 rows`;
+- fixture is intended only for local controlled usage checks.
+
+### Boundary
+
+Confirmed boundaries:
+
+- standalone readonly fixture provider only;
+- not connected to pipeline;
+- not connected to runners;
+- no live DB;
+- no production DB;
+- no SQL/apply artifacts;
+- no runtime fixture JSON left after check;
+- no production output;
+- `approved` remains only a review-chain status, not SQL/apply permission.
+
+### Syntax check
+
+Command:
+
+```text
+C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyFirstRealDataUsageInputFixture.php
+```
+
+Result:
+
+```text
+No syntax errors detected
+```
+
+### Standalone fixture check
+
+Observed:
+
+- `context = pump_diameter`
+- prepared rows count `4 <= 12`
+- first run rows count `2 <= 2`
+- `readonly = 1`
+- all required row fields exist
+- SQL/apply markers are all `0`
+
+Non-apply markers:
+
+- `sql_generated = 0`
+- `apply_plan_created = 0`
+- `safe_to_apply = 0`
+- `sql_apply_allowed = 0`
+- `production_ready = 0`
+
+### Integration check with DbReadOnlyRealDataReviewChainUsageChecker
+
+Manual check setup:
+
+- `getFirstRunSlice()` result was passed to `DbReadOnlyRealDataReviewChainUsageChecker->run($readonlyInput)`;
+- usage checker created parser-like output;
+- usage checker called the standalone E2E checker;
+- runtime fixture JSON did not remain after check;
+- SQL/apply artifacts were not created.
+
+Observed:
+
+- `used = 1`
+- `parser_like_output_created = 1`
+- `e2e_checker_called = 1`
+- `e2e_checked = 1`
+- `review_ready = 1`
+- `errors_count = 0`
+
+### Default dry-run regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+The fixture provider remains a standalone readonly input source for controlled local review-chain checks only.
