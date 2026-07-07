@@ -2433,6 +2433,8 @@ Result:
 No syntax errors detected
 ```
 
+- `Syntax: No syntax errors detected`
+
 ### Manual command run
 
 Command:
@@ -2494,3 +2496,121 @@ Result:
 - `all 9 stages ok`
 
 The command remains a standalone manual readonly usage-check entrypoint only.
+
+## 2026-07-07  db-readonly-real-data-usage-review-batch-check manual command implementation check
+
+### Context
+
+Implementation commit:
+
+`02e4456 Add DB readonly real data usage review batch command`
+
+Created standalone manual command:
+
+`framework-standardization/bin/db-readonly-real-data-usage-review-batch-check.php`
+
+Purpose:
+
+- standalone manual command for controlled expanded review batch;
+- uses prepared fixture rows from `DbReadOnlyFirstRealDataUsageInputFixture`;
+- runs expanded batch with `input_rows_count = 4`;
+- passes readonly input to `DbReadOnlyRealDataReviewChainUsageChecker::run($readonlyInput)`;
+- prints concise diagnostics as plain text;
+- returns exit code `0` only for a successful safe readonly expanded batch check.
+
+### Boundary
+
+Confirmed boundaries:
+
+- standalone manual command only;
+- expanded batch `input_rows_count = 4`;
+- not connected to pipeline;
+- not connected to runners;
+- no live DB;
+- no production DB;
+- no full category batch;
+- no arbitrary input;
+- no filenames/paths/URLs input;
+- no SQL preview;
+- no SQL generation/files/diff/apply plan/apply;
+- no DB/schema changes;
+- no production output;
+- no committed runtime artifacts;
+- default dry-run path does not change;
+- `approved` remains only a review-chain status, not SQL/apply permission.
+
+### Syntax check
+
+Command:
+
+```text
+C:\php56\php.exe -l framework-standardization\bin\db-readonly-real-data-usage-review-batch-check.php
+```
+
+Result:
+
+```text
+No syntax errors detected
+```
+
+### Manual command run
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-real-data-usage-review-batch-check.php
+```
+
+Observed:
+
+- `used = 1`
+- `review_ready = 1`
+- `input_rows_count = 4`
+- `e2e_checked = 1`
+- `sql_generated = 0`
+- `apply_plan_created = 0`
+- `safe_to_apply = 0`
+- `sql_apply_allowed = 0`
+- `production_ready = 0`
+- `errors_count = 0`
+- `warnings_count = 0`
+- `exit_code = 0`
+
+### Runtime artifact safety
+
+Observed:
+
+- runtime fixture JSON did not remain after command;
+- SQL/apply artifacts were not created.
+
+### Default dry-run regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+The expanded batch command remains a standalone manual readonly usage-check entrypoint only.
