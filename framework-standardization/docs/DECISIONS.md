@@ -2722,3 +2722,130 @@ Implementation не должен:
 Связанный документ:
 
 - `docs/DB_READONLY_REAL_DATA_USAGE_REVIEW_BATCH_EXPANSION_SPEC.md`.
+
+## 2026-07-07 — Prepared fixture expansion должен оставаться small local readonly fixture expansion
+
+### Решение
+
+Prepared fixture expansion допустим только для context:
+
+```text
+pump_diameter
+```
+
+Current baseline:
+
+```text
+DbReadOnlyFirstRealDataUsageInputFixture
+```
+
+Current prepared fixture rows count:
+
+```text
+4
+```
+
+Expanded batch command уже успешно прошёл:
+
+```text
+input_rows_count = 4
+```
+
+Future expansion может увеличить prepared fixture до:
+
+```text
+prepared rows count > 4
+prepared rows count <= 12
+```
+
+Rows должны оставаться:
+
+- local;
+- readonly;
+- dump-derived/test-like;
+- controlled.
+
+Row format сохраняется:
+
+- `product_id`;
+- `attribute_id`;
+- `attribute_name`;
+- `raw_value`;
+- `normalized_value`;
+- `confidence`.
+
+Prepared fixture expansion не должен добавлять:
+
+- external file reading;
+- CLI input;
+- DB access.
+
+`approved` остаётся только review-chain status.
+
+`approved` не означает SQL/apply permission.
+
+### Запрещено
+
+Для prepared fixture expansion запрещено:
+
+- pipeline wiring;
+- runner integration;
+- live DB / production DB;
+- full category batch;
+- arbitrary input;
+- filenames/paths/URLs input;
+- SQL preview;
+- SQL generation/files/diff;
+- apply plan;
+- SQL apply;
+- DB/schema changes;
+- write/schema operations;
+- production output;
+- committed runtime artifacts;
+- default dry-run path changes.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+Current prepared fixture уже доказал safe path на `4` rows через expanded batch command.
+
+Следующий controlled step может увеличить local fixture coverage, но только в пределах documented max `<= 12 rows`.
+
+Это должно оставаться local readonly fixture expansion, а не новым runtime data source, pipeline step, live DB integration или production workflow.
+
+### Next-step boundary
+
+Implementation допустима только после explicit `+`.
+
+Implementation должна быть minimal controlled update of fixture provider.
+
+Если manual command boundary нужно расширить, это должно оставаться standalone/manual, без runner/pipeline.
+
+Не добавлять постоянный runner.
+
+Implementation не должен:
+
+- подключаться к pipeline;
+- подключаться к runners;
+- читать external files;
+- принимать CLI arbitrary input;
+- использовать DB/live DB;
+- генерировать SQL/apply;
+- создавать production output;
+- менять default dry-run path.
+
+### Контекст
+
+Связанный документ:
+
+- `docs/DB_READONLY_PREPARED_FIXTURE_EXPANSION_SPEC.md`.
