@@ -1997,3 +1997,144 @@ Confirmed after implementation:
 - DB/live DB was not used.
 
 The reporter remains a standalone review-chain reporting/diagnostics boundary only.
+
+## 2026-07-07  DbReadOnlyStandaloneReviewChainE2EChecker implementation check
+
+### Context
+
+Implementation commit:
+
+`0dab23a Add DB readonly standalone review chain E2E checker`
+
+Created standalone class:
+
+`framework-standardization/src/Approval/DbReadOnlyStandaloneReviewChainE2EChecker.php`
+
+The checker is standalone diagnostic-only and runs the local review chain:
+
+```text
+generator
+-> writer
+-> local ignored JSON
+-> synthetic review blocks
+-> loader
+-> bridge
+-> approval flow
+-> reporter
+```
+
+### Boundary
+
+Confirmed boundaries:
+
+- checker is not a pipeline stage;
+- checker is not runner integration;
+- checker is not SQL preview input;
+- checker is not production output;
+- checker does not change default dry-run path;
+- checker does not use DB or live DB;
+- checker does not perform DB/schema changes;
+- checker does not create SQL/apply artifacts;
+- runtime fixture JSON does not remain after successful check;
+- `approved` remains only a review-chain status, not SQL/apply permission.
+
+### Syntax check
+
+Command:
+
+```text
+C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyStandaloneReviewChainE2EChecker.php
+```
+
+Result:
+
+```text
+No syntax errors detected
+```
+
+### Standalone manual check
+
+Manual check setup:
+
+- parser-like output array was created in memory;
+- `checker->run($parserOutput)` was called;
+- temporary fixture JSON was created only under `framework-standardization/var/review-fixtures/`;
+- fixture was removed after check;
+- SQL/apply artifacts were not created.
+
+Observed:
+
+- `checked = 1`
+- `generator_ok = 1`
+- `writer_ok = 1`
+- `loader_ok = 1`
+- `bridge_ok = 1`
+- `approval_flow_ok = 1`
+- `reporter_ok = 1`
+- `temp_fixture_created = 1`
+- `temp_fixture_removed = 1`
+- `sql_generated = 0`
+- `apply_plan_created = 0`
+- `safe_to_apply = 0`
+- `sql_apply_allowed = 0`
+- `production_ready = 0`
+- `errors_count = 0`
+- `warnings_count = 0`
+- `fixture_exists_after_run = 0`
+- `json_files_count_after_run = 0`
+
+### Default dry-run regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### Git safety
+
+Confirmed after implementation:
+
+- `git status` showed only the new PHP file before commit;
+- docs did not change during implementation;
+- `.gitignore` did not change during implementation;
+- pipeline did not change;
+- runners did not change;
+- jobs did not change;
+- config did not change;
+- parser did not change;
+- generator did not change;
+- writer did not change;
+- loader did not change;
+- bridge did not change;
+- approval flow did not change;
+- reporter did not change;
+- SQL preview did not change;
+- report did not change;
+- framework result did not change;
+- runtime fixture JSON did not remain after check;
+- SQL/apply artifacts were not created.
+
+The checker remains a standalone review-chain diagnostic/compatibility boundary only.
