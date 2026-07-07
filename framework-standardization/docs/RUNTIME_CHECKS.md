@@ -2378,3 +2378,119 @@ Result:
 - `all 9 stages ok`
 
 The fixture provider remains a standalone readonly input source for controlled local review-chain checks only.
+
+## 2026-07-07  db-readonly-first-real-data-usage-check manual command implementation check
+
+### Context
+
+Implementation commit:
+
+`87f6c35 Add DB readonly first real data usage manual command`
+
+Created standalone manual command:
+
+`framework-standardization/bin/db-readonly-first-real-data-usage-check.php`
+
+Purpose:
+
+- standalone manual entrypoint;
+- does not accept CLI arguments;
+- gets `DbReadOnlyFirstRealDataUsageInputFixture::getFirstRunSlice(2)`;
+- passes input to `DbReadOnlyRealDataReviewChainUsageChecker::run($readonlyInput)`;
+- prints concise diagnostics as plain text;
+- returns exit code `0` only for a successful safe readonly check.
+
+### Boundary
+
+Confirmed boundaries:
+
+- standalone manual command only;
+- not connected to pipeline;
+- not connected to runners;
+- no arbitrary input;
+- no filenames/paths/URLs input;
+- no live DB;
+- no production DB;
+- no SQL preview;
+- no SQL generation/files/diff/apply plan/apply;
+- no DB/schema changes;
+- no production output;
+- no committed runtime artifacts;
+- default dry-run path does not change;
+- `approved` remains only a review-chain status, not SQL/apply permission.
+
+### Syntax check
+
+Command:
+
+```text
+C:\php56\php.exe -l framework-standardization\bin\db-readonly-first-real-data-usage-check.php
+```
+
+Result:
+
+```text
+No syntax errors detected
+```
+
+### Manual command run
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-first-real-data-usage-check.php
+```
+
+Observed:
+
+- `used = 1`
+- `review_ready = 1`
+- `input_rows_count = 2`
+- `e2e_checked = 1`
+- `sql_generated = 0`
+- `apply_plan_created = 0`
+- `safe_to_apply = 0`
+- `sql_apply_allowed = 0`
+- `production_ready = 0`
+- `errors_count = 0`
+- `warnings_count = 0`
+- `exit_code = 0`
+
+### Runtime artifact safety
+
+Observed:
+
+- runtime fixture JSON did not remain after command;
+- SQL/apply artifacts were not created.
+
+### Default dry-run regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+The command remains a standalone manual readonly usage-check entrypoint only.
