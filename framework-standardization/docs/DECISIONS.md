@@ -2199,3 +2199,103 @@ Standalone review chain E2E checker не должен:
 Связанный документ:
 
 - `docs/DB_READONLY_STANDALONE_REVIEW_CHAIN_E2E_CHECK_SPEC.md`.
+
+## 2026-07-07 — Review chain result export artifact не реализуется сейчас; возможен только как future diagnostic-only boundary
+
+### Решение
+
+Сейчас отдельный review-chain result export writer не нужен.
+
+Причины:
+
+- `DbReadOnlyStandaloneReviewChainE2EChecker` уже возвращает diagnostics;
+- `DbReadOnlyReviewChainResultReporter` уже возвращает summary;
+- observed facts уже фиксируются в `docs/RUNTIME_CHECKS.md`;
+- дополнительный artifact layer увеличит surface area;
+- дополнительный artifact layer повышает риск восприятия файла как production/export output.
+
+Возможный future class допустим только как option:
+
+```text
+src/Approval/DbReadOnlyReviewChainResultExportWriter.php
+```
+
+Future implementation допустима только после отдельного explicit decision step.
+
+### Границы future artifact
+
+Если когда-либо будет реализован, artifact должен быть только local ignored diagnostic/reporting snapshot.
+
+Обязательные границы:
+
+- target dir только внутри `framework-standardization/var/`;
+- no SQL content;
+- no apply plan;
+- no production output;
+- no committed runtime artifacts;
+- `approved` остаётся только review-chain status, не SQL/apply permission.
+
+Future artifact не должен становиться:
+
+- pipeline stage;
+- runner integration;
+- SQL preview input;
+- production export;
+- SQL/apply layer.
+
+### Запрещено
+
+Для review-chain result export/report artifact boundary запрещено:
+
+- pipeline wiring;
+- runner integration;
+- SQL preview integration;
+- SQL generation;
+- SQL files;
+- SQL diff;
+- apply plan;
+- SQL apply;
+- DB/live DB;
+- DB/schema changes;
+- write/schema operations;
+- OpenCart module runtime paths;
+- default dry-run path changes.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+Текущий safe layer уже достаточен:
+
+```text
+DbReadOnlyStandaloneReviewChainE2EChecker result
+-> reporter_summary
+-> e2e_diagnostics
+-> component_diagnostics
+-> runtime checks documentation
+```
+
+Отдельный persisted artifact может быть полезен только при явной потребности в human-readable diagnostic snapshot.
+
+Без такой потребности новый file artifact добавит риск неправильного использования как production/export output или SQL preview input.
+
+### Последствие
+
+Следующие шаги не должны реализовывать `DbReadOnlyReviewChainResultExportWriter` без отдельного explicit decision.
+
+Если future decision разрешит artifact layer, он должен оставаться local ignored diagnostic/reporting-only boundary без SQL/apply и production semantics.
+
+### Контекст
+
+Связанный документ:
+
+- `docs/DB_READONLY_REVIEW_CHAIN_RESULT_EXPORT_BOUNDARY_SPEC.md`.
