@@ -3916,3 +3916,185 @@ normalization proposal generation spec after approved canonical unit contract
 Этот следующий step должен быть отдельным spec/decision step.
 
 Implementation, parser/normalizer work, `config/jobs`, review-chain input, SQL/apply and production/cache actions остаются blocked до approved contract and separate explicit steps.
+
+## 2026-07-07 — Normalization proposals generation as bridge to standalone review-chain
+
+### Решение
+
+Normalization proposals generation запускается только после:
+
+- target attribute meaning задан;
+- DB-readonly attribute discovery выполнен;
+- canonical `attribute_id` выбран пользователем;
+- included alias `attribute_ids` явно подтверждены;
+- excluded similar-but-different `attribute_ids` явно исключены;
+- raw values inventory завершён;
+- canonical unit / `normalized_value` contract approved by human.
+
+Proposals являются обязательным bridge между approved contract и standalone review-chain.
+
+Proposals должны быть:
+
+- reviewable;
+- deterministic;
+- diagnostic-only.
+
+Proposals не меняют DB/cache/config/jobs.
+
+Proposals не означают SQL/apply permission.
+
+Proposal должен содержать:
+
+- source `attribute_id`;
+- source `attribute_name`;
+- `raw_value`;
+- raw `usage_count` или affected rows count;
+- parsed value;
+- `normalized_value`;
+- canonical unit;
+- canonical attribute key;
+- canonical `attribute_id`;
+- conversion rule used;
+- confidence;
+- warnings;
+- status candidate, например `proposed`;
+- reference/id/hash на approved contract;
+- sample `product_ids`;
+- diagnostics.
+
+Proposal generation запрещён без human-approved contract marker.
+
+Proposal должен ссылаться на approved contract.
+
+Unknown/unsafe raw values не должны silently normalize.
+
+Values outside contract должны попадать в warnings/manual review.
+
+Prohibited conversions должны блокировать proposal или маркировать как unsafe.
+
+Values из excluded `attribute_ids` не должны попадать в proposals.
+
+Values из included aliases должны сохранять source `attribute_id`.
+
+`normalized_value` не должен содержать raw suffix/unit string.
+
+Canonical unit хранится отдельно.
+
+Confidence не должен подменять human approval.
+
+### Relationship to parser/normalizer family
+
+Архитектурная модель:
+
+- одна характеристика = один job/contract;
+- один тип значений = один parser/normalizer family;
+- новая характеристика не обязательно требует новый PHP handler.
+
+Если semantics покрыта существующим parser family, proposal generation может ссылаться на него.
+
+Если semantics не покрыта, нужен отдельный spec/decision before implementation.
+
+В этом step parser/normalizer не реализуется.
+
+### Relationship to standalone review-chain
+
+Proposals должны быть совместимы с уже реализованной второй половиной workflow:
+
+- review fixture generator;
+- writer;
+- manual review;
+- loader;
+- bridge;
+- approval flow;
+- result reporter.
+
+Standalone review-chain принимает proposals только после approved contract.
+
+`approved` в review-chain означает только review status.
+
+`approved` не означает SQL apply permission.
+
+Apply plan возможен только отдельным explicit step после review.
+
+### Relationship to config/jobs
+
+`config/jobs` не является стартом.
+
+`config/jobs` может появляться только после:
+
+- accepted canonical decision;
+- completed raw values inventory;
+- approved unit/contract;
+- proposal generation model/spec.
+
+Config/job не должен обходить human canonical selection или approved contract.
+
+### Production safety
+
+Production/cache changes запрещены.
+
+No cache rebuild.
+
+Selector/cache-related attributes require explicit canonical unit contract and separate implementation approval.
+
+Approved proposals не должны автоматически менять production/cache.
+
+Production incident with `max_flow_l_min`:
+
+- temporary cache hotfix for Belamos/Pedrollo;
+- rebuild restored old flow values in `m/h`;
+- therefore unit semantics must not be guessed.
+
+No production cache rebuild without separate explicit approval.
+
+### Границы
+
+Это решение является documentation/decision only.
+
+Оно фиксирует DB-readonly workflow only.
+
+Запрещено:
+
+- proposals implementation;
+- parser implementation;
+- normalizer implementation;
+- PHP implementation;
+- config/jobs changes;
+- pipeline wiring;
+- runner integration;
+- SQL preview;
+- SQL generation/files/diff;
+- apply plan;
+- SQL apply;
+- live DB / production DB;
+- DB/schema changes;
+- write/schema operations;
+- production output;
+- production/cache changes;
+- cache rebuild;
+- runtime artifacts;
+- committed runtime artifacts;
+- default dry-run path changes.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+Proposal generation нужен как явный bridge между approved unit/`normalized_value` contract и standalone review-chain.
+
+Без этого bridge review-chain рискует получить raw inventory, unapproved contract assumptions или parser output без traceability к human-approved contract.
+
+### Последствие
+
+Следующий safe step после этого decision может быть только отдельный spec/decision или explicit implementation step для proposal generation.
+
+Implementation, parser/normalizer work, `config/jobs`, pipeline/runners, SQL/apply and production/cache actions остаются blocked до отдельного explicit approval.
