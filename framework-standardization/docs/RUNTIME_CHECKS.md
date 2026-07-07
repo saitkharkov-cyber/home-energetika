@@ -2614,3 +2614,152 @@ Result:
 - `all 9 stages ok`
 
 The expanded batch command remains a standalone manual readonly usage-check entrypoint only.
+
+## 2026-07-07  DbReadOnlyFirstRealDataUsageInputFixture expansion check
+
+### Context
+
+Implementation commit:
+
+`04d02e5 Expand DB readonly first real data usage input fixture`
+
+Updated fixture provider:
+
+`framework-standardization/src/Approval/DbReadOnlyFirstRealDataUsageInputFixture.php`
+
+Purpose:
+
+- expanded prepared fixture from 4 to 8 controlled rows;
+- context remains `pump_diameter`;
+- `max_rows` remains `12`;
+- `getFirstRunSlice()` default remains `<= 2 rows`;
+- fixture remains local readonly dump-derived/test-like data.
+
+### Boundary
+
+Confirmed boundaries:
+
+- prepared fixture expanded from 4 to 8 controlled rows;
+- `max_rows` remains `12`;
+- context remains `pump_diameter`;
+- `getFirstRunSlice()` default remains `<= 2 rows`;
+- no external file reading;
+- no CLI input;
+- no DB access;
+- not connected to pipeline;
+- not connected to runners;
+- no SQL/apply artifacts;
+- no production output;
+- default dry-run path does not change;
+- `approved` remains only a review-chain status, not SQL/apply permission.
+
+### Syntax check
+
+Command:
+
+```text
+C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyFirstRealDataUsageInputFixture.php
+```
+
+Result:
+
+```text
+No syntax errors detected
+```
+
+### Standalone fixture check
+
+Observed:
+
+- `context = pump_diameter`
+- `prepared_rows_count = 8`
+- `prepared_rows_gt_4 = 1`
+- `prepared_rows_lte_12 = 1`
+- `first_run_rows_count = 2`
+- `first_run_rows_lte_2 = 1`
+- `readonly = 1`
+- `all_required_row_fields_exist = 1`
+- SQL/apply markers are all `0`
+
+Non-apply markers:
+
+- `sql_generated = 0`
+- `apply_plan_created = 0`
+- `safe_to_apply = 0`
+- `sql_apply_allowed = 0`
+- `production_ready = 0`
+
+### First manual command regression
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-first-real-data-usage-check.php
+```
+
+Observed:
+
+- `used = 1`
+- `review_ready = 1`
+- `input_rows_count = 2`
+- `e2e_checked = 1`
+- SQL/apply markers are all `0`
+- `errors_count = 0`
+- `exit_code = 0`
+
+### Expanded batch command regression
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-real-data-usage-review-batch-check.php
+```
+
+Observed:
+
+- `used = 1`
+- `review_ready = 1`
+- `input_rows_count = 4`
+- `e2e_checked = 1`
+- SQL/apply markers are all `0`
+- `errors_count = 0`
+- `exit_code = 0`
+
+### Runtime artifact safety
+
+Observed:
+
+- runtime fixture JSON did not remain after checks;
+- SQL/apply artifacts were not created.
+
+### Default dry-run regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+The prepared fixture provider remains a standalone local readonly fixture source only.
