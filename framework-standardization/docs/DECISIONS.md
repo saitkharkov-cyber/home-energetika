@@ -3343,3 +3343,136 @@ Future implementation должна оставаться small controlled readonl
 Связанный документ:
 
 - `docs/DB_READONLY_PUMP_MAX_HEAD_CONTROLLED_SOURCE_SPEC.md`.
+
+## 2026-07-07 — Framework standardization as controlled attribute consolidation workflow
+
+### Решение
+
+Framework standardization работает как controlled attribute consolidation workflow, а не как fully automatic normalizer.
+
+Основной workflow:
+
+1. User задаёт целевой смысл характеристики.
+2. System делает readonly discovery похожих attribute names / aliases / duplicates.
+3. System показывает candidates:
+   - `attribute_id`;
+   - `attribute_name`;
+   - `usage_count`;
+   - samples;
+   - warnings.
+4. User выбирает canonical `attribute_id`.
+5. User явно подтверждает included alias `attribute_id`.
+6. User явно исключает similar-but-different `attribute_id`.
+7. System собирает raw values inventory по выбранной группе.
+8. System предлагает canonical unit и `normalized_value` contract.
+9. User утверждает canonical unit/contract.
+10. System создаёт normalization proposals.
+11. User review approves/rejects proposals.
+12. Apply plan возможен только отдельным explicit step после review.
+
+`config/jobs` не является начальной точкой угадывания характеристики.
+
+`config/jobs` должен быть результатом принятого canonical decision/contract.
+
+Новая характеристика не должна означать новый уникальный PHP-обработчик.
+
+Архитектурная модель:
+
+- одна характеристика = один job/contract;
+- один тип значений = один parser/normalizer family;
+- если value semantics уже покрыта существующим parser family, отдельный обработчик под конкретный `attribute_id` не нужен.
+
+Production selector/cache usage требует explicit canonical unit contract до implementation.
+
+`approved` в review chain не означает SQL apply permission.
+
+No auto-apply.
+
+No production cache rebuild without separate explicit approval.
+
+Уже реализованная standalone review-chain остаётся полезной второй половиной workflow:
+
+```text
+normalization proposals -> human review -> approval flow -> reporter
+```
+
+Недостающая следующая область развития:
+
+```text
+attribute name discovery -> canonical selection -> raw values inventory
+```
+
+### Причина
+
+Readonly discovery по категории `Скважинные насосы` показал, что похожие названия могут иметь разные смыслы и не должны объединяться автоматически.
+
+Примеры риска:
+
+- `Максимальный напор`;
+- `Минимальный напор`;
+- `Номинальный напор`;
+- `Max напор, м`;
+- `Максимальный напор, м.вод.ст.`.
+
+Production incident с `max_flow_l_min` показал риск неправильных единиц измерения и cache rebuild.
+
+На production был временный cache hotfix для Belamos/Pedrollo `max_flow_l_min`.
+
+Production rebuild восстановил старые flow values в шкале `m/h`.
+
+Поэтому любые характеристики, которые могут попасть в selector/cache, требуют explicit canonical unit contract до implementation.
+
+### Границы
+
+Framework не должен сам автоматически объединять похожие характеристики только по названию.
+
+Human canonical selection обязательна.
+
+Apply plan не является частью review approval.
+
+Production/cache actions требуют отдельного explicit approval.
+
+Запрещено:
+
+- pipeline wiring;
+- runner integration;
+- SQL preview без отдельного explicit step;
+- SQL generation;
+- SQL files;
+- SQL diff;
+- apply plan как часть review approval;
+- SQL apply;
+- live DB / production DB;
+- DB/schema changes;
+- write/schema operations;
+- production/cache changes;
+- production cache rebuild без отдельного explicit approval;
+- committed runtime artifacts;
+- default dry-run path changes;
+- automatic alias consolidation только по похожему названию.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Последствие
+
+Следующие production-facing steps должны развивать сначала первую половину workflow:
+
+- readonly attribute name discovery;
+- candidate grouping;
+- alias / duplicate diagnostics;
+- human canonical selection;
+- raw values inventory;
+- explicit unit/contract decision.
+
+Только после этого standalone review-chain должна использоваться для normalization proposals and human review.
+
+SQL/apply и production/cache actions остаются отдельными future decisions.
