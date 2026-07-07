@@ -2138,3 +2138,125 @@ Confirmed after implementation:
 - SQL/apply artifacts were not created.
 
 The checker remains a standalone review-chain diagnostic/compatibility boundary only.
+
+## 2026-07-07  DbReadOnlyRealDataReviewChainUsageChecker implementation check
+
+### Context
+
+Implementation commit:
+
+`79106c0 Add DB readonly real data review chain usage checker`
+
+Created standalone class:
+
+`framework-standardization/src/Approval/DbReadOnlyRealDataReviewChainUsageChecker.php`
+
+Purpose:
+
+- standalone usage checker for controlled readonly real-data-like scenario;
+- accepts readonly input array;
+- builds parser-like output;
+- calls `DbReadOnlyStandaloneReviewChainE2EChecker`;
+- returns `used`, `usage_diagnostics`, `e2e_result`, `errors`, `warnings`, `source`.
+
+### Boundary
+
+Confirmed boundaries:
+
+- standalone controlled readonly usage only;
+- not a pipeline stage;
+- not runner integration;
+- not SQL preview input;
+- not production output;
+- no live DB;
+- no production DB;
+- no full category batch;
+- no arbitrary uploaded data;
+- no OpenCart runtime path;
+- no production data changes;
+- no SQL generation/files/diff/apply plan/apply;
+- no DB/schema changes;
+- no write/schema operations;
+- `approved` remains only a review-chain status, not SQL/apply permission.
+
+### Syntax check
+
+Command:
+
+```text
+C:\php56\php.exe -l framework-standardization\src\Approval\DbReadOnlyRealDataReviewChainUsageChecker.php
+```
+
+Result:
+
+```text
+No syntax errors detected
+```
+
+### Positive standalone check
+
+Manual check setup:
+
+- readonly input array was created in memory with 1-2 rows;
+- `checker->run($readonlyInput)` was called;
+- checker built parser-like output;
+- checker called `DbReadOnlyStandaloneReviewChainE2EChecker`;
+- runtime fixture JSON did not remain after check;
+- SQL/apply artifacts were not created.
+
+Observed:
+
+- `used = 1`
+- `parser_like_output_created = 1`
+- `e2e_checker_called = 1`
+- `e2e_checked = 1`
+- `review_ready = 1`
+- `errors_count = 0`
+
+### Negative checks
+
+Observed:
+
+- non-array input rejected with `used = 0`;
+- empty rows rejected with `used = 0`;
+- over-limit rows rejected with `used = 0`;
+- path/URL inputs rejected with `used = 0`.
+
+### Runtime artifact safety
+
+Observed:
+
+- JSON fixture after check did not remain;
+- SQL/apply artifacts were not created.
+
+### Default dry-run regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+```text
+C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php
+```
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+The usage checker remains a standalone controlled readonly real-data-like scenario checker only.
