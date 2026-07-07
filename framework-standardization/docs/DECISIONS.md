@@ -3752,3 +3752,167 @@ canonical unit and normalized_value contract after raw values inventory
 ```
 
 Этот step должен быть отдельным spec/decision step и не должен начинаться до completed inventory.
+
+## 2026-07-07 — Canonical unit and normalized value contract as pre-proposal gate
+
+### Решение
+
+Canonical unit / `normalized_value` contract запускается только после:
+
+- target attribute meaning задан;
+- DB-readonly attribute discovery выполнен;
+- canonical `attribute_id` выбран пользователем;
+- included alias `attribute_ids` явно подтверждены;
+- excluded similar-but-different `attribute_ids` явно исключены;
+- raw values inventory завершён;
+- warnings/dirtiness signals из inventory просмотрены.
+
+Contract является обязательным gate перед:
+
+- normalization proposals;
+- parser/normalizer implementation;
+- `config/jobs`;
+- selector/cache usage;
+- review-chain;
+- apply plan.
+
+Contract должен фиксировать:
+
+- canonical attribute key;
+- canonical meaning;
+- canonical `attribute_id`;
+- included alias `attribute_ids`;
+- canonical unit;
+- `normalized_value` type;
+- `normalized_value` meaning;
+- allowed source units;
+- allowed conversions;
+- prohibited conversions;
+- parsing expectations;
+- examples;
+- anti-examples;
+- warnings requiring manual review;
+- selector/cache safety notes;
+- human approval marker.
+
+Unit semantics нельзя угадывать автоматически.
+
+`normalized_value` должен быть машинно-сравнимым значением.
+
+`normalized_value` не должен содержать raw suffix/unit string.
+
+Unit должна быть сохранена отдельно на уровне contract.
+
+Unknown/unsafe values не должны silently normalize.
+
+Ranges, multiple values, HTML entities, fractions, text+number cases требуют explicit handling или manual review.
+
+Comma/point decimals приводятся только по утверждённому rule.
+
+Normalization proposals нельзя генерировать до approved contract.
+
+Proposal должен ссылаться на approved contract.
+
+### Relationship to config/jobs
+
+`config/jobs` не является стартом.
+
+`config/jobs` может появляться только после:
+
+- accepted canonical decision;
+- raw values inventory;
+- approved unit/contract.
+
+Архитектурная модель:
+
+- одна характеристика = один job/contract;
+- один тип значений = один parser/normalizer family;
+- новая характеристика не обязательно требует новый PHP handler, если semantics покрыта существующим parser family.
+
+### Relationship to review-chain
+
+Standalone review-chain получает proposals только после approved contract.
+
+Review approval не означает SQL apply permission.
+
+Apply plan возможен только отдельным explicit step после review.
+
+Approved normalized proposals не должны автоматически менять DB/cache.
+
+### Production safety
+
+Selector/cache-related attributes требуют explicit canonical unit contract before implementation.
+
+Production/cache changes запрещены.
+
+No cache rebuild.
+
+Production incident with `max_flow_l_min` remains warning example:
+
+- temporary cache hotfix for Belamos/Pedrollo;
+- rebuild restored old flow values in `m/h`;
+- therefore unit semantics must not be guessed.
+
+No production cache rebuild without separate explicit approval.
+
+### Границы
+
+Это решение является documentation/decision only.
+
+Оно фиксирует DB-readonly workflow only.
+
+Запрещено:
+
+- unit auto-approval;
+- `normalized_value` auto-contract;
+- normalization proposals in this step;
+- parser implementation;
+- normalizer implementation;
+- PHP implementation;
+- config/jobs changes;
+- pipeline wiring;
+- runner integration;
+- SQL preview;
+- SQL generation/files/diff;
+- apply plan;
+- SQL apply;
+- live DB / production DB;
+- DB/schema changes;
+- write/schema operations;
+- production output;
+- production/cache changes;
+- cache rebuild;
+- runtime artifacts;
+- committed runtime artifacts;
+- default dry-run path changes.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+### Причина
+
+Canonical unit / `normalized_value` contract нужен как safety gate между raw values inventory и proposal generation.
+
+Без approved contract system рискует угадывать unit semantics, создавать machine values с raw suffix, смешивать несовместимые units или выводить selector/cache-facing values с неправильной шкалой.
+
+Production incident with `max_flow_l_min` показывает, что unit mistakes and cache rebuild can restore unsafe legacy values.
+
+### Последствие
+
+Следующий safe step после этого decision:
+
+```text
+normalization proposal generation spec after approved canonical unit contract
+```
+
+Этот следующий step должен быть отдельным spec/decision step.
+
+Implementation, parser/normalizer work, `config/jobs`, review-chain input, SQL/apply and production/cache actions остаются blocked до approved contract and separate explicit steps.
