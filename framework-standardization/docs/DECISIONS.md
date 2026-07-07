@@ -3204,3 +3204,142 @@ Implementation не должен:
 Связанный документ:
 
 - `docs/DB_READONLY_PUMP_DIAMETER_CONTROLLED_SOURCES_STABILITY_SPEC.md`.
+
+## 2026-07-07 — Pump max head должен быть первой новой controlled характеристикой после pump_diameter
+
+### Решение
+
+Первой новой controlled характеристикой после `pump_diameter` выбирается:
+
+```text
+attribute_id = 12
+attribute_name = Максимальный напор
+canonical key = pump_max_head
+```
+
+Source discovery:
+
+```text
+category_id = 11900213
+language_id = 1
+direct_products = 1972
+usage_count = 385
+```
+
+Canonical meaning:
+
+```text
+maximum pump head
+```
+
+Canonical unit:
+
+```text
+m
+```
+
+Canonical `normalized_value`:
+
+```text
+decimal number in meters
+```
+
+Examples:
+
+- `46.5м.` -> `normalized_value = 46.5`, `unit = m`;
+- `68м.` -> `normalized_value = 68`, `unit = m`;
+- `93м.` -> `normalized_value = 93`, `unit = m`;
+- `133м.` -> `normalized_value = 133`, `unit = m`;
+- `20.5м` -> `normalized_value = 20.5`, `unit = m`.
+
+`pump_max_head` выбран, потому что:
+
+- имеет высокий coverage;
+- значения имеют формат число + метры;
+- semantic понятна внутри pump domain;
+- contract проще и безопаснее, чем у flow/performance attributes;
+- подходит для проверки масштабирования после `pump_diameter`.
+
+Flow/performance attributes postponed из-за production safety note по `max_flow_l_min`.
+
+Не запускать cache rebuild, пока permanent flow normalization не исправлена.
+
+`pump_max_head` нельзя смешивать с `max_flow_l_min`.
+
+### Explicit anti-errors
+
+Запрещено:
+
+- передавать в подборщик raw строку `68м.`;
+- терять единицу измерения на уровне contract;
+- конвертировать метры в миллиметры;
+- конвертировать метры в сантиметры;
+- трактовать `68м` как `68 мм`;
+- сохранять `normalized_value` как строку с suffix;
+- смешивать `Максимальный напор` с `Минимальный напор`;
+- смешивать max head с flow / `max_flow_l_min`.
+
+### Границы
+
+Это решение является standalone / DB-readonly boundary.
+
+В этом шаге запрещено:
+
+- PHP implementation;
+- config/jobs changes;
+- pipeline wiring;
+- runner integration;
+- SQL preview;
+- SQL generation/files/diff;
+- apply plan;
+- SQL apply;
+- live DB / production DB;
+- DB/schema changes;
+- write/schema operations;
+- production output;
+- cache rebuild;
+- committed runtime artifacts;
+- default dry-run path changes.
+
+Запрещённые operation families:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `REPLACE`
+- `ALTER`
+- `DROP`
+- `TRUNCATE`
+- `CREATE`
+
+`approved` остаётся только review-chain status.
+
+`approved` не означает SQL/apply permission.
+
+### Причина
+
+Readonly discovery по категории `Скважинные насосы` показал, что `Максимальный напор` имеет высокий usage count и clean numeric meter values.
+
+Это делает `pump_max_head` более безопасным первым новым controlled source, чем flow/performance attributes, где есть production risk вокруг `max_flow_l_min`, dual-unit semantics и cache rebuild safety.
+
+### Последствие
+
+Следующий implementation step допустим только после отдельного explicit `+`.
+
+Future implementation должна оставаться small controlled readonly fixture/source и не должна:
+
+- подключаться к pipeline;
+- подключаться к runners;
+- принимать arbitrary input;
+- принимать filenames/paths/URLs;
+- использовать live DB;
+- использовать production DB;
+- генерировать SQL/apply;
+- создавать production output;
+- менять default dry-run path.
+
+### Контекст
+
+Связанный документ:
+
+- `docs/DB_READONLY_PUMP_MAX_HEAD_CONTROLLED_SOURCE_SPEC.md`.
