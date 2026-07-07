@@ -1,4 +1,4 @@
-# Handoff — Framework Standardization
+# Handoff - Framework Standardization
 
 Дата: 07.07.2026
 
@@ -9,129 +9,69 @@
 
 ## 1. Текущая стабильная точка
 
-Текущая стабильная точка:
+`d136057 Update framework standardization project master summary`
 
-`a8396a3 Document normalization proposals review-chain bridge decision`
+Ожидаемое состояние для следующего чата: HEAD/main/origin/main соответствует `d136057`, working tree clean.
 
-Ожидаемое состояние для следующего чата:
+В новом чате сначала сверить `git status --short` и `git log --oneline --decorate -5`. Если HEAD отличается, сверить фактическую точку с `docs/START_HERE.md`, `docs/DECISIONS.md` и `docs/RUNTIME_CHECKS.md`.
 
-* HEAD/main/origin/main соответствует `a8396a3`;
-* working tree clean.
+## 2. Текущий статус навигации
 
-В новом чате сначала проверить:
+Onboarding/navigation обновлены:
 
-```text
-git status --short
-git log --oneline --decorate -5
-```
+* `docs/START_HERE.md` создан как входной документ для нового ChatGPT-чата;
+* `README.md` ссылается на `docs/START_HERE.md`;
+* корневой `PROJECT_MASTER_SUMMARY.md` знает про Framework Standardization;
+* `framework-standardization/PROJECT_MASTER_SUMMARY.md` обновлён под controlled attribute consolidation workflow.
 
-Если HEAD отличается от `a8396a3`, сначала сверить фактическую рабочую точку с `docs/DECISIONS.md` и `docs/RUNTIME_CHECKS.md`.
+`HANDOFF.md` остаётся оперативным состоянием, не changelog и не замена `START_HERE.md`.
 
-## 2. Главный архитектурный разворот
+## 3. Актуальная архитектура
 
-Framework standardization теперь зафиксирован как:
+Framework Standardization = controlled attribute consolidation workflow, not fully automatic normalizer.
 
-```text
-controlled attribute consolidation workflow
-```
+Актуальная цепочка:
 
-а не как:
-
-```text
-fully automatic normalizer
-```
-
-Framework не должен сам автоматически объединять похожие характеристики только по названию.
-
-Human canonical selection обязательна.
-
-`config/jobs` не является стартовой точкой угадывания характеристики. `config/jobs` должен быть результатом accepted canonical decision/contract.
-
-## 3. Актуальная workflow-модель
-
-Актуальная модель:
-
-```text
-target attribute meaning
--> DB-readonly attribute name discovery
--> candidate list
--> human canonical selection
--> explicit include/exclude alias decision
--> raw values inventory
--> canonical unit / normalized_value contract
--> normalization proposals generation
--> standalone review-chain
--> отдельный explicit apply-plan
-```
+* target attribute meaning;
+* DB-readonly attribute name discovery;
+* candidate list;
+* human canonical selection;
+* explicit include/exclude alias decision;
+* raw values inventory;
+* canonical unit / `normalized_value` contract;
+* normalization proposals generation;
+* standalone review-chain;
+* separate explicit apply-plan.
 
 Каждый переход является gate. Нельзя перескакивать сразу к fixture/source/job, parser implementation, SQL preview или apply plan.
 
-## 4. Уже реализованная вторая половина workflow
+## 4. Standalone review-chain
 
-Ранее уже построена и остаётся полезной standalone review-chain:
+Уже построена и остаётся полезной вторая половина workflow:
 
-```text
-raw values / proposals
--> review fixture generator
--> writer
--> manual review
--> loader
--> bridge
--> approval flow
--> result reporter
-```
+* raw values / proposals;
+* review fixture generator;
+* writer;
+* manual review;
+* loader;
+* bridge;
+* approval flow;
+* result reporter.
 
-Эта chain остаётся standalone-only и должна получать proposals только после:
+Standalone review-chain должна получать proposals только после:
 
 * canonical attribute group selected;
 * raw values inventory completed;
 * canonical unit / `normalized_value` contract approved;
 * normalization proposals generation completed.
 
-`approved` в review-chain означает только review status.
+`approved` в review-chain означает только review status. `approved` не означает SQL apply permission.
 
-`approved` не означает SQL apply permission.
+## 5. Paused path
 
-Apply plan возможен только отдельным explicit step после review.
+Не продолжать immediate `pump_max_head` fixture/source/job.
 
-## 5. Что зафиксировано сегодня
-
-Сегодняшний блок документов/decisions:
-
-* `c185c76` — controlled attribute consolidation workflow decision;
-* `c51dc21` — spec для attribute name discovery / canonical selection;
-* `a11f123` — decision: attribute discovery/canonical selection as first pre-review gate;
-* `3809b47` — spec для raw values inventory;
-* `56c5967` — decision: raw values inventory as pre-contract gate;
-* `9828fb1` — spec для canonical unit / normalized_value contract;
-* `befef6d` — decision: canonical unit contract as pre-proposal gate;
-* `b9a78de` — spec для normalization proposals generation;
-* `a8396a3` — decision: normalization proposals generation as bridge to standalone review-chain.
-
-Смысл блока:
-
-* сначала target meaning и DB-readonly discovery;
-* затем human canonical selection и explicit include/exclude aliases;
-* затем raw values inventory;
-* затем approved canonical unit / `normalized_value` contract;
-* затем deterministic diagnostic-only proposals;
-* только после этого standalone review-chain.
-
-## 6. Важный rejected/paused path
-
-Не продолжать прежнюю ветку как немедленное создание fixture/source/job для `pump_max_head`.
-
-`pump_max_head` остаётся полезным candidate/example:
-
-* `attribute_id = 12`;
-* `attribute_name = Максимальный напор`;
-* canonical key: `pump_max_head`;
-* canonical unit example: `m`;
-* `normalized_value` example: decimal meters.
-
-Но implementation для `pump_max_head` сейчас не следующий шаг.
-
-Перед любыми fixture/config/jobs нужна первая половина workflow:
+`pump_max_head` остаётся useful candidate/example, но перед fixture/config/jobs обязательны:
 
 * discovery;
 * canonical selection;
@@ -139,85 +79,41 @@ Apply plan возможен только отдельным explicit step пос
 * approved unit/contract;
 * proposals generation.
 
-## 7. Production safety note
+## 6. Safety / boundaries
 
-На production был временный cache hotfix для Belamos/Pedrollo `max_flow_l_min`.
+Короткие обязательные границы:
 
-Production rebuild восстановил старые flow values в шкале `m/h`.
-
-Следствия:
-
-* flow/performance attributes не трогать без permanent flow normalization;
-* не запускать cache rebuild без отдельного explicit approval;
-* любые selector/cache-related attributes требуют explicit canonical unit contract before implementation;
-* unit semantics нельзя угадывать автоматически;
-* approved proposals не должны автоматически менять DB/cache.
-
-## 8. Главные правила и границы
-
-Обязательные правила:
-
-* `config/jobs` не стартовая точка угадывания характеристики;
-* `config/jobs` должен быть результатом accepted canonical decision/contract;
-* одна характеристика = один job/contract;
-* один тип значений = один parser/normalizer family;
-* новая характеристика не обязательно требует новый PHP handler;
-* human canonical selection обязательна;
-* explicit include/exclude alias decision обязателен;
-* raw values inventory обязателен перед unit/contract;
-* canonical unit / `normalized_value` contract обязателен перед proposals;
-* proposal generation является bridge к review-chain;
-* `approved` в review-chain не означает SQL apply permission;
-* no auto-apply;
-* apply-plan только отдельным explicit step;
+* no auto-merge;
+* no auto-canonical selection;
+* no `config/jobs` as starting point;
+* no SQL preview/generation/apply by default;
+* no apply-plan without separate explicit step;
 * no production/cache changes;
-* no cache rebuild.
+* no cache rebuild;
+* approved in review-chain does not mean SQL apply permission.
 
-Запрещено без отдельного explicit step:
+Без отдельного explicit step также запрещены:
 
 * PHP implementation;
 * config/jobs changes;
 * pipeline wiring;
 * runner integration;
-* SQL preview;
-* SQL generation;
-* SQL files;
-* SQL diff;
-* apply plan;
-* SQL apply;
 * live DB / production DB;
 * DB/schema changes;
 * write/schema operations;
-* production output;
-* production/cache changes;
 * runtime artifacts;
 * committed runtime artifacts;
 * default dry-run path changes.
 
-Запрещённые operation families:
+## 7. Next direction
 
-* `INSERT`
-* `UPDATE`
-* `DELETE`
-* `REPLACE`
-* `ALTER`
-* `DROP`
-* `TRUNCATE`
-* `CREATE`
+Следующий direction:
 
-## 9. Рекомендованный следующий шаг
+`implementation spec для первого DB-readonly attribute name discovery command/tool`
 
-Следующий шаг в новом чате должен быть не implementation, а выбор следующего маленького spec/decision/implementation в новой архитектуре.
+Только после separate explicit `+`.
 
-Рекомендуемое направление:
-
-```text
-implementation spec для первого DB-readonly attribute name discovery command/tool
-```
-
-Только после отдельного explicit `+`.
-
-Будущий tool должен принимать target meaning / controlled scope и показывать candidates:
+Future tool должен показывать candidates:
 
 * `attribute_id`;
 * `attribute_name`;
@@ -232,22 +128,20 @@ implementation spec для первого DB-readonly attribute name discovery c
   * similar but different;
   * unsafe / unresolved.
 
-В HANDOFF это только направление. Готовый implementation prompt здесь намеренно не фиксируется.
+Это direction, не готовый Codex prompt.
 
-## 10. Не делать следующим шагом
+## 8. Не делать следующим шагом
 
 Не делать:
 
-* сразу fixture/source/job для `pump_max_head`;
+* immediate `pump_max_head` fixture/source/job;
 * implementation без отдельного explicit `+`;
 * parser/normalizer implementation;
 * config/jobs changes;
-* pipeline wiring;
-* runner integration;
-* SQL preview integration;
-* SQL generation/apply;
+* pipeline/runners;
+* SQL preview/generation/apply;
 * live DB;
 * production/cache changes;
 * cache rebuild;
 * DB/schema changes;
-* обновлять другие документы без отдельного задания.
+* runtime artifacts.
