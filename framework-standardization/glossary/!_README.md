@@ -17,7 +17,8 @@
 - [Raw values inventory](raw-values-inventory.md)
 
 ## S
-
+- [Scope](scope.md)
+- [Spec](spec.md)  
 - [SQL apply](sql-apply.md)
 
 ## W
