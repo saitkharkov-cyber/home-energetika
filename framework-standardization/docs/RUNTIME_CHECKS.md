@@ -4478,3 +4478,117 @@ UPDATE oc_product_attribute SET text = '60' WHERE product_id = 1072 AND attribut
 `review SQL preview`
 
 SQL apply по-прежнему запрещён.
+
+## 2026-07-09 — Ручное ревью SQL preview
+
+### Контекст
+
+Связанные команды и проверки:
+
+- `dc58ac4 Add DB readonly SQL preview command`
+- `42e7249 Document DB readonly SQL preview check`
+
+SQL preview команда:
+
+`framework-standardization/bin/db-readonly-sql-preview.php`
+
+Проверялся SQL preview для:
+
+- category_scope: `11900213`
+- attribute_ids: `12,101,119,81`
+- canonical_attribute_id: `12`
+- canonical_unit: `m`
+
+### Результат ручного просмотра
+
+SQL preview просмотрен вручную.
+
+Результат:
+
+`SQL preview выглядит корректно`
+
+### Что проверено
+
+Проверено глазами:
+
+- `UPDATE` выполняется только по `oc_product_attribute`;
+- `UPDATE` ограничен `attribute_id = 12`;
+- `INSERT` создаёт только canonical rows с `attribute_id = 12`;
+- `language_id` присутствует и не теряется;
+- `product_id` указаны явно;
+- широких `UPDATE` без `product_id` нет;
+- `text` получает только нормализованное числовое значение;
+- unresolved values не попали в SQL preview;
+- `DELETE` отсутствует;
+- `ALTER` отсутствует;
+- `DROP` отсутствует;
+- `TRUNCATE` отсутствует;
+- `CREATE TABLE` отсутствует;
+- `COMMIT` отсутствует;
+- transaction/apply wrapper отсутствует.
+
+### Подтверждённый summary
+
+Подтверждены ключевые значения:
+
+- `preview_update_existing_canonical_row_count: 400`
+- `preview_insert_missing_canonical_row_count: 81`
+- `keep_existing_source_row_count: 81`
+- `unresolved_excluded_count: 14`
+- `schema_blocker_count: 0`
+- `conflicts_count: 0`
+
+### Проверка INSERT
+
+Проверено, что INSERT statements имеют ожидаемый смысл:
+
+```sql
+INSERT INTO oc_product_attribute (product_id, attribute_id, language_id, text) VALUES (..., 12, ..., '...');
+```
+
+То есть:
+
+- вставляется canonical attribute row;
+- `attribute_id` равен `12`;
+- `language_id` сохраняется;
+- `text` содержит нормализованное значение;
+- source alias rows не удаляются.
+
+### Проверка unresolved
+
+Подтверждено:
+
+- unresolved values исключены из SQL preview;
+- ranges не попали в SQL statements;
+- `до X м` не попало в SQL statements;
+- mixed-text / ambiguous multi-number values не попали в SQL statements.
+
+Примеры исключённых значений остаются unresolved:
+
+- `100-104`
+- `104–118`
+- `50–51,5`
+- `до 51 м`
+
+### Подтверждение границ
+
+Подтверждено:
+
+- выполнялось только ручное ревью SQL preview;
+- SQL statements не выполнялись;
+- SQL files/diff не создавались;
+- apply-plan не создавался;
+- SQL apply не выполнялся;
+- product data не менялись;
+- production/cache не трогались;
+- cache rebuild не выполнялся.
+
+Этим закрыт gate:
+
+`review SQL preview`
+
+Следующий gate должен быть отдельным и явным:
+
+`apply-plan generation`
+
+SQL apply по-прежнему запрещён.
