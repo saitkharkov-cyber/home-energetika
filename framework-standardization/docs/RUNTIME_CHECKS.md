@@ -4592,3 +4592,231 @@ INSERT INTO oc_product_attribute (product_id, attribute_id, language_id, text) V
 `apply-plan generation`
 
 SQL apply по-прежнему запрещён.
+
+## 2026-07-09 — Проверка DB-readonly команды apply-plan preview
+
+### Контекст
+
+Коммит реализации:
+
+`b46d70f Add DB readonly apply plan preview command`
+
+Связанные решения и проверки:
+
+- `docs/HUMAN_DECISION_MAX_HEAD_SCOPE_11900213.md`
+- `docs/MAX_HEAD_UNIT_CONTRACT_SCOPE_11900213.md`
+- `docs/MAX_HEAD_RANGE_POLICY_SCOPE_11900213.md`
+- `docs/HUMAN_REVIEW_MAX_HEAD_PROPOSALS_SCOPE_11900213.md`
+- `docs/SQL_PREVIEW_PLAN_MAX_HEAD_SCOPE_11900213.md`
+- `docs/RUNTIME_CHECKS.md`
+
+Команда:
+
+`framework-standardization/bin/db-readonly-apply-plan-preview.php`
+
+Класс:
+
+`framework-standardization/src/ApplyPlan/DbReadOnlyApplyPlanPreview.php`
+
+Команда apply-plan preview является отдельной ручной DB-readonly командой.
+
+Она:
+
+- читает только local dump DB;
+- переиспользует `DbReadOnlySqlPreview`;
+- не дублирует правила нормализации и review-chain;
+- группирует SQL preview statements в будущие UPDATE/INSERT операции;
+- показывает preflight checks;
+- показывает operation groups;
+- показывает post-apply verification plan;
+- показывает rollback notes;
+- печатает apply-plan preview только в консоль;
+- не выполняет SQL;
+- не создаёт SQL files;
+- не создаёт apply-plan file;
+- не меняет product data;
+- не трогает production/cache.
+
+### Ручная проверка markdown-вывода
+
+Команда:
+
+`chcp 65001; $OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8; C:\php56\php.exe framework-standardization\bin\db-readonly-apply-plan-preview.php framework-standardization\config\runtime\local.dump.php --category-id=11900213 --attribute-ids=12,101,119,81 --canonical-attribute-id=12 --canonical-unit=m --format=markdown`
+
+Наблюдалось:
+
+- `runtime_mode: db_readonly`
+- `command: apply_plan_preview`
+- `category_scope: 11900213`
+- `attribute_ids: 12,101,119,81`
+- `canonical_attribute_id: 12`
+- `canonical_unit: m`
+- `format: markdown`
+- читаемый кириллический вывод в PowerShell после настройки UTF-8;
+- apply-plan summary выведен;
+- preflight checks выведены;
+- operation groups выведены;
+- UPDATE statements напечатаны только как preview text;
+- INSERT statements напечатаны только как preview text;
+- post-apply verification plan выведен;
+- rollback notes выведены;
+- safety markers выведены fenced `text` блоком.
+
+### Apply-plan summary
+
+Наблюдавшийся summary:
+
+- `apply_plan_preview_generated: 1`
+- `update_existing_canonical_row_count: 400`
+- `insert_missing_canonical_row_count: 81`
+- `keep_existing_source_row_count: 81`
+- `unresolved_excluded_count: 14`
+- `schema_blocker_count: 0`
+- `conflicts_count: 0`
+- `executable_apply_plan: 0`
+- `sql_apply_allowed: 0`
+
+Интерпретация:
+
+- `400` existing canonical rows входят в будущую UPDATE-группу;
+- `81` missing canonical rows входят в будущую INSERT-группу;
+- `81` source alias rows должны остаться как есть;
+- `14` unresolved values исключены;
+- schema blockers не обнаружены;
+- conflicts не обнаружены;
+- executable apply-plan не создан;
+- SQL apply не разрешён.
+
+### Preflight checks
+
+Наблюдавшиеся preflight checks:
+
+- `runtime_mode_db_readonly: ok`
+- `local_dump_runtime_verified: ok`
+- `product_attribute_schema_verified: ok`
+- `no_schema_blockers: ok`
+- `no_conflicts: ok`
+- `unresolved_excluded: ok`
+- `human_review_decision_present: ok`
+- `manual_sql_preview_review_documented: ok`
+
+### Operation groups
+
+Наблюдавшиеся operation groups:
+
+- `A. Update existing canonical rows: 400`
+- `B. Insert missing canonical rows: 81`
+- `C. Keep existing source alias rows: 81`
+- `D. Excluded unresolved: 14`
+
+### Примеры UPDATE preview statements
+
+UPDATE statements были напечатаны только как preview text.
+
+Наблюдавшиеся примеры:
+
+```sql
+UPDATE oc_product_attribute SET text = '46.5' WHERE product_id = 1068 AND attribute_id = 12 AND language_id = 1;
+UPDATE oc_product_attribute SET text = '68' WHERE product_id = 1069 AND attribute_id = 12 AND language_id = 1;
+UPDATE oc_product_attribute SET text = '93' WHERE product_id = 1070 AND attribute_id = 12 AND language_id = 1;
+UPDATE oc_product_attribute SET text = '133' WHERE product_id = 1071 AND attribute_id = 12 AND language_id = 1;
+UPDATE oc_product_attribute SET text = '60' WHERE product_id = 1072 AND attribute_id = 12 AND language_id = 1;
+```
+
+Эти statements не выполнялись.
+
+Они не были сохранены в файл.
+
+### Примеры INSERT preview statements
+
+INSERT statements были напечатаны только как preview text.
+
+Наблюдавшиеся примеры:
+
+```sql
+INSERT INTO oc_product_attribute (product_id, attribute_id, language_id, text) VALUES (7316, 12, 1, '150');
+INSERT INTO oc_product_attribute (product_id, attribute_id, language_id, text) VALUES (8195, 12, 1, '45');
+INSERT INTO oc_product_attribute (product_id, attribute_id, language_id, text) VALUES (8196, 12, 1, '86');
+INSERT INTO oc_product_attribute (product_id, attribute_id, language_id, text) VALUES (8197, 12, 1, '45');
+INSERT INTO oc_product_attribute (product_id, attribute_id, language_id, text) VALUES (8198, 12, 1, '375');
+```
+
+Эти statements не выполнялись.
+
+Они не были сохранены в файл.
+
+### Post-apply verification plan
+
+Наблюдавшийся post-apply verification plan:
+
+- verify updated canonical rows count against `preview_update_existing_canonical_row_count`;
+- verify inserted canonical rows count against `preview_insert_missing_canonical_row_count`;
+- verify unresolved values were not included in applied set;
+- verify all affected rows use `canonical attribute_id=12`;
+- verify source alias rows are preserved;
+- verify affected products remain within category_scope only.
+
+Это только текстовый план будущей проверки.
+
+Проверка не выполнялась как apply.
+
+### Rollback notes
+
+Наблюдавшиеся rollback notes:
+
+- rollback SQL is not generated in this gate;
+- rollback requires a separate explicit gate;
+- rollback requires a verified backup or local dump snapshot before any future apply;
+- production/cache rollback is out of scope for this preview.
+
+Rollback SQL на этом шаге не генерировался.
+
+### Safety markers
+
+Наблюдавшиеся safety markers:
+
+- `apply_plan_preview_generated: 1`
+- `executable_apply_plan: 0`
+- `sql_preview_generated: 1`
+- `sql_preview_printed_to_console: 1`
+- `sql_files_created: 0`
+- `sql_apply_allowed: 0`
+- `sql_applied: 0`
+- `product_data_changed: 0`
+- `production_ready: 0`
+- `cache_rebuild_required: 0`
+- `unresolved_values_excluded: 1`
+- `auto_canonical_selected: 0`
+- `auto_merge_performed: 0`
+
+### Подтверждение границ
+
+Подтверждено:
+
+- выполнена только DB-readonly apply-plan preview generation;
+- apply-plan preview напечатан только в консоль;
+- executable apply-plan не создан;
+- SQL statements не выполнялись;
+- SQL files/diff не создавались;
+- apply-plan file не создавался;
+- SQL apply не выполнялся;
+- product data не менялись;
+- output files не создавались;
+- runtime artifacts не создавались;
+- config/jobs не менялись;
+- pipeline/runners не менялись;
+- production/cache не трогались;
+- cache rebuild не выполнялся;
+- unresolved values исключены;
+- auto-canonical selection не выполнялся;
+- auto-merge не выполнялся.
+
+Этим закрыт gate:
+
+`apply-plan preview generation`
+
+Следующий gate:
+
+`review apply-plan preview`
+
+SQL apply по-прежнему запрещён.
