@@ -3986,3 +3986,195 @@ Range-like, upper-bound, mixed-text и ambiguous multi-number values были в
 `подготовка review-chain для generated proposals`
 
 Следующий gate должен быть отдельным и явным. SQL/apply по-прежнему запрещены.
+
+## 2026-07-09 — Проверка DB-readonly команды normalization review sample
+
+### Контекст
+
+Коммит реализации:
+
+`d9e3acd Add DB readonly normalization review sample command`
+
+Связанные решения и проверки:
+
+- `docs/HUMAN_DECISION_MAX_HEAD_SCOPE_11900213.md`
+- `docs/MAX_HEAD_UNIT_CONTRACT_SCOPE_11900213.md`
+- `docs/MAX_HEAD_RANGE_POLICY_SCOPE_11900213.md`
+- `docs/RUNTIME_CHECKS.md`
+
+Команда:
+
+`framework-standardization/bin/db-readonly-normalization-review-sample.php`
+
+Класс:
+
+`framework-standardization/src/Review/DbReadOnlyNormalizationReviewSample.php`
+
+Команда normalization review sample является отдельной ручной DB-readonly командой.
+
+Она формирует выборку review-chain только в консоль:
+
+- первые `N` строк со статусом `pending_review`;
+- отдельную выборку строк со статусом `unresolved`;
+- `approved` автоматически не выставляется.
+
+Команда не сохраняет sample никуда.
+
+### Ручная проверка markdown-вывода
+
+Команда:
+
+`chcp 65001; $OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8; C:\php56\php.exe framework-standardization\bin\db-readonly-normalization-review-sample.php framework-standardization\config\runtime\local.dump.php --category-id=11900213 --attribute-ids=12,101,119,81 --canonical-attribute-id=12 --canonical-unit=m --limit=50 --format=markdown`
+
+Наблюдалось:
+
+- `runtime_mode: db_readonly`
+- `command: normalization_review_sample`
+- `category_scope: 11900213`
+- `attribute_ids: 12,101,119,81`
+- `canonical_attribute_id: 12`
+- `canonical_unit: m`
+- `limit: 50`
+- `format: markdown`
+- читаемый кириллический вывод в PowerShell после настройки UTF-8;
+- pending review sample выведен markdown-таблицей;
+- unresolved sample выведен отдельной markdown-таблицей;
+- safety markers выведены fenced `text` блоком.
+
+### Поведение pending review sample
+
+Accepted simple values были выведены со статусом:
+
+`pending_review`
+
+Наблюдавшиеся первые строки:
+
+- `max_head_11900213_1068_12_normalized`
+  - product_id: `1068`
+  - attribute_id: `12`
+  - raw_value: `46.5м.`
+  - proposed_normalized_value: `46.5`
+  - canonical_unit: `m`
+  - review_status: `pending_review`
+  - reason: `accepted_simple_meter_value`
+
+- `max_head_11900213_1069_12_normalized`
+  - product_id: `1069`
+  - attribute_id: `12`
+  - raw_value: `68м.`
+  - proposed_normalized_value: `68`
+  - canonical_unit: `m`
+  - review_status: `pending_review`
+  - reason: `accepted_simple_meter_value`
+
+- `max_head_11900213_1070_12_normalized`
+  - product_id: `1070`
+  - attribute_id: `12`
+  - raw_value: `93м.`
+  - proposed_normalized_value: `93`
+  - canonical_unit: `m`
+  - review_status: `pending_review`
+  - reason: `accepted_simple_meter_value`
+
+- `max_head_11900213_1071_12_normalized`
+  - product_id: `1071`
+  - attribute_id: `12`
+  - raw_value: `133м.`
+  - proposed_normalized_value: `133`
+  - canonical_unit: `m`
+  - review_status: `pending_review`
+  - reason: `accepted_simple_meter_value`
+
+- `max_head_11900213_1072_12_normalized`
+  - product_id: `1072`
+  - attribute_id: `12`
+  - raw_value: `60м.`
+  - proposed_normalized_value: `60`
+  - canonical_unit: `m`
+  - review_status: `pending_review`
+  - reason: `accepted_simple_meter_value`
+
+### Поведение unresolved sample
+
+Unresolved sample показал все `14` unresolved строк.
+
+Наблюдавшиеся примеры:
+
+- `max_head_11900213_8218_81_unresolved`
+  - product_id: `8218`
+  - attribute_id: `81`
+  - raw_value: `50–51,5`
+  - review_status: `unresolved`
+  - reason: `range_value_unresolved`
+
+- `max_head_11900213_8224_81_unresolved`
+  - product_id: `8224`
+  - attribute_id: `81`
+  - raw_value: `106-109`
+  - review_status: `unresolved`
+  - reason: `range_value_unresolved`
+
+- `max_head_11900213_8271_81_unresolved`
+  - product_id: `8271`
+  - attribute_id: `81`
+  - raw_value: `до 51 м`
+  - review_status: `unresolved`
+  - reason: `textual_upper_bound_unresolved`
+
+- `max_head_11900213_8288_81_unresolved`
+  - product_id: `8288`
+  - attribute_id: `81`
+  - raw_value: `104–118`
+  - review_status: `unresolved`
+  - reason: `range_value_unresolved`
+
+### Summary
+
+Наблюдавшийся summary:
+
+- `total_pending_review_count: 481`
+- `pending_review_sample_count: 50`
+- `total_unresolved_count: 14`
+- `unresolved_sample_count: 14`
+- `skipped_count: 0`
+
+### Safety markers
+
+Наблюдавшиеся safety markers:
+
+- `review_sample_generated: 1`
+- `review_sample_persisted: 0`
+- `approved_auto_assigned: 0`
+- `review_chain_persisted: 0`
+- `sql_generated: 0`
+- `sql_apply_allowed: 0`
+- `apply_plan_created: 0`
+- `auto_canonical_selected: 0`
+- `auto_merge_performed: 0`
+- `production_ready: 0`
+
+### Подтверждение границ
+
+Подтверждено:
+
+- только DB-readonly review sample generation;
+- output files не создавались;
+- runtime artifacts не создавались;
+- config/jobs не менялись;
+- pipeline/runners не менялись;
+- SQL preview не создавался;
+- SQL files/diff не создавались;
+- apply plan не создавался;
+- SQL apply не выполнялся;
+- production/cache не трогались;
+- cache rebuild не выполнялся;
+- auto-canonical selection не выполнялся;
+- auto-merge не выполнялся;
+- product data не менялись;
+- review sample печатается только в консоль;
+- `approved` автоматически не выставляется;
+- `pending_review` не означает разрешение на SQL/apply.
+
+Этим подготовлена ручная выборочная проверка generated proposals.
+
+Следующий gate должен быть отдельным и явным. SQL/apply по-прежнему запрещены.
