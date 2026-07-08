@@ -21,6 +21,7 @@ try {
     $cliOptions = parseCliOptions($argv);
     $limit = $cliOptions['limit'];
     $format = $cliOptions['format'];
+    $categoryId = $cliOptions['category_id'];
 
     assertSafeTargetText($targetText);
 
@@ -43,7 +44,7 @@ try {
 
     $db = new PdoReadOnlyDbConnection(createPdo($runtimeConfig));
     $discovery = new DbReadOnlyAttributeDiscovery($db, $runtimeConfig->getDbPrefix(), 1);
-    $result = $discovery->discover($targetText, $limit);
+    $result = $discovery->discover($targetText, $limit, $categoryId);
 
     if ($format === 'markdown') {
         printDiscoveryResultMarkdown($targetText, $result);
@@ -60,6 +61,7 @@ function parseCliOptions(array $argv)
 {
     $limit = 20;
     $format = 'plain';
+    $categoryId = null;
     $limitSeen = false;
 
     for ($i = 3; $i < count($argv); $i++) {
@@ -80,6 +82,17 @@ function parseCliOptions(array $argv)
             continue;
         }
 
+        if (strpos($arg, '--category-id=') === 0) {
+            $categoryIdValue = substr($arg, strlen('--category-id='));
+
+            if (!preg_match('/^[1-9][0-9]*$/', $categoryIdValue)) {
+                throw new \InvalidArgumentException('invalid_category_id');
+            }
+
+            $categoryId = (int) $categoryIdValue;
+            continue;
+        }
+
         if ($limitSeen) {
             throw new \InvalidArgumentException('unexpected_cli_argument');
         }
@@ -95,6 +108,7 @@ function parseCliOptions(array $argv)
     return array(
         'limit' => $limit,
         'format' => $format,
+        'category_id' => $categoryId,
     );
 }
 
@@ -186,6 +200,7 @@ function printDiscoveryResult($targetText, array $result)
     echo "runtime_mode: db_readonly\n";
     echo "command: attribute_discovery\n";
     echo 'target: ' . $targetText . "\n";
+    echo 'category_scope: ' . categoryScopeValue($result) . "\n";
     echo 'candidates_count: ' . count($candidates) . "\n";
     echo "\n";
     echo "candidates:\n";
@@ -223,6 +238,7 @@ function printDiscoveryResultMarkdown($targetText, array $result)
     echo "- runtime_mode: db_readonly\n";
     echo "- command: attribute_discovery\n";
     echo '- target: ' . markdownCell($targetText) . "\n";
+    echo '- category_scope: ' . markdownCell(categoryScopeValue($result)) . "\n";
     echo '- candidates_count: ' . count($candidates) . "\n";
     echo "\n";
     echo "## Candidates\n";
@@ -297,4 +313,13 @@ function markdownCell($value)
     $value = str_replace('|', '\\|', $value);
 
     return $value;
+}
+
+function categoryScopeValue(array $result)
+{
+    if (!isset($result['category_id']) || $result['category_id'] === null) {
+        return 'none';
+    }
+
+    return (string) $result['category_id'];
 }

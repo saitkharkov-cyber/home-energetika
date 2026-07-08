@@ -17,10 +17,11 @@ final class DbReadOnlyAttributeDiscovery
         $this->languageId = (int) $languageId;
     }
 
-    public function discover($targetText, $limit)
+    public function discover($targetText, $limit, $categoryId = null)
     {
         $targetText = trim((string) $targetText);
         $limit = (int) $limit;
+        $categoryId = $categoryId === null ? null : (int) $categoryId;
 
         if ($limit < 1) {
             $limit = 20;
@@ -31,23 +32,26 @@ final class DbReadOnlyAttributeDiscovery
         }
 
         $terms = $this->buildSearchTerms($targetText);
+        $categoryIds = $categoryId === null ? array() : $this->loadCategoryScopeIds($categoryId);
 
         if (count($terms) === 0) {
             return array(
                 'target' => $targetText,
+                'category_id' => $categoryId,
+                'category_scope_ids' => $categoryIds,
                 'candidates' => array(),
                 'warnings' => array('no_search_terms'),
             );
         }
 
-        $candidates = $this->loadCandidates($terms);
+        $candidates = $this->loadCandidates($terms, $categoryIds);
         $enrichedCandidates = array();
 
         foreach ($candidates as $candidate) {
             $attributeId = isset($candidate['attribute_id']) ? (int) $candidate['attribute_id'] : 0;
             $attributeName = isset($candidate['attribute_name']) ? (string) $candidate['attribute_name'] : '';
             $usageCount = isset($candidate['usage_count']) ? (int) $candidate['usage_count'] : 0;
-            $rawSamples = $this->loadRawSamples($attributeId);
+            $rawSamples = $this->loadRawSamples($attributeId, $categoryIds);
             $match = $this->classifyMatch($targetText, $attributeName, $terms, $usageCount);
 
             $enrichedCandidates[] = array(
@@ -67,14 +71,26 @@ final class DbReadOnlyAttributeDiscovery
 
         return array(
             'target' => $targetText,
+            'category_id' => $categoryId,
+            'category_scope_ids' => $categoryIds,
             'candidates' => $enrichedCandidates,
             'warnings' => array(),
         );
     }
 
-    private function loadCandidates(array $terms)
+    private function loadCandidates(array $terms, array $categoryIds)
     {
         $params = array(':language_id' => $this->languageId);
+        $scoped = count($categoryIds) > 0;
+        $categoryJoin = '';
+        $categoryWhere = '';
+
+        if ($scoped) {
+            $placeholders = $this->buildCategoryPlaceholders($categoryIds, $params);
+            $categoryJoin = 'INNER JOIN ' . $this->dbPrefix . 'product_to_category p2c ';
+            $categoryJoin .= 'ON p2c.product_id = pa.product_id AND p2c.category_id IN (' . implode(', ', $placeholders) . ') ';
+            $categoryWhere = 'AND p2c.product_id IS NOT NULL ';
+        }
 
         $sql = 'SELECT ad.attribute_id, ad.name AS attribute_name, ';
         $sql .= 'COALESCE(agd.name, \'\') AS attribute_group_name, ';
@@ -83,9 +99,11 @@ final class DbReadOnlyAttributeDiscovery
         $sql .= 'LEFT JOIN ' . $this->dbPrefix . 'attribute a ON a.attribute_id = ad.attribute_id ';
         $sql .= 'LEFT JOIN ' . $this->dbPrefix . 'attribute_group_description agd ';
         $sql .= 'ON agd.attribute_group_id = a.attribute_group_id AND agd.language_id = ad.language_id ';
-        $sql .= 'LEFT JOIN ' . $this->dbPrefix . 'product_attribute pa ';
+        $sql .= ($scoped ? 'INNER JOIN ' : 'LEFT JOIN ') . $this->dbPrefix . 'product_attribute pa ';
         $sql .= 'ON pa.attribute_id = ad.attribute_id AND pa.language_id = ad.language_id ';
+        $sql .= $categoryJoin;
         $sql .= 'WHERE ad.language_id = :language_id ';
+        $sql .= $categoryWhere;
         $sql .= 'GROUP BY ad.attribute_id, ad.name, agd.name ';
         $sql .= 'ORDER BY usage_count DESC, ad.name ASC';
 
@@ -116,14 +134,27 @@ final class DbReadOnlyAttributeDiscovery
         return false;
     }
 
-    private function loadRawSamples($attributeId)
+    private function loadRawSamples($attributeId, array $categoryIds)
     {
         if ((int) $attributeId <= 0) {
             return array();
         }
 
+        $params = array(
+            ':attribute_id' => (int) $attributeId,
+            ':language_id' => $this->languageId,
+        );
+        $categoryJoin = '';
+
+        if (count($categoryIds) > 0) {
+            $placeholders = $this->buildCategoryPlaceholders($categoryIds, $params);
+            $categoryJoin = 'INNER JOIN ' . $this->dbPrefix . 'product_to_category p2c ';
+            $categoryJoin .= 'ON p2c.product_id = pa.product_id AND p2c.category_id IN (' . implode(', ', $placeholders) . ') ';
+        }
+
         $sql = 'SELECT TRIM(pa.text) AS raw_value ';
         $sql .= 'FROM ' . $this->dbPrefix . 'product_attribute pa ';
+        $sql .= $categoryJoin;
         $sql .= 'WHERE pa.attribute_id = :attribute_id ';
         $sql .= 'AND pa.language_id = :language_id ';
         $sql .= 'AND TRIM(pa.text) <> \'\' ';
@@ -131,10 +162,7 @@ final class DbReadOnlyAttributeDiscovery
         $sql .= 'ORDER BY MIN(pa.product_id) ASC ';
         $sql .= 'LIMIT 3';
 
-        $rows = $this->db->fetchAll($sql, array(
-            ':attribute_id' => (int) $attributeId,
-            ':language_id' => $this->languageId,
-        ));
+        $rows = $this->db->fetchAll($sql, $params);
 
         $samples = array();
 
@@ -145,6 +173,85 @@ final class DbReadOnlyAttributeDiscovery
         }
 
         return $samples;
+    }
+
+    private function loadCategoryScopeIds($categoryId)
+    {
+        if ((int) $categoryId <= 0) {
+            return array();
+        }
+
+        $rows = $this->db->fetchAll(
+            'SELECT category_id, parent_id FROM ' . $this->dbPrefix . 'category',
+            array()
+        );
+        $childrenByParent = array();
+        $knownCategoryIds = array();
+
+        foreach ($rows as $row) {
+            $id = isset($row['category_id']) ? (int) $row['category_id'] : 0;
+            $parentId = isset($row['parent_id']) ? (int) $row['parent_id'] : 0;
+
+            if ($id <= 0) {
+                continue;
+            }
+
+            $knownCategoryIds[$id] = true;
+
+            if (!isset($childrenByParent[$parentId])) {
+                $childrenByParent[$parentId] = array();
+            }
+
+            $childrenByParent[$parentId][] = $id;
+        }
+
+        if (!isset($knownCategoryIds[(int) $categoryId])) {
+            return array((int) $categoryId);
+        }
+
+        $scopeIds = array();
+        $queue = array((int) $categoryId);
+        $seen = array();
+
+        while (count($queue) > 0) {
+            $currentId = array_shift($queue);
+
+            if (isset($seen[$currentId])) {
+                continue;
+            }
+
+            $seen[$currentId] = true;
+            $scopeIds[] = $currentId;
+
+            if (!isset($childrenByParent[$currentId])) {
+                continue;
+            }
+
+            foreach ($childrenByParent[$currentId] as $childId) {
+                if (!isset($seen[$childId])) {
+                    $queue[] = $childId;
+                }
+            }
+        }
+
+        sort($scopeIds);
+
+        return $scopeIds;
+    }
+
+    private function buildCategoryPlaceholders(array $categoryIds, array &$params)
+    {
+        $placeholders = array();
+        $index = 0;
+
+        foreach ($categoryIds as $categoryId) {
+            $key = ':category_id_' . $index;
+            $params[$key] = (int) $categoryId;
+            $placeholders[] = $key;
+            $index++;
+        }
+
+        return $placeholders;
     }
 
     private function buildSearchTerms($targetText)
