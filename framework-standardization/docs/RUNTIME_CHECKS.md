@@ -4820,3 +4820,141 @@ Rollback SQL на этом шаге не генерировался.
 `review apply-plan preview`
 
 SQL apply по-прежнему запрещён.
+
+## 2026-07-09 — Ручное ревью apply-plan preview
+
+### Контекст
+
+Связанные команды и проверки:
+
+- `b46d70f Add DB readonly apply plan preview command`
+- `177bef4 Document DB readonly apply plan preview check`
+
+Apply-plan preview команда:
+
+`framework-standardization/bin/db-readonly-apply-plan-preview.php`
+
+Проверялся apply-plan preview для:
+
+- category_scope: `11900213`
+- attribute_ids: `12,101,119,81`
+- canonical_attribute_id: `12`
+- canonical_unit: `m`
+
+### Результат short-check
+
+Для проверки использовался short-check по выводу команды, без ручного чтения полной простыни.
+
+Подтверждены ключевые значения:
+
+- `apply_plan_preview_generated: 1`
+- `update_existing_canonical_row_count: 400`
+- `insert_missing_canonical_row_count: 81`
+- `keep_existing_source_row_count: 81`
+- `unresolved_excluded_count: 14`
+- `schema_blocker_count: 0`
+- `conflicts_count: 0`
+- `executable_apply_plan: 0`
+- `sql_apply_allowed: 0`
+- `sql_applied: 0`
+- `product_data_changed: 0`
+
+### Проверка preflight
+
+Подтверждено:
+
+- `no_schema_blockers: ok`
+- `no_conflicts: ok`
+- `unresolved_excluded: ok`
+
+### Проверка опасных SQL-операций
+
+Проверка по опасным словам не выявила исполняемых опасных SQL statements.
+
+Найденный `ROLLBACK` относится только к текстовому разделу rollback notes:
+
+- rollback SQL is not generated in this gate;
+- rollback requires a separate explicit gate;
+- rollback requires a verified backup or local dump snapshot before any future apply;
+- production/cache rollback is out of scope for this preview.
+
+Это не SQL statement и не исполняемая команда.
+
+### Проверка UPDATE statements
+
+Первые UPDATE statements просмотрены вручную.
+
+Наблюдавшийся формат:
+
+```sql
+UPDATE oc_product_attribute SET text = '46.5' WHERE product_id = 1068 AND attribute_id = 12 AND language_id = 1;
+UPDATE oc_product_attribute SET text = '68' WHERE product_id = 1069 AND attribute_id = 12 AND language_id = 1;
+UPDATE oc_product_attribute SET text = '93' WHERE product_id = 1070 AND attribute_id = 12 AND language_id = 1;
+UPDATE oc_product_attribute SET text = '133' WHERE product_id = 1071 AND attribute_id = 12 AND language_id = 1;
+UPDATE oc_product_attribute SET text = '60' WHERE product_id = 1072 AND attribute_id = 12 AND language_id = 1;
+```
+
+Подтверждено:
+
+- UPDATE идёт только по `oc_product_attribute`;
+- обновляется только поле `text`;
+- `product_id` указан явно;
+- `attribute_id = 12`;
+- `language_id = 1`;
+- широких UPDATE без `product_id` нет;
+- значение `text` является нормализованным числом.
+
+### Проверка INSERT statements
+
+INSERT statements ранее были проверены в SQL preview и apply-plan preview.
+
+Подтверждён ожидаемый формат:
+
+```sql
+INSERT INTO oc_product_attribute (product_id, attribute_id, language_id, text) VALUES (..., 12, 1, '...');
+```
+
+Подтверждено:
+
+- INSERT создаёт canonical attribute row;
+- `attribute_id = 12`;
+- `language_id` сохраняется;
+- `text` содержит нормализованное значение;
+- source alias rows не удаляются и не merge-ятся автоматически.
+
+### Проверка unresolved
+
+Подтверждено:
+
+- unresolved values исключены;
+- ranges не входят в UPDATE/INSERT;
+- `до X м` не входит в UPDATE/INSERT;
+- mixed-text / ambiguous multi-number values не входят в UPDATE/INSERT.
+
+Количество исключённых unresolved values:
+
+- `14`
+
+### Подтверждение границ
+
+Подтверждено:
+
+- выполнялось только ручное ревью apply-plan preview;
+- executable apply-plan не создан;
+- SQL statements не выполнялись;
+- SQL files/diff не создавались;
+- apply-plan file не создавался;
+- SQL apply не выполнялся;
+- product data не менялись;
+- production/cache не трогались;
+- cache rebuild не выполнялся.
+
+Этим закрыт gate:
+
+`review apply-plan preview`
+
+Следующий gate должен быть отдельным и явным:
+
+`apply readiness decision`
+
+SQL apply по-прежнему запрещён до отдельного явного решения.
