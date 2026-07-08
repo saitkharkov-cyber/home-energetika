@@ -3290,3 +3290,120 @@ Confirmed:
 - no normalization proposals.
 
 The command remains a standalone manual readonly discovery entrypoint.
+
+## 2026-07-08 — DB-readonly attribute discovery category scope check
+
+### Context
+
+Implementation commit:
+
+`eab3691 Add category scope to DB readonly attribute discovery`
+
+The standalone DB-readonly attribute discovery command now supports optional category scope filtering:
+
+- `--category-id=<int>`
+
+When provided, discovery is limited to products assigned to the selected category or its child categories.
+
+### Manual scoped markdown check
+
+Command:
+
+`chcp 65001; $OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8; C:\php56\php.exe framework-standardization\bin\db-readonly-attribute-discovery.php "максимальный напор" framework-standardization\config\runtime\local.dump.php --format=markdown --category-id=11900213`
+
+Observed:
+
+- `runtime_mode: db_readonly`
+- `command: attribute_discovery`
+- `target: максимальный напор`
+- `category_scope: 11900213`
+- `candidates_count: 8`
+- readable Cyrillic output in PowerShell after UTF-8 console setup;
+- candidates printed as a markdown table;
+- safety markers printed as a fenced `text` block.
+
+### Scoped candidate result
+
+Canonical candidate:
+
+- `12 — Максимальный напор`
+- group: `Параметры насоса`
+- usage_count: `400`
+- reason_found: `exact_name_match`
+- possible_role: `canonical_candidate`
+- raw_samples: `46.5м. | 68м. | 93м.`
+
+Possible alias candidates for later human review:
+
+- `101 — Максимальный напор, м.вод.ст.`
+- usage_count: `4`
+- raw_samples: `310 | 279 | 54.5`
+
+- `119 — Максимальный напор, м`
+- usage_count: `1`
+- raw_samples: `150`
+
+- `81 — Max напор, м`
+- usage_count: `90`
+- raw_samples: `45 | 86 | 375`
+
+Excluded similar-but-different candidates:
+
+- `20 — Минимальный напор`
+- `171 — Максимальный расход Qmax, м³/ч`
+- `100 — Максимальный расход Qmax, м³/ч`
+- `120 — Номинальный напор, м`
+
+### Scope effect
+
+Compared with the previous unscoped run:
+
+- unscoped candidates_count: `14`
+- scoped candidates_count: `8`
+
+The category scope removed unrelated branches/examples from the result, including:
+
+- `108 — Напор, м — Фекальные насосы`
+- `150 — Максимальный ток — Насосные установки Grundfos`
+- `159 — Номинальный напор — Насосные установки Grundfos`
+- no-usage nominal head candidates from unrelated scope.
+
+Remaining similar-but-different candidates are expected because they occur inside the selected category scope and must be excluded by human canonical selection.
+
+### Safety markers
+
+Observed safety markers remained zero:
+
+- `auto_canonical_selected: 0`
+- `auto_merge_performed: 0`
+- `raw_values_inventory_completed: 0`
+- `unit_contract_created: 0`
+- `normalization_proposals_created: 0`
+- `sql_generated: 0`
+- `apply_plan_created: 0`
+- `safe_to_apply: 0`
+- `sql_apply_allowed: 0`
+- `production_ready: 0`
+
+### Boundary confirmation
+
+Confirmed:
+
+- category scope is readonly discovery only;
+- no output files created;
+- no runtime artifacts created;
+- no config/jobs changes;
+- no pipeline/runners changes;
+- no SQL preview;
+- no SQL generation/files/diff;
+- no apply plan;
+- no SQL apply;
+- no production/cache changes;
+- no cache rebuild;
+- no auto-canonical selection;
+- no auto-merge;
+- no raw values inventory as a full step;
+- no unit contract;
+- no normalization proposals.
+
+The command remains a standalone manual readonly discovery entrypoint.
