@@ -3559,3 +3559,276 @@ Confirmed:
 - no normalization proposals.
 
 The next allowed workflow gate is canonical unit / normalized_value contract decision based on the inventory evidence.
+
+## 2026-07-09 — DB-readonly normalization proposals command check
+
+### Context
+
+Implementation commit:
+
+`eafe9e6 Add DB readonly normalization proposals command`
+
+Related decisions:
+
+- `docs/HUMAN_DECISION_MAX_HEAD_SCOPE_11900213.md`
+- `docs/MAX_HEAD_UNIT_CONTRACT_SCOPE_11900213.md`
+- `docs/MAX_HEAD_RANGE_POLICY_SCOPE_11900213.md`
+
+Command:
+
+`framework-standardization/bin/db-readonly-normalization-proposals.php`
+
+Class:
+
+`framework-standardization/src/Proposals/DbReadOnlyNormalizationProposals.php`
+
+The normalization proposals command is a standalone manual DB-readonly command.
+
+It generates console-only normalization proposals for accepted simple values and reports unresolved values separately.
+
+It does not persist proposals anywhere.
+
+### Manual markdown proposals check
+
+Command:
+
+`chcp 65001; $OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8; C:\php56\php.exe framework-standardization\bin\db-readonly-normalization-proposals.php framework-standardization\config\runtime\local.dump.php --category-id=11900213 --attribute-ids=12,101,119,81 --canonical-attribute-id=12 --canonical-unit=m --format=markdown`
+
+Observed:
+
+- `runtime_mode: db_readonly`
+- `command: normalization_proposals`
+- `category_scope: 11900213`
+- `attribute_ids: 12,101,119,81`
+- `canonical_attribute_id: 12`
+- `canonical_unit: m`
+- `format: markdown`
+- readable Cyrillic output in PowerShell after UTF-8 console setup;
+- proposals printed as markdown table;
+- unresolved values printed as separate markdown table;
+- safety markers printed as fenced `text` block.
+
+### Proposals behavior
+
+Accepted simple values were converted to decimal meters.
+
+Observed examples:
+
+- `46.5м.` -> `46.5`
+- `68м.` -> `68`
+- `31,5` -> `31.5`
+- `310` -> `310`
+
+The generated proposal action is descriptive only:
+
+`propose_normalized_value`
+
+It does not imply SQL/apply permission.
+
+### Unresolved behavior
+
+Range-like, upper-bound, mixed-text, and ambiguous multi-number values were not normalized.
+
+Observed unresolved examples:
+
+- `50–51,5` -> `range_value_unresolved`
+- `100-104` -> `range_value_unresolved`
+- `до 51 м` -> `textual_upper_bound_unresolved`
+- `104–118` -> `range_value_unresolved`
+
+### Summary
+
+Observed summary:
+
+- `proposals_count: 481`
+- `unresolved_count: 14`
+- `skipped_count: 0`
+
+### Plain format check
+
+Also checked:
+
+`--format=plain`
+
+Observed:
+
+- command completed successfully;
+- summary matched markdown output:
+  - `proposals_count: 481`
+  - `unresolved_count: 14`
+  - `skipped_count: 0`
+
+### Safety markers
+
+Observed safety markers:
+
+- `normalization_proposals_generated: 1`
+- `unresolved_values_reported: 1`
+- `sql_generated: 0`
+- `sql_apply_allowed: 0`
+- `apply_plan_created: 0`
+- `auto_canonical_selected: 0`
+- `auto_merge_performed: 0`
+- `production_ready: 0`
+
+### Boundary confirmation
+
+Confirmed:
+
+- DB-readonly proposals generation only;
+- no output files created;
+- no runtime artifacts created;
+- no config/jobs changes;
+- no pipeline/runners changes;
+- no SQL preview;
+- no SQL generation/files/diff;
+- no apply plan;
+- no SQL apply;
+- no production/cache changes;
+- no cache rebuild;
+- no auto-canonical selection;
+- no auto-merge;
+- no product data changes;
+- proposals are printed to console only.
+
+The next allowed workflow gate is review-chain preparation for generated proposals, still without SQL/apply.
+
+## 2026-07-09 — Проверка DB-readonly команды normalization proposals
+
+### Контекст
+
+Коммит реализации:
+
+`eafe9e6 Add DB readonly normalization proposals command`
+
+Связанные решения:
+
+- `docs/HUMAN_DECISION_MAX_HEAD_SCOPE_11900213.md`
+- `docs/MAX_HEAD_UNIT_CONTRACT_SCOPE_11900213.md`
+- `docs/MAX_HEAD_RANGE_POLICY_SCOPE_11900213.md`
+
+Команда:
+
+`framework-standardization/bin/db-readonly-normalization-proposals.php`
+
+Класс:
+
+`framework-standardization/src/Proposals/DbReadOnlyNormalizationProposals.php`
+
+Команда normalization proposals является отдельной ручной DB-readonly командой.
+
+Она формирует предложения нормализации только в консоль:
+
+- accepted simple values попадают в proposals;
+- range-like / upper-bound / mixed-text / ambiguous multi-number values попадают в unresolved.
+
+Команда не сохраняет proposals никуда.
+
+### Ручная проверка markdown-вывода
+
+Команда:
+
+`chcp 65001; $OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8; C:\php56\php.exe framework-standardization\bin\db-readonly-normalization-proposals.php framework-standardization\config\runtime\local.dump.php --category-id=11900213 --attribute-ids=12,101,119,81 --canonical-attribute-id=12 --canonical-unit=m --format=markdown`
+
+Наблюдалось:
+
+- `runtime_mode: db_readonly`
+- `command: normalization_proposals`
+- `category_scope: 11900213`
+- `attribute_ids: 12,101,119,81`
+- `canonical_attribute_id: 12`
+- `canonical_unit: m`
+- `format: markdown`
+- читаемый кириллический вывод в PowerShell после настройки UTF-8;
+- proposals выведены markdown-таблицей;
+- unresolved values выведены отдельной markdown-таблицей;
+- safety markers выведены fenced `text` блоком.
+
+### Поведение proposals
+
+Accepted simple values были преобразованы в decimal meters.
+
+Наблюдавшиеся примеры:
+
+- `46.5м.` -> `46.5`
+- `68м.` -> `68`
+- `31,5` -> `31.5`
+- `310` -> `310`
+
+Действие proposal является только описательным:
+
+`propose_normalized_value`
+
+Оно не означает разрешение на SQL/apply.
+
+### Поведение unresolved
+
+Range-like, upper-bound, mixed-text и ambiguous multi-number values не нормализовались.
+
+Наблюдавшиеся unresolved examples:
+
+- `50–51,5` -> `range_value_unresolved`
+- `100-104` -> `range_value_unresolved`
+- `до 51 м` -> `textual_upper_bound_unresolved`
+- `104–118` -> `range_value_unresolved`
+
+### Summary
+
+Наблюдавшийся summary:
+
+- `proposals_count: 481`
+- `unresolved_count: 14`
+- `skipped_count: 0`
+
+### Проверка plain-формата
+
+Также проверено:
+
+`--format=plain`
+
+Наблюдалось:
+
+- команда успешно завершилась;
+- summary совпал с markdown-выводом:
+  - `proposals_count: 481`
+  - `unresolved_count: 14`
+  - `skipped_count: 0`
+
+### Safety markers
+
+Наблюдавшиеся safety markers:
+
+- `normalization_proposals_generated: 1`
+- `unresolved_values_reported: 1`
+- `sql_generated: 0`
+- `sql_apply_allowed: 0`
+- `apply_plan_created: 0`
+- `auto_canonical_selected: 0`
+- `auto_merge_performed: 0`
+- `production_ready: 0`
+
+### Подтверждение границ
+
+Подтверждено:
+
+- только DB-readonly proposals generation;
+- output files не создавались;
+- runtime artifacts не создавались;
+- config/jobs не менялись;
+- pipeline/runners не менялись;
+- SQL preview не создавался;
+- SQL files/diff не создавались;
+- apply plan не создавался;
+- SQL apply не выполнялся;
+- production/cache не трогались;
+- cache rebuild не выполнялся;
+- auto-canonical selection не выполнялся;
+- auto-merge не выполнялся;
+- product data не менялись;
+- proposals печатаются только в консоль.
+
+Следующий разрешённый workflow gate:
+
+`review-chain preparation for generated proposals`
+
+По-прежнему без SQL/apply.
