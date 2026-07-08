@@ -1,26 +1,26 @@
-# Start Here — Framework Standardization
+# С чего начать — стандартизация характеристик
 
 Дата: 2026-07-07
 
-## 1. Purpose
+## 1. Назначение
 
-Этот документ — короткий вход для нового чистого ChatGPT-чата по проекту `HmEnerg_Характеристики / framework-standardization`.
+Этот документ — короткая точка входа для нового чистого ChatGPT-чата по проекту `HmEnerg_Характеристики / framework-standardization`.
 
-Источник истины остаётся в repo-документации. Master summary из чата не должен заменять GitHub/repo documents.
+Основной источник истины — документация в репозитории. Краткое summary из чата не должно заменять документы в GitHub/repo.
 
-`START_HERE.md` не является changelog и не заменяет `HANDOFF.md`.
+`START_HERE.md` не является журналом изменений и не заменяет `HANDOFF.md`.
 
-## 2. Current stable point
+## 2. Текущая стабильная точка
 
 Текущая стабильная точка:
 
 `e128e61 Add framework standardization glossary`
 
-Previous onboarding refresh point:
+Предыдущая точка обновления onboarding/handoff:
 
 `f2fdaa6 Update framework standardization handoff after onboarding refresh`
 
-## 3. Read order for a new ChatGPT chat
+## 3. Порядок чтения для нового ChatGPT-чата
 
 Новый ChatGPT должен читать документы в таком порядке:
 
@@ -28,120 +28,128 @@ Previous onboarding refresh point:
 2. `docs/HANDOFF.md`
 3. `docs/DECISIONS.md`
 4. `docs/RUNTIME_CHECKS.md`
-5. актуальные specs из `docs/`, если они нужны для конкретного шага
+5. актуальные спецификации из `docs/`, если они нужны для конкретного шага
 
-`docs/RULES.md` предназначен для ChatGPT-процесса. ChatGPT должен соблюдать rules.
+`docs/RULES.md` предназначен для работы ChatGPT. ChatGPT должен соблюдать эти правила.
 
-Codex не должен получать задачу вида "соблюдай RULES.md". Если ограничение важно для Codex, ChatGPT должен явно включить это ограничение в prompt.
+Codex не должен получать задачу в формате «соблюдай RULES.md». Если какое-то ограничение важно для Codex, ChatGPT должен явно включить его в prompt.
 
-## 4. Current architecture
+## 4. Текущая архитектура
 
-Framework standardization = controlled attribute consolidation workflow, not fully automatic normalizer.
+Стандартизация framework — это управляемый процесс объединения характеристик, а не полностью автоматический нормализатор.
 
-Актуальная цепочка:
+Актуальная цепочка работы:
 
-* target attribute meaning
-* DB-readonly attribute name discovery
-* candidate list
-* human canonical selection
-* explicit include/exclude alias decision
-* raw values inventory
-* canonical unit / `normalized_value` contract
-* normalization proposals generation
-* standalone review-chain
-* separate explicit apply-plan
+* определение смысла целевой характеристики;
+* поиск названий характеристик в БД в режиме только чтения;
+* список кандидатов;
+* ручной выбор канонической характеристики;
+* явное решение, какие aliases включать или исключать;
+* инвентаризация исходных значений;
+* утверждение канонической единицы измерения и контракта `normalized_value`;
+* генерация предложений по нормализации;
+* отдельная цепочка ручной проверки;
+* отдельный явный план применения изменений.
 
 Framework не должен автоматически объединять похожие характеристики только по названию.
 
-## 5. What is already useful
+## 5. Что уже полезно
 
-Уже построена и остаётся полезной вторая половина workflow:
+Уже построена и остаётся полезной вторая часть процесса:
 
-* raw values / proposals
-* review fixture generator
-* writer
-* manual review
-* loader
-* bridge
-* approval flow
-* result reporter
+* исходные значения и предложения по нормализации;
+* генератор проверочных данных;
+* writer;
+* ручная проверка;
+* loader;
+* bridge;
+* процесс утверждения;
+* отчёт по результату.
 
-Standalone review-chain должна получать proposals только после approved canonical unit / `normalized_value` contract.
+Отдельная цепочка ручной проверки должна получать предложения только после утверждения канонической единицы измерения и контракта `normalized_value`.
 
-`approved` в review-chain не означает SQL apply permission.
+Статус `approved` в цепочке проверки не означает разрешение применять изменения в SQL.
 
-## 6. Do not continue the paused path
+## 6. Не продолжать остановленный путь
 
 Не продолжать immediate `pump_max_head` fixture/job.
 
-`pump_max_head` остаётся useful candidate/example, но перед fixture/config/jobs обязательны:
+`pump_max_head` остаётся полезным кандидатом и примером, но перед созданием fixture/config/jobs обязательны:
 
-* discovery;
-* canonical selection;
-* raw values inventory;
-* approved unit/contract;
-* proposals generation.
+* поиск характеристик;
+* выбор канонической характеристики;
+* инвентаризация исходных значений;
+* утверждение единицы измерения и контракта;
+* генерация предложений по нормализации.
 
-## 7. Production safety
+## 7. Безопасность production
 
 На production был cache hotfix для Belamos/Pedrollo `max_flow_l_min`.
 
-Cache rebuild восстановил старые flow values в `m/h`.
+Пересборка cache восстановила старые значения расхода в `m/h`.
 
 Правила:
 
-* no cache rebuild without separate explicit approval;
-* flow/performance attributes не трогать без permanent flow normalization;
-* selector/cache-related attributes require explicit canonical unit contract before implementation;
-* unit semantics нельзя угадывать автоматически.
+* не выполнять пересборку cache без отдельного явного подтверждения;
+* не трогать характеристики расхода и производительности без постоянной нормализации расхода;
+* характеристики, связанные с selector/cache, требуют явного контракта канонической единицы измерения до реализации;
+* смысл единиц измерения нельзя угадывать автоматически.
 
-## 8. Operating rules for the new ChatGPT chat
+## 8. Рабочие правила для нового ChatGPT-чата
 
-ChatGPT выбирает следующий маленький step. Не спрашивать Codex "что дальше?".
+ChatGPT выбирает следующий маленький шаг. Не спрашивать Codex: «что дальше?».
 
-Implementation только после explicit `+`.
+Реализация начинается только после явного `+`.
 
-Codex получает конкретный bounded prompt: какие файлы читать, какой один файл менять/создавать, что запрещено, какие проверки выполнять или не выполнять.
+Codex получает конкретный ограниченный prompt:
 
-Codex обычно не делает commit. После отчёта Codex ChatGPT проверяет scope и даёт commit command отдельно.
+* какие файлы читать;
+* какой один файл менять или создавать;
+* что запрещено;
+* какие проверки выполнять или не выполнять.
 
-`HANDOFF.md` обновлять только при закрытии, паузе, переносе или существенной смене stable point.
+Обычно Codex не делает commit. После отчёта Codex ChatGPT проверяет scope и отдельно даёт команду для commit.
 
-PowerShell commands давать одной строкой.
+`HANDOFF.md` обновлять только при закрытии, паузе, переносе работы или существенной смене стабильной точки.
 
-PHP checks выполнять через `C:\php56\php.exe`.
+PowerShell-команды давать одной строкой.
 
-## 9. Current next direction
+PHP-проверки выполнять через:
 
-Следующий direction:
+`C:\php56\php.exe`
 
-implementation spec для первого DB-readonly attribute name discovery command/tool.
+## 9. Текущее следующее направление
 
-Только после отдельного explicit `+`.
+Следующее направление:
 
-Future tool должен показывать candidates:
+спецификация реализации первой команды/утилиты для поиска названий характеристик в БД в режиме только чтения.
 
-* `attribute_id`
-* `attribute_name`
-* `usage_count`
-* optional category coverage
-* short raw samples preview
-* warnings
-* reason found
-* possible role:
-  * canonical candidate
-  * possible alias / duplicate
-  * similar but different
-  * unsafe / unresolved
+Только после отдельного явного `+`.
 
-## 10. Boundaries for this START_HERE step
+Будущая утилита должна показывать кандидатов:
 
-Этот документ не содержит готовый Codex prompt.
+* `attribute_id`;
+* `attribute_name`;
+* `usage_count`;
+* опционально — покрытие по категориям;
+* короткий preview исходных значений;
+* предупреждения;
+* причина, почему кандидат найден;
+* возможная роль:
 
-Этот документ не является полным changelog.
+  * канонический кандидат;
+  * возможный alias / дубль;
+  * похожая, но другая характеристика;
+  * небезопасно / неразрешено.
+
+## 10. Границы этого шага START_HERE
+
+Этот документ не содержит готовый prompt для Codex.
+
+Этот документ не является полным журналом изменений.
 
 Этот документ не дублирует полностью `HANDOFF.md`.
 
 Этот документ не добавляет runtime checks.
 
-Этот документ не добавляет PHP implementation instructions.
+Этот документ не добавляет PHP-инструкции по реализации.
