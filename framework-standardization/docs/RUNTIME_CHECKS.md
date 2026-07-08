@@ -4249,3 +4249,232 @@ Range-like / upper-bound / mixed-text значения не попали в `pen
 `ручное ревью sample из generated proposals`
 
 Следующий gate должен быть отдельным и явным. SQL/apply по-прежнему запрещены.
+
+## 2026-07-09 — Проверка DB-readonly команды SQL preview
+
+### Контекст
+
+Коммит реализации:
+
+`dc58ac4 Add DB readonly SQL preview command`
+
+Связанные решения и проверки:
+
+- `docs/HUMAN_DECISION_MAX_HEAD_SCOPE_11900213.md`
+- `docs/MAX_HEAD_UNIT_CONTRACT_SCOPE_11900213.md`
+- `docs/MAX_HEAD_RANGE_POLICY_SCOPE_11900213.md`
+- `docs/HUMAN_REVIEW_MAX_HEAD_PROPOSALS_SCOPE_11900213.md`
+- `docs/SQL_PREVIEW_PLAN_MAX_HEAD_SCOPE_11900213.md`
+- `docs/RUNTIME_CHECKS.md`
+
+Команда:
+
+`framework-standardization/bin/db-readonly-sql-preview.php`
+
+Класс:
+
+`framework-standardization/src/Preview/DbReadOnlySqlPreview.php`
+
+Команда SQL preview является отдельной ручной DB-readonly командой.
+
+Она:
+
+- читает только local dump DB;
+- переиспользует существующую proposals/review-chain логику;
+- строит SQL preview только для review-approved simple proposals;
+- исключает unresolved values;
+- проверяет схему хранения `oc_product_attribute`;
+- печатает SQL preview только в консоль;
+- не выполняет SQL;
+- не создаёт SQL files;
+- не создаёт apply-plan.
+
+### Ручная проверка markdown-вывода
+
+Команда:
+
+`chcp 65001; $OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8; C:\php56\php.exe framework-standardization\bin\db-readonly-sql-preview.php framework-standardization\config\runtime\local.dump.php --category-id=11900213 --attribute-ids=12,101,119,81 --canonical-attribute-id=12 --canonical-unit=m --format=markdown`
+
+Наблюдалось:
+
+- `runtime_mode: db_readonly`
+- `command: sql_preview`
+- `category_scope: 11900213`
+- `attribute_ids: 12,101,119,81`
+- `canonical_attribute_id: 12`
+- `canonical_unit: m`
+- `format: markdown`
+- читаемый кириллический вывод в PowerShell после настройки UTF-8;
+- storage schema summary выведен;
+- SQL preview action summary выведен;
+- SQL preview actions выведены;
+- SQL preview statements напечатаны только в консоль;
+- unresolved values выведены отдельно как excluded;
+- safety markers выведены fenced `text` блоком.
+
+### Storage schema summary
+
+Наблюдавшаяся схема хранения:
+
+- table_name: `oc_product_attribute`
+- relevant_columns: `product_id,attribute_id,language_id,text`
+- schema_status: `ok`
+- notes: `canonical_attribute_row_exists`
+
+Вывод:
+
+- схема хранения подтверждена;
+- fake SQL не генерировался;
+- SQL preview построен по реальной таблице `oc_product_attribute`.
+
+### SQL preview action summary
+
+Наблюдавшийся summary:
+
+- `preview_update_existing_canonical_row_count: 400`
+- `preview_insert_missing_canonical_row_count: 81`
+- `keep_existing_source_row_count: 81`
+- `unresolved_excluded_count: 14`
+- `schema_blocker_count: 0`
+- `conflicts_count: 0`
+
+Интерпретация:
+
+- `400` existing canonical rows могут быть обновлены в будущей операции;
+- `81` missing canonical rows могут быть добавлены в будущей операции;
+- `81` source alias rows остаются как есть;
+- `14` unresolved values исключены;
+- schema blockers не обнаружены;
+- conflicts не обнаружены.
+
+### Примеры SQL preview actions
+
+Наблюдавшиеся первые строки:
+
+- product_id: `1068`
+  - source_attribute_id: `12`
+  - source_attribute_name: `Максимальный напор`
+  - canonical_attribute_id: `12`
+  - raw_value: `46.5м.`
+  - proposed_normalized_value: `46.5`
+  - canonical_unit: `m`
+  - preview_action: `preview_update_existing_canonical_row`
+  - reason: `review_approved_existing_canonical_row`
+
+- product_id: `1069`
+  - source_attribute_id: `12`
+  - source_attribute_name: `Максимальный напор`
+  - canonical_attribute_id: `12`
+  - raw_value: `68м.`
+  - proposed_normalized_value: `68`
+  - canonical_unit: `m`
+  - preview_action: `preview_update_existing_canonical_row`
+  - reason: `review_approved_existing_canonical_row`
+
+- product_id: `1070`
+  - source_attribute_id: `12`
+  - source_attribute_name: `Максимальный напор`
+  - canonical_attribute_id: `12`
+  - raw_value: `93м.`
+  - proposed_normalized_value: `93`
+  - canonical_unit: `m`
+  - preview_action: `preview_update_existing_canonical_row`
+  - reason: `review_approved_existing_canonical_row`
+
+### Примеры SQL preview statements
+
+SQL statements были напечатаны только как preview text.
+
+Наблюдавшиеся примеры:
+
+```sql
+UPDATE oc_product_attribute SET text = '46.5' WHERE product_id = 1068 AND attribute_id = 12 AND language_id = 1;
+UPDATE oc_product_attribute SET text = '68' WHERE product_id = 1069 AND attribute_id = 12 AND language_id = 1;
+UPDATE oc_product_attribute SET text = '93' WHERE product_id = 1070 AND attribute_id = 12 AND language_id = 1;
+UPDATE oc_product_attribute SET text = '133' WHERE product_id = 1071 AND attribute_id = 12 AND language_id = 1;
+UPDATE oc_product_attribute SET text = '60' WHERE product_id = 1072 AND attribute_id = 12 AND language_id = 1;
+```
+
+Эти statements не выполнялись.
+
+Они не были сохранены в файл.
+
+### Excluded unresolved
+
+Наблюдавшийся excluded unresolved count:
+
+- `14`
+
+Примеры excluded unresolved:
+
+- product_id: `8218`
+  - attribute_id: `81`
+  - attribute_name: `Max напор, м`
+  - raw_value: `50–51,5`
+  - reason: `range_value_unresolved`
+
+- product_id: `8224`
+  - attribute_id: `81`
+  - attribute_name: `Max напор, м`
+  - raw_value: `106-109`
+  - reason: `range_value_unresolved`
+
+- product_id: `8225`
+  - attribute_id: `81`
+  - attribute_name: `Max напор, м`
+  - raw_value: `100-104`
+  - reason: `range_value_unresolved`
+
+- product_id: `8271`
+  - attribute_id: `81`
+  - attribute_name: `Max напор, м`
+  - raw_value: `до 51 м`
+  - reason: `textual_upper_bound_unresolved`
+
+### Safety markers
+
+Наблюдавшиеся safety markers:
+
+- `sql_preview_generated: 1`
+- `sql_preview_printed_to_console: 1`
+- `sql_files_created: 0`
+- `sql_apply_allowed: 0`
+- `sql_applied: 0`
+- `apply_plan_created: 0`
+- `product_data_changed: 0`
+- `production_ready: 0`
+- `cache_rebuild_required: 0`
+- `unresolved_values_excluded: 1`
+- `auto_canonical_selected: 0`
+- `auto_merge_performed: 0`
+
+### Подтверждение границ
+
+Подтверждено:
+
+- выполнена только DB-readonly SQL preview generation;
+- SQL preview напечатан только в консоль;
+- SQL statements не выполнялись;
+- SQL files/diff не создавались;
+- apply-plan не создавался;
+- SQL apply не выполнялся;
+- product data не менялись;
+- output files не создавались;
+- runtime artifacts не создавались;
+- config/jobs не менялись;
+- pipeline/runners не менялись;
+- production/cache не трогались;
+- cache rebuild не выполнялся;
+- unresolved values исключены;
+- auto-canonical selection не выполнялся;
+- auto-merge не выполнялся.
+
+Этим закрыт gate:
+
+`DB-readonly SQL preview generation`
+
+Следующий gate:
+
+`review SQL preview`
+
+SQL apply по-прежнему запрещён.
