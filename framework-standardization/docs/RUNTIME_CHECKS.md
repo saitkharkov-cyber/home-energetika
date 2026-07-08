@@ -3407,3 +3407,155 @@ Confirmed:
 - no normalization proposals.
 
 The command remains a standalone manual readonly discovery entrypoint.
+
+## 2026-07-08 — DB-readonly raw values inventory command check
+
+### Context
+
+Implementation commit:
+
+`ad0090b Add DB readonly raw values inventory command`
+
+Human decision source:
+
+`docs/HUMAN_DECISION_MAX_HEAD_SCOPE_11900213.md`
+
+Inventory command:
+
+`framework-standardization/bin/db-readonly-raw-values-inventory.php`
+
+Inventory class:
+
+`framework-standardization/src/Inventory/DbReadOnlyRawValuesInventory.php`
+
+The raw values inventory command is a standalone manual DB-readonly command.
+
+It uses explicit manual inputs:
+
+- `--category-id=11900213`
+- `--attribute-ids=12,101,119,81`
+
+The attribute IDs come from the human decision document and were not selected automatically by the command.
+
+### Manual markdown inventory check
+
+Command:
+
+`chcp 65001; $OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8; C:\php56\php.exe framework-standardization\bin\db-readonly-raw-values-inventory.php framework-standardization\config\runtime\local.dump.php --category-id=11900213 --attribute-ids=12,101,119,81 --format=markdown`
+
+Observed:
+
+- `runtime_mode: db_readonly`
+- `command: raw_values_inventory`
+- `category_scope: 11900213`
+- `attribute_ids: 12,101,119,81`
+- readable Cyrillic output in PowerShell after UTF-8 console setup;
+- attributes summary printed as markdown table;
+- raw values printed as markdown tables grouped by attribute;
+- safety markers printed as fenced `text` block.
+
+### Attributes summary
+
+Observed attributes summary:
+
+- `12 — Максимальный напор`
+  - group: `Параметры насоса`
+  - products_with_attribute_count: `400`
+  - distinct_raw_values_count: `182`
+
+- `101 — Максимальный напор, м.вод.ст.`
+  - group: `Насосы Pedrollo`
+  - products_with_attribute_count: `4`
+  - distinct_raw_values_count: `4`
+
+- `119 — Максимальный напор, м`
+  - group: `Параметры насоса`
+  - products_with_attribute_count: `1`
+  - distinct_raw_values_count: `1`
+
+- `81 — Max напор, м`
+  - group: `Насосы Pedrollo`
+  - products_with_attribute_count: `90`
+  - distinct_raw_values_count: `77`
+
+### Inventory evidence summary
+
+The inventory shows that `attribute_id: 12` is the main source for maximum head values in the selected category scope.
+
+Observed raw value patterns include values with meter unit suffix:
+
+- `60м.`
+- `120м.`
+- `90м.`
+- `75 м`
+
+Observed raw value patterns also include numeric values without explicit unit:
+
+- `42`
+- `65`
+- `84`
+- `200`
+- `279`
+- `310`
+- `54.5`
+
+Observed range / mixed values include examples such as:
+
+- `100-104`
+- `104–118`
+- `123–151`
+- `43–46`
+- `50–51,5`
+- `до 51 м`
+
+These were flagged with warnings such as:
+
+- `contains_unit_m`
+- `multiple_numbers`
+- `range_value`
+- `mixed_text_value`
+
+### Important observations
+
+`attribute_id: 81 — Max напор, м` is confirmed as a real alias candidate within category scope `11900213`, but it contains mixed raw value formats, including ranges.
+
+The inventory does not decide how to normalize these values.
+
+Range handling remains unresolved and must be handled by a later canonical unit / normalized_value contract decision.
+
+### Safety markers
+
+Observed safety markers:
+
+- `raw_values_inventory_completed: 1`
+- `auto_canonical_selected: 0`
+- `auto_merge_performed: 0`
+- `unit_contract_created: 0`
+- `normalization_proposals_created: 0`
+- `sql_generated: 0`
+- `apply_plan_created: 0`
+- `safe_to_apply: 0`
+- `sql_apply_allowed: 0`
+- `production_ready: 0`
+
+### Boundary confirmation
+
+Confirmed:
+
+- DB-readonly inventory only;
+- no output files created;
+- no runtime artifacts created;
+- no config/jobs changes;
+- no pipeline/runners changes;
+- no SQL preview;
+- no SQL generation/files/diff;
+- no apply plan;
+- no SQL apply;
+- no production/cache changes;
+- no cache rebuild;
+- no auto-canonical selection;
+- no auto-merge;
+- no unit contract;
+- no normalization proposals.
+
+The next allowed workflow gate is canonical unit / normalized_value contract decision based on the inventory evidence.
