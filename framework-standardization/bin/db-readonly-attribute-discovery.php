@@ -16,13 +16,11 @@ try {
         throw new \InvalidArgumentException('usage: php bin/db-readonly-attribute-discovery.php "target meaning" path/to/runtime.php [limit]');
     }
 
-    if (isset($argv[4])) {
-        throw new \InvalidArgumentException('unexpected_cli_argument');
-    }
-
     $targetText = normalizeCliText(trim($argv[1]));
     $runtimeFile = $argv[2];
-    $limit = isset($argv[3]) ? (int) $argv[3] : 20;
+    $cliOptions = parseCliOptions($argv);
+    $limit = $cliOptions['limit'];
+    $format = $cliOptions['format'];
 
     assertSafeTargetText($targetText);
 
@@ -47,11 +45,57 @@ try {
     $discovery = new DbReadOnlyAttributeDiscovery($db, $runtimeConfig->getDbPrefix(), 1);
     $result = $discovery->discover($targetText, $limit);
 
-    printDiscoveryResult($targetText, $result);
+    if ($format === 'markdown') {
+        printDiscoveryResultMarkdown($targetText, $result);
+    } else {
+        printDiscoveryResult($targetText, $result);
+    }
     exit(0);
 } catch (\Exception $e) {
     fwrite(STDERR, 'attribute_discovery_error: ' . $e->getMessage() . "\n");
     exit(1);
+}
+
+function parseCliOptions(array $argv)
+{
+    $limit = 20;
+    $format = 'plain';
+    $limitSeen = false;
+
+    for ($i = 3; $i < count($argv); $i++) {
+        $arg = trim($argv[$i]);
+
+        if ($arg === '') {
+            continue;
+        }
+
+        if (strpos($arg, '--format=') === 0) {
+            $formatValue = substr($arg, strlen('--format='));
+
+            if ($formatValue !== 'plain' && $formatValue !== 'markdown') {
+                throw new \InvalidArgumentException('unsupported_format');
+            }
+
+            $format = $formatValue;
+            continue;
+        }
+
+        if ($limitSeen) {
+            throw new \InvalidArgumentException('unexpected_cli_argument');
+        }
+
+        if (!preg_match('/^\d+$/', $arg)) {
+            throw new \InvalidArgumentException('unexpected_cli_argument');
+        }
+
+        $limit = (int) $arg;
+        $limitSeen = true;
+    }
+
+    return array(
+        'limit' => $limit,
+        'format' => $format,
+    );
 }
 
 function assertSafeTargetText($targetText)
@@ -170,6 +214,50 @@ function printDiscoveryResult($targetText, array $result)
     echo "production_ready: 0\n";
 }
 
+function printDiscoveryResultMarkdown($targetText, array $result)
+{
+    $candidates = isset($result['candidates']) && is_array($result['candidates']) ? $result['candidates'] : array();
+
+    echo "# DB-readonly attribute discovery\n";
+    echo "\n";
+    echo "- runtime_mode: db_readonly\n";
+    echo "- command: attribute_discovery\n";
+    echo '- target: ' . markdownCell($targetText) . "\n";
+    echo '- candidates_count: ' . count($candidates) . "\n";
+    echo "\n";
+    echo "## Candidates\n";
+    echo "\n";
+    echo "| attribute_id | attribute_name | group | usage_count | reason_found | possible_role | warnings | raw_samples |\n";
+    echo "| --- | --- | --- | --- | --- | --- | --- | --- |\n";
+
+    foreach ($candidates as $candidate) {
+        echo '| ' . markdownCell(valueOrNone($candidate, 'attribute_id'));
+        echo ' | ' . markdownCell(valueOrNone($candidate, 'attribute_name'));
+        echo ' | ' . markdownCell(valueOrNone($candidate, 'attribute_group_name'));
+        echo ' | ' . markdownCell(valueOrNone($candidate, 'usage_count'));
+        echo ' | ' . markdownCell(valueOrNone($candidate, 'reason_found'));
+        echo ' | ' . markdownCell(valueOrNone($candidate, 'possible_role'));
+        echo ' | ' . markdownCell(listValueOrNone($candidate, 'warnings'));
+        echo ' | ' . markdownCell(listValueOrNone($candidate, 'raw_samples')) . " |\n";
+    }
+
+    echo "\n";
+    echo "## Safety markers\n";
+    echo "\n";
+    echo "```text\n";
+    echo "auto_canonical_selected: 0\n";
+    echo "auto_merge_performed: 0\n";
+    echo "raw_values_inventory_completed: 0\n";
+    echo "unit_contract_created: 0\n";
+    echo "normalization_proposals_created: 0\n";
+    echo "sql_generated: 0\n";
+    echo "apply_plan_created: 0\n";
+    echo "safe_to_apply: 0\n";
+    echo "sql_apply_allowed: 0\n";
+    echo "production_ready: 0\n";
+    echo "```\n";
+}
+
 function valueOrEmpty(array $row, $key)
 {
     if (!isset($row[$key])) {
@@ -186,4 +274,27 @@ function listValueOrNone(array $row, $key)
     }
 
     return implode(' | ', $row[$key]);
+}
+
+function valueOrNone(array $row, $key)
+{
+    if (!isset($row[$key]) || (string) $row[$key] === '') {
+        return 'none';
+    }
+
+    return (string) $row[$key];
+}
+
+function markdownCell($value)
+{
+    $value = (string) $value;
+
+    if ($value === '') {
+        $value = 'none';
+    }
+
+    $value = str_replace(array("\r\n", "\r", "\n"), ' ', $value);
+    $value = str_replace('|', '\\|', $value);
+
+    return $value;
 }
