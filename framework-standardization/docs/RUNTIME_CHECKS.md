@@ -4178,3 +4178,74 @@ Unresolved sample показал все `14` unresolved строк.
 Этим подготовлена ручная выборочная проверка generated proposals.
 
 Следующий gate должен быть отдельным и явным. SQL/apply по-прежнему запрещены.
+
+## 2026-07-09 — Ручное ревью sample generated proposals
+
+### Контекст
+
+Связанные команды и проверки:
+
+- `d9e3acd Add DB readonly normalization review sample command`
+- `8ae4714 Document DB readonly normalization review sample check`
+
+Sample-команда:
+
+`framework-standardization/bin/db-readonly-normalization-review-sample.php`
+
+Проверялся sample для:
+
+- category_scope: `11900213`
+- attribute_ids: `12,101,119,81`
+- canonical_attribute_id: `12`
+- canonical_unit: `m`
+- limit: `50`
+
+### Результат ручного просмотра
+
+Sample из `50` строк со статусом `pending_review` просмотрен вручную.
+
+Результат:
+
+`sample выглядит корректно`
+
+Простые значения нормализуются ожидаемо:
+
+- `46.5м.` -> `46.5`
+- `68м.` -> `68`
+- `93м.` -> `93`
+- `133м.` -> `133`
+- `60м.` -> `60`
+- значения с decimal comma нормализуются в decimal dot, например `31,5` -> `31.5`
+
+### Проверка unresolved
+
+Range-like / upper-bound / mixed-text значения не попали в `pending_review`.
+
+Они остаются в `unresolved`.
+
+Примеры unresolved:
+
+- `100-104`
+- `104–118`
+- `50–51,5`
+- `до 51 м`
+
+### Подтверждение границ
+
+Подтверждено:
+
+- выполнялось только ручное ревью sample;
+- `approved` автоматически не выставлялся;
+- `pending_review` не означает разрешение на SQL/apply;
+- SQL preview не создавался;
+- SQL files/diff не создавались;
+- apply plan не создавался;
+- SQL apply не выполнялся;
+- product data не менялись;
+- production/cache не трогались.
+
+Этим закрыт gate:
+
+`ручное ревью sample из generated proposals`
+
+Следующий gate должен быть отдельным и явным. SQL/apply по-прежнему запрещены.
