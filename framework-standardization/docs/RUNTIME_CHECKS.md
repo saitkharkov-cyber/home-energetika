@@ -3182,3 +3182,111 @@ Result:
 - `all 9 stages ok`
 
 The DB-readonly attribute discovery command remains a standalone manual readonly discovery entrypoint only.
+
+## 2026-07-08 — DB-readonly attribute discovery markdown output check
+
+### Context
+
+Implementation commit:
+
+`32d5933 Add markdown output for DB readonly attribute discovery`
+
+Related previous implementation:
+
+`05a1f2a Add DB readonly attribute discovery command`
+
+The standalone DB-readonly attribute discovery command now supports console-only output formats:
+
+- `--format=plain`
+- `--format=markdown`
+
+Default remains `plain`.
+
+### Manual markdown output check
+
+Command:
+
+`chcp 65001; $OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8; C:\php56\php.exe framework-standardization\bin\db-readonly-attribute-discovery.php "максимальный напор" framework-standardization\config\runtime\local.dump.php --format=markdown`
+
+Observed:
+
+- Windows console code page switched to `65001`;
+- output rendered readable Cyrillic text;
+- `runtime_mode: db_readonly`;
+- `command: attribute_discovery`;
+- `target: максимальный напор`;
+- `candidates_count: 14`;
+- candidates were printed as a markdown table;
+- raw sample separators inside table cells were escaped as `\|`;
+- safety markers were printed as a fenced `text` block.
+
+Top observed candidate:
+
+- `attribute_id: 12`
+- `attribute_name: Максимальный напор`
+- `group: Параметры насоса`
+- `usage_count: 1193`
+- `reason_found: exact_name_match`
+- `possible_role: canonical_candidate`
+- `warnings: none`
+- `raw_samples: 40м. | 55м. | 22м.`
+
+Observed possible alias candidates for later human review:
+
+- `101 — Максимальный напор, м.вод.ст.`
+- `134 — Максимальный напор, м.вод.ст`
+- `119 — Максимальный напор, м`
+- `81 — Max напор, м`
+
+Observed excluded / similar-but-different examples:
+
+- `20 — Минимальный напор`
+- `100 — Максимальный расход Qmax, м³/ч`
+- `150 — Максимальный ток`
+- `159 — Номинальный напор`
+- `171 — Максимальный расход Qmax, м³/ч`
+- `120 — Номинальный напор, м`
+- `148 — Номинальный напор`
+- `129 — Номинальный напор, м`
+
+Observed unresolved / manual-check candidate:
+
+- `108 — Напор, м`
+
+### Safety markers
+
+Observed safety markers remained zero:
+
+- `auto_canonical_selected: 0`
+- `auto_merge_performed: 0`
+- `raw_values_inventory_completed: 0`
+- `unit_contract_created: 0`
+- `normalization_proposals_created: 0`
+- `sql_generated: 0`
+- `apply_plan_created: 0`
+- `safe_to_apply: 0`
+- `sql_apply_allowed: 0`
+- `production_ready: 0`
+
+### Boundary confirmation
+
+Confirmed:
+
+- markdown output is console-only;
+- no output files created;
+- no runtime artifacts created;
+- no config/jobs changes;
+- no pipeline/runners changes;
+- no SQL preview;
+- no SQL generation/files/diff;
+- no apply plan;
+- no SQL apply;
+- no production/cache changes;
+- no cache rebuild;
+- no auto-canonical selection;
+- no auto-merge;
+- no raw values inventory as a full step;
+- no unit contract;
+- no normalization proposals.
+
+The command remains a standalone manual readonly discovery entrypoint.
