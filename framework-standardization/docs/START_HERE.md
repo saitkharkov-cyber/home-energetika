@@ -14,7 +14,11 @@
 
 Текущая стабильная точка:
 
-`f18d173 Update framework standardization handoff`
+`e128e61 Add framework standardization glossary`
+
+Previous onboarding refresh point:
+
+`f2fdaa6 Update framework standardization handoff after onboarding refresh`
 
 ## 3. Read order for a new ChatGPT chat
 
