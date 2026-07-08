@@ -9,9 +9,13 @@
 
 ## 1. Текущая стабильная точка
 
-`d136057 Update framework standardization project master summary`
+`e128e61 Add framework standardization glossary`
 
-Ожидаемое состояние для следующего чата: HEAD/main/origin/main соответствует `d136057`, working tree clean.
+Previous onboarding refresh point:
+
+`f2fdaa6 Update framework standardization handoff after onboarding refresh`
+
+Ожидаемое состояние для следующего чата: HEAD/main/origin/main соответствует `e128e61`, working tree clean.
 
 В новом чате сначала сверить `git status --short` и `git log --oneline --decorate -5`. Если HEAD отличается, сверить фактическую точку с `docs/START_HERE.md`, `docs/DECISIONS.md` и `docs/RUNTIME_CHECKS.md`.
 
