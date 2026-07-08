@@ -1,0 +1,189 @@
+<?php
+
+require dirname(__DIR__) . '/bootstrap.php';
+
+use FrameworkStandardization\Discovery\DbReadOnlyAttributeDiscovery;
+use FrameworkStandardization\OpenCart\OpenCartRuntimeConfig;
+use FrameworkStandardization\OpenCart\PdoReadOnlyDbConnection;
+
+if (PHP_SAPI !== 'cli') {
+    fwrite(STDERR, "db-readonly-attribute-discovery.php must be executed from CLI.\n");
+    exit(1);
+}
+
+try {
+    if (!isset($argv[1]) || trim($argv[1]) === '' || !isset($argv[2]) || trim($argv[2]) === '') {
+        throw new \InvalidArgumentException('usage: php bin/db-readonly-attribute-discovery.php "target meaning" path/to/runtime.php [limit]');
+    }
+
+    if (isset($argv[4])) {
+        throw new \InvalidArgumentException('unexpected_cli_argument');
+    }
+
+    $targetText = normalizeCliText(trim($argv[1]));
+    $runtimeFile = $argv[2];
+    $limit = isset($argv[3]) ? (int) $argv[3] : 20;
+
+    assertSafeTargetText($targetText);
+
+    if ($limit < 1 || $limit > 50) {
+        throw new \InvalidArgumentException('limit_out_of_allowed_range');
+    }
+
+    if (!is_file($runtimeFile)) {
+        throw new \InvalidArgumentException('runtime_config_not_found');
+    }
+
+    $rawRuntime = require $runtimeFile;
+
+    if (!is_array($rawRuntime)) {
+        throw new \InvalidArgumentException('runtime_config_must_return_array');
+    }
+
+    $runtimeConfig = OpenCartRuntimeConfig::fromArray($rawRuntime);
+    assertLocalRuntime($runtimeConfig);
+
+    $db = new PdoReadOnlyDbConnection(createPdo($runtimeConfig));
+    $discovery = new DbReadOnlyAttributeDiscovery($db, $runtimeConfig->getDbPrefix(), 1);
+    $result = $discovery->discover($targetText, $limit);
+
+    printDiscoveryResult($targetText, $result);
+    exit(0);
+} catch (\Exception $e) {
+    fwrite(STDERR, 'attribute_discovery_error: ' . $e->getMessage() . "\n");
+    exit(1);
+}
+
+function assertSafeTargetText($targetText)
+{
+    if (preg_match('/^[a-zA-Z]:[\\\\\/]/', $targetText)) {
+        throw new \InvalidArgumentException('target_text_must_not_be_path');
+    }
+
+    if (strpos($targetText, '://') !== false) {
+        throw new \InvalidArgumentException('target_text_must_not_be_url');
+    }
+
+    if (is_file($targetText) || is_dir($targetText)) {
+        throw new \InvalidArgumentException('target_text_must_not_be_existing_path');
+    }
+}
+
+function normalizeCliText($value)
+{
+    if (function_exists('iconv')) {
+        if (!preg_match('//u', $value)) {
+            $converted = @iconv('Windows-1251', 'UTF-8//IGNORE', $value);
+
+            if ($converted !== false && $converted !== '') {
+                return $converted;
+            }
+
+            $converted = @iconv('CP866', 'UTF-8//IGNORE', $value);
+
+            if ($converted !== false && $converted !== '') {
+                return $converted;
+            }
+        }
+
+        $converted = @iconv('Windows-1251', 'UTF-8//IGNORE', $value);
+
+        if ($converted !== false && $converted !== '' && strpos($converted, 'Р') === false) {
+            return $converted;
+        }
+    }
+
+    return $value;
+}
+
+function assertLocalRuntime(OpenCartRuntimeConfig $runtimeConfig)
+{
+    $database = $runtimeConfig->getDatabase();
+
+    if ($runtimeConfig->getRuntimeMode() !== 'db_readonly') {
+        throw new \InvalidArgumentException('runtime_mode_not_db_readonly');
+    }
+
+    if (!isset($database['driver']) || $database['driver'] !== 'pdo_mysql') {
+        throw new \InvalidArgumentException('runtime_driver_not_supported');
+    }
+
+    if (!isset($database['host']) || $database['host'] !== '127.0.1.19') {
+        throw new \InvalidArgumentException('runtime_host_not_allowed');
+    }
+
+    if (!isset($database['dbname']) || $database['dbname'] !== 'he_framework_local_dump') {
+        throw new \InvalidArgumentException('runtime_dbname_not_allowed');
+    }
+
+    if ($runtimeConfig->getDbPrefix() !== 'oc_') {
+        throw new \InvalidArgumentException('runtime_db_prefix_not_allowed');
+    }
+}
+
+function createPdo(OpenCartRuntimeConfig $runtimeConfig)
+{
+    $database = $runtimeConfig->getDatabase();
+    $dsn = 'mysql:host=' . $database['host'];
+    $dsn .= ';port=' . $database['port'];
+    $dsn .= ';dbname=' . $database['dbname'];
+    $dsn .= ';charset=' . $database['charset'];
+
+    $pdo = new \PDO($dsn, $database['username'], $database['password']);
+    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+    return $pdo;
+}
+
+function printDiscoveryResult($targetText, array $result)
+{
+    $candidates = isset($result['candidates']) && is_array($result['candidates']) ? $result['candidates'] : array();
+
+    echo "runtime_mode: db_readonly\n";
+    echo "command: attribute_discovery\n";
+    echo 'target: ' . $targetText . "\n";
+    echo 'candidates_count: ' . count($candidates) . "\n";
+    echo "\n";
+    echo "candidates:\n";
+
+    foreach ($candidates as $candidate) {
+        echo '- attribute_id: ' . valueOrEmpty($candidate, 'attribute_id') . "\n";
+        echo '  attribute_name: ' . valueOrEmpty($candidate, 'attribute_name') . "\n";
+        echo '  attribute_group_name: ' . valueOrEmpty($candidate, 'attribute_group_name') . "\n";
+        echo '  usage_count: ' . valueOrEmpty($candidate, 'usage_count') . "\n";
+        echo '  reason_found: ' . valueOrEmpty($candidate, 'reason_found') . "\n";
+        echo '  possible_role: ' . valueOrEmpty($candidate, 'possible_role') . "\n";
+        echo '  warnings: ' . listValueOrNone($candidate, 'warnings') . "\n";
+        echo '  raw_samples: ' . listValueOrNone($candidate, 'raw_samples') . "\n";
+    }
+
+    echo "\n";
+    echo "auto_canonical_selected: 0\n";
+    echo "auto_merge_performed: 0\n";
+    echo "raw_values_inventory_completed: 0\n";
+    echo "unit_contract_created: 0\n";
+    echo "normalization_proposals_created: 0\n";
+    echo "sql_generated: 0\n";
+    echo "apply_plan_created: 0\n";
+    echo "safe_to_apply: 0\n";
+    echo "sql_apply_allowed: 0\n";
+    echo "production_ready: 0\n";
+}
+
+function valueOrEmpty(array $row, $key)
+{
+    if (!isset($row[$key])) {
+        return '';
+    }
+
+    return (string) $row[$key];
+}
+
+function listValueOrNone(array $row, $key)
+{
+    if (!isset($row[$key]) || !is_array($row[$key]) || count($row[$key]) === 0) {
+        return 'none';
+    }
+
+    return implode(' | ', $row[$key]);
+}
