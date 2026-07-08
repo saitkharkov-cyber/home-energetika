@@ -5,7 +5,7 @@
 Его задача — простым языком объяснять термины проекта `framework-standardization`, которые встречаются в specs, decisions, handoff и рабочих командах.
 
 ## C
-
+- [CLI](cli.md)
 - [Config / Job](config-job.md)
 
 ## I
