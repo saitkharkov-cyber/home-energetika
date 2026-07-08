@@ -3042,3 +3042,143 @@ Result:
 - `all 9 stages ok`
 
 The second pump diameter usage input fixture remains a standalone local readonly controlled source only.
+
+## 2026-07-08 — DB-readonly attribute discovery command implementation check
+
+### Context
+
+Implementation commit:
+
+`05a1f2a Add DB readonly attribute discovery command`
+
+Spec commit:
+
+`c7a9cbc Add DB readonly attribute discovery command spec`
+
+Created standalone manual command:
+
+`framework-standardization/bin/db-readonly-attribute-discovery.php`
+
+Created discovery class:
+
+`framework-standardization/src/Discovery/DbReadOnlyAttributeDiscovery.php`
+
+Purpose:
+
+- standalone manual CLI command for DB-readonly attribute name discovery;
+- shows real OpenCart `attribute_id` / `attribute_name` candidates for human canonical selection;
+- uses readonly local dump runtime config;
+- does not choose canonical attribute automatically;
+- does not perform auto-merge;
+- does not perform raw values inventory as a full step;
+- does not perform normalization, proposals, SQL/apply, config/jobs, pipeline wiring or runner integration.
+
+### Boundary
+
+Confirmed boundaries:
+
+- standalone manual command only;
+- not connected to pipeline;
+- not connected to runners;
+- no config/jobs changes;
+- no live DB;
+- no production DB;
+- no arbitrary SQL input;
+- no SQL preview;
+- no SQL generation/files/diff;
+- no apply plan;
+- no SQL apply;
+- no DB/schema changes;
+- no write/schema operations;
+- no production output;
+- no production/cache changes;
+- no cache rebuild;
+- no runtime artifacts;
+- no committed runtime artifacts;
+- default dry-run path does not change;
+- `approved` remains only a review-chain status, not SQL/apply permission.
+
+### Syntax checks
+
+Commands:
+
+`C:\php56\php.exe -l framework-standardization\src\Discovery\DbReadOnlyAttributeDiscovery.php`
+
+`C:\php56\php.exe -l framework-standardization\bin\db-readonly-attribute-discovery.php`
+
+Result:
+
+`No syntax errors detected`
+
+### Manual readonly command check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\db-readonly-attribute-discovery.php "максимальный напор" framework-standardization\config\runtime\local.dump.php`
+
+Observed:
+
+- `runtime_mode: db_readonly`
+- `command: attribute_discovery`
+- `target: максимальный напор`
+- `candidates_count: 14`
+
+Top observed candidates:
+
+- `attribute_id: 12`
+- `attribute_name: Максимальный напор`
+- `usage_count: 1193`
+- `reason_found: exact_name_match`
+- `possible_role: canonical_candidate`
+- `raw_samples: 40м. | 55м. | 22м.`
+
+Second observed candidate:
+
+- `attribute_id: 101`
+- `attribute_name: Максимальный напор, м.вод.ст.`
+- `usage_count: 14`
+- `reason_found: all_search_terms_matched`
+- `possible_role: canonical_candidate`
+
+### Safety markers
+
+Observed safety markers:
+
+- `auto_canonical_selected: 0`
+- `auto_merge_performed: 0`
+- `raw_values_inventory_completed: 0`
+- `unit_contract_created: 0`
+- `normalization_proposals_created: 0`
+- `sql_generated: 0`
+- `apply_plan_created: 0`
+- `safe_to_apply: 0`
+- `sql_apply_allowed: 0`
+- `production_ready: 0`
+
+### Default dry-run regression check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php`
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+### DB-readonly runner regression check
+
+Command:
+
+`C:\php56\php.exe framework-standardization\bin\db-readonly-run.php framework-standardization\config\jobs\pump_diameter.db_readonly.php framework-standardization\config\runtime\local.dump.php`
+
+Result:
+
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- `all 9 stages ok`
+
+The DB-readonly attribute discovery command remains a standalone manual readonly discovery entrypoint only.
