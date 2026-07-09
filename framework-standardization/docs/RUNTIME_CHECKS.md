@@ -5452,5 +5452,209 @@ Synthetic fixture source-based dry-run остаётся зелёным:
 * `HANDOFF.md` не менялся;
 * `DECISIONS.md` не менялся.
 
+## 2026-07-09  Generic controlled canonical apply write-path implementation check
+
+### Commit/context
+
+* implementation commit: `b4ce8be Implement generic controlled attribute apply write path`
+* previous runtime check commit: `7ef6975 Document generic attribute apply write-path structure`
+* structure commit: `50fe53b Add generic attribute apply write-path structure`
+* implementation plan commit: `9572f0e Document generic canonical write-path implementation plan`
+
+### Scope
+
+* command: `framework-standardization/bin/db-controlled-attribute-apply.php`
+* class: `framework-standardization/src/Apply/DbControlledAttributeApplyCommand.php`
+* target contract used for DB dry-run: `framework-standardization/config/attribute-contracts/max_head_11900213.php`
+* fixture contract used for source-based dry-run: `framework-standardization/config/attribute-contracts/fixtures/max_head_synthetic_fixture.php`
+* fixture rows: `framework-standardization/fixtures/generic-canonical-apply/max_head_synthetic_rows.php`
+
+### Что реализовано
+
+* реализован generic controlled canonical apply write-path через explicit contract;
+* write-path больше не является только skeleton;
+* generic class содержит real bounded UPDATE/INSERT path;
+* UPDATE/INSERT доступны только через controlled confirm path;
+* dry-run без `--confirm-apply` не выполняет writes;
+* `--confirm-apply` в этом шаге не запускался;
+* SQL/apply в этом шаге не выполнялись.
+
+### Contract-driven behavior
+
+Generic write-path берёт параметры из contract:
+
+* `category_scope_id`;
+* `canonical_attribute_id`;
+* `alias_attribute_ids`;
+* `allowed_table`;
+* `allowed_columns`;
+* `expected_*` counts;
+* `runtime_allowlist`;
+* `confirmation_required`;
+* `allow_confirm_apply`;
+* `normalizer_key`.
+
+Hardcoded max_head behavior в generic write-path не добавлялся.
+
+### Confirm apply gates
+
+Confirm path gated через checks:
+
+* runtime должен соответствовать controlled local dump;
+* contract должен требовать confirmation;
+* runtime allowlist должен разрешать `allow_confirm_apply`;
+* `production_ready` должен оставаться disabled;
+* `cache_rebuild_allowed` должен оставаться disabled;
+* source-based plan должен быть available;
+* expected counts должны совпадать;
+* affected rows должны быть только canonical attribute rows;
+* affected products должны оставаться внутри category scope;
+* unresolved values должны быть excluded.
+
+### Write-path boundaries
+
+Разрешённые будущие write operations внутри confirm path:
+
+* UPDATE only `oc_product_attribute`;
+* INSERT only `oc_product_attribute`;
+* UPDATE только по concrete `product_id`, `attribute_id`, `language_id`;
+* `attribute_id` только canonical attribute id из contract;
+* `text` только normalized value из source-based plan;
+* INSERT только canonical row с concrete `product_id`, `canonical_attribute_id`, `language_id`, `text`.
+
+Запрещённые операции не добавлялись:
+
+* DELETE;
+* ALTER;
+* TRUNCATE;
+* DROP;
+* CREATE TABLE;
+* writes в `oc_attribute`;
+* writes в `oc_attribute_description`;
+* source alias row changes;
+* canonical row delete;
+* cache rebuild;
+* production/cache actions.
+
+### Transaction / rollback / verification behavior
+
+Confirm path теперь содержит:
+
+* transaction start before UPDATE/INSERT;
+* bounded execution только planned updates/inserts;
+* actual updated/inserted counts;
+* post-apply verification before commit;
+* commit only if verification ok;
+* rollback on verification mismatch;
+* rollback on exception;
+* hard fail / non-zero behavior через exception;
+* rollback в catch только если transaction была начата этой command.
+
+Post-apply verification перечитывает planned canonical rows из DB и сверяет:
+
+* `product_id`;
+* `attribute_id`;
+* `language_id`;
+* `text`.
+
+Также verification сохраняет checks:
+
+* source alias rows preserved;
+* affected rows canonical-only;
+* affected products inside category scope;
+* unresolved values not applied;
+* actual update/insert counts match planned counts.
+
+### Syntax checks
+
+Команды:
+
+* `C:\php56\php.exe -l framework-standardization\src\Apply\DbControlledAttributeApplyCommand.php`
+* `C:\php56\php.exe -l framework-standardization\bin\db-controlled-attribute-apply.php`
+
+Результат:
+
+* `No syntax errors detected in framework-standardization\src\Apply\DbControlledAttributeApplyCommand.php`
+* `No syntax errors detected in framework-standardization\bin\db-controlled-attribute-apply.php`
+
+### DB dry-run result на already-cleaned local dump
+
+DB dry-run без `--confirm-apply` остался безопасным.
+
+Наблюдалось:
+
+* `transaction_started: 0`
+* `sql_applied: 0`
+* `product_data_changed: 0`
+* `source_based_plan_available: 0`
+* `canonical_only_verified_count: 481`
+* `post_apply_verification_ok: 0`
+
+Ожидаемая interpretation:
+
+* current local dump уже находится after alias cleanup;
+* source-based rows для applied canonical values недоступны;
+* dry-run честно остаётся diagnostic-only;
+* `expected_counts_match: 0` и `post_apply_verification_ok: 0` ожидаемы для already-cleaned dump;
+* dry-run не выполняет transaction/write path.
+
+### Fixture dry-run result
+
+Synthetic fixture source-based dry-run остаётся зелёным:
+
+* `source_based_plan_available: 1`
+* `expected_counts_match: 1`
+* `dry_run_expected_counts_ok: 1`
+* `sql_applied: 0`
+* `product_data_changed: 0`
+
+### Safety search
+
+Проверено по изменённому файлу:
+
+* UPDATE / INSERT находятся только в confirm write-path;
+* DELETE / ALTER / TRUNCATE / DROP / CREATE TABLE не добавлены;
+* `oc_attribute` / `oc_attribute_description` не используются как write target;
+* cache rebuild не добавлен;
+* production/cache actions не добавлены;
+* UPDATE содержит `WHERE product_id + attribute_id + language_id`;
+* INSERT пишет только canonical attribute row;
+* source alias rows не меняются.
+
+### Boundary confirmation
+
+Подтверждено:
+
+* изменён только `framework-standardization/src/Apply/DbControlledAttributeApplyCommand.php`;
+* `db-controlled-attribute-apply.php` не менялся;
+* fixture files не менялись;
+* fixture command/runner не менялись;
+* prototype max-head files не менялись;
+* generic alias cleanup files не менялись;
+* existing contract не менялся;
+* runtime configs не менялись;
+* docs не менялись до этого runtime check;
+* `HANDOFF.md` не менялся;
+* `DECISIONS.md` не менялся;
+* `--confirm-apply` не запускался;
+* SQL/apply/UPDATE/INSERT/DELETE не выполнялись;
+* product data не менялись;
+* production/cache не трогались;
+* cache rebuild не выполнялся.
+
+### Interpretation
+
+* generic controlled canonical apply write-path реализован;
+* это implementation check, а не apply execution;
+* actual generic UPDATE/INSERT ещё не выполнялся;
+* текущий шаг не является production readiness;
+* следующий gate должен быть отдельным и явным:
+
+  * либо controlled local `--confirm-apply` decision;
+  * либо дополнительная verification подготовка перед controlled local apply.
+
+SQL/apply по-прежнему запрещён до отдельного явного решения.
+
+
 
 
