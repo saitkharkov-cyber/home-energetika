@@ -4,6 +4,10 @@ require dirname(__DIR__) . '/bootstrap.php';
 
 use FrameworkStandardization\Apply\DbControlledMaxHeadApplyCommand;
 use FrameworkStandardization\OpenCart\OpenCartRuntimeConfig;
+use FrameworkStandardization\OpenCart\PdoReadOnlyDbConnection;
+use FrameworkStandardization\Preview\DbReadOnlySqlPreview;
+use FrameworkStandardization\Proposals\DbReadOnlyNormalizationProposals;
+use FrameworkStandardization\Review\DbReadOnlyNormalizationReviewChain;
 
 if (PHP_SAPI !== 'cli') {
     fwrite(STDERR, "db-controlled-apply-max-head.php must be executed from CLI.\n");
@@ -29,7 +33,12 @@ try {
     }
 
     $runtimeConfig = OpenCartRuntimeConfig::fromArray($rawRuntime);
-    $command = new DbControlledMaxHeadApplyCommand();
+    $pdo = createPdo($runtimeConfig);
+    $readOnlyDb = new PdoReadOnlyDbConnection($pdo);
+    $proposalGenerator = new DbReadOnlyNormalizationProposals($readOnlyDb, $runtimeConfig->getDbPrefix(), 1);
+    $reviewChain = new DbReadOnlyNormalizationReviewChain($proposalGenerator);
+    $sqlPreview = new DbReadOnlySqlPreview($readOnlyDb, $runtimeConfig->getDbPrefix(), $reviewChain);
+    $command = new DbControlledMaxHeadApplyCommand($pdo, $runtimeConfig->getDbPrefix(), $sqlPreview);
     $result = $command->run($runtimeConfig, $options);
 
     if ($options['format'] === 'markdown') {
@@ -120,6 +129,25 @@ function parseCliOptions(array $argv)
     return $options;
 }
 
+function createPdo(OpenCartRuntimeConfig $runtimeConfig)
+{
+    $database = $runtimeConfig->getDatabase();
+    $dsn = 'mysql:host=' . $database['host'];
+    $dsn .= ';port=' . $database['port'];
+    $dsn .= ';dbname=' . $database['dbname'];
+    $dsn .= ';charset=' . $database['charset'];
+    $options = array();
+
+    if (defined('PDO::MYSQL_ATTR_FOUND_ROWS')) {
+        $options[\PDO::MYSQL_ATTR_FOUND_ROWS] = true;
+    }
+
+    $pdo = new \PDO($dsn, $database['username'], $database['password'], $options);
+    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+    return $pdo;
+}
+
 function parsePositiveInt($value, $error)
 {
     if (!preg_match('/^[1-9][0-9]*$/', $value)) {
@@ -169,16 +197,27 @@ function printResultPlain(array $result)
     echo "target_columns: " . implode(',', $result['target_columns']) . "\n";
     echo "update_existing_canonical_row_count: " . $result['update_existing_canonical_row_count'] . "\n";
     echo "insert_missing_canonical_row_count: " . $result['insert_missing_canonical_row_count'] . "\n";
+    echo "actual_updated_count: " . $result['actual_updated_count'] . "\n";
+    echo "actual_inserted_count: " . $result['actual_inserted_count'] . "\n";
+    echo "already_applied_count: " . $result['already_applied_count'] . "\n";
     echo "keep_existing_source_row_count: " . $result['keep_existing_source_row_count'] . "\n";
     echo "unresolved_excluded_count: " . $result['unresolved_excluded_count'] . "\n";
     echo "schema_blocker_count: " . $result['schema_blocker_count'] . "\n";
     echo "conflicts_count: " . $result['conflicts_count'] . "\n";
     echo "preflight_ok: " . $result['preflight_ok'] . "\n";
+    echo "transaction_started: " . $result['transaction_started'] . "\n";
+    echo "transaction_committed: " . $result['transaction_committed'] . "\n";
+    echo "transaction_rolled_back: " . $result['transaction_rolled_back'] . "\n";
+    echo "rollback_reason: " . $result['rollback_reason'] . "\n";
     echo "sql_applied: " . $result['sql_applied'] . "\n";
     echo "product_data_changed: " . $result['product_data_changed'] . "\n";
     echo "production_ready: " . $result['production_ready'] . "\n";
     echo "cache_rebuild_performed: " . $result['cache_rebuild_performed'] . "\n";
-    echo "apply_execution_not_enabled_for_this_step: " . $result['apply_execution_not_enabled_for_this_step'] . "\n";
+    echo "affected_only_canonical_attribute_12: " . $result['affected_only_canonical_attribute_12'] . "\n";
+    echo "affected_only_scope_11900213: " . $result['affected_only_scope_11900213'] . "\n";
+    echo "source_alias_rows_preserved: " . $result['source_alias_rows_preserved'] . "\n";
+    echo "unresolved_not_applied: " . $result['unresolved_not_applied'] . "\n";
+    echo "post_apply_verification_ok: " . $result['post_apply_verification_ok'] . "\n";
     echo "\npreflight_checks:\n";
 
     foreach ($result['preflight_checks'] as $check) {
@@ -200,16 +239,27 @@ function printResultMarkdown(array $result)
     echo "## Summary\n\n";
     echo "- update_existing_canonical_row_count: " . $result['update_existing_canonical_row_count'] . "\n";
     echo "- insert_missing_canonical_row_count: " . $result['insert_missing_canonical_row_count'] . "\n";
+    echo "- actual_updated_count: " . $result['actual_updated_count'] . "\n";
+    echo "- actual_inserted_count: " . $result['actual_inserted_count'] . "\n";
+    echo "- already_applied_count: " . $result['already_applied_count'] . "\n";
     echo "- keep_existing_source_row_count: " . $result['keep_existing_source_row_count'] . "\n";
     echo "- unresolved_excluded_count: " . $result['unresolved_excluded_count'] . "\n";
     echo "- schema_blocker_count: " . $result['schema_blocker_count'] . "\n";
     echo "- conflicts_count: " . $result['conflicts_count'] . "\n";
     echo "- preflight_ok: " . $result['preflight_ok'] . "\n";
+    echo "- transaction_started: " . $result['transaction_started'] . "\n";
+    echo "- transaction_committed: " . $result['transaction_committed'] . "\n";
+    echo "- transaction_rolled_back: " . $result['transaction_rolled_back'] . "\n";
+    echo "- rollback_reason: " . markdownCell($result['rollback_reason']) . "\n";
     echo "- sql_applied: " . $result['sql_applied'] . "\n";
     echo "- product_data_changed: " . $result['product_data_changed'] . "\n";
     echo "- production_ready: " . $result['production_ready'] . "\n";
     echo "- cache_rebuild_performed: " . $result['cache_rebuild_performed'] . "\n";
-    echo "- apply_execution_not_enabled_for_this_step: " . $result['apply_execution_not_enabled_for_this_step'] . "\n\n";
+    echo "- affected_only_canonical_attribute_12: " . $result['affected_only_canonical_attribute_12'] . "\n";
+    echo "- affected_only_scope_11900213: " . $result['affected_only_scope_11900213'] . "\n";
+    echo "- source_alias_rows_preserved: " . $result['source_alias_rows_preserved'] . "\n";
+    echo "- unresolved_not_applied: " . $result['unresolved_not_applied'] . "\n";
+    echo "- post_apply_verification_ok: " . $result['post_apply_verification_ok'] . "\n\n";
     echo "## Preflight checks\n\n";
     echo "| check | status |\n";
     echo "| --- | --- |\n";
