@@ -26,9 +26,7 @@ final class DbControlledAttributeApplyCommand
             throw new \RuntimeException('normalizer_not_supported');
         }
 
-        if ($confirmApply) {
-            $this->assertConfirmApplyDisabledForImplementationOnly();
-        }
+        $this->assertStorageContract();
 
         $plan = $this->buildPlan();
         $expectedCountsMatch = $this->expectedCountsMatch($plan) ? 1 : 0;
@@ -36,14 +34,83 @@ final class DbControlledAttributeApplyCommand
         $dryRunLimitation = $sourceBasedPlanAvailable
             ? 'none'
             : 'canonical apply dry-run after alias cleanup has limited source rows';
+        $actualUpdatedCount = 0;
+        $actualInsertedCount = 0;
+        $transactionStarted = 0;
+        $transactionCommitted = 0;
+        $transactionRolledBack = 0;
+        $rollbackReason = 'none';
+        $sourceAliasRowsPreserved = 1;
+        $affectedOnlyCanonical = $this->affectedOnlyCanonicalAttribute($plan) ? 1 : 0;
+        $affectedOnlyScope = $this->affectedOnlyScope($plan, $plan['category_scope_ids']) ? 1 : 0;
+        $unresolvedNotApplied = $plan['unresolved_excluded_count'] === (int) $this->contract['expected_unresolved_excluded_count'] ? 1 : 0;
+        $confirmApplyEnabled = ($this->confirmApplyAllowedByContractRuntime($runtimeMode) && $expectedCountsMatch && $sourceBasedPlanAvailable && $affectedOnlyCanonical && $affectedOnlyScope && $unresolvedNotApplied) ? 1 : 0;
+        $postApplyVerificationOk = $expectedCountsMatch;
+
+        if ($confirmApply) {
+            $this->assertConfirmApplyAllowed($runtimeMode, $expectedCountsMatch, $sourceBasedPlanAvailable, $affectedOnlyCanonical, $affectedOnlyScope, $unresolvedNotApplied);
+
+            try {
+                $sourceAliasRowsBefore = $this->countSourceAliasRows($plan['category_scope_ids']);
+
+                if ($this->pdo->inTransaction()) {
+                    $rollbackReason = 'transaction_already_active';
+                    throw new \RuntimeException($rollbackReason);
+                } elseif (!$this->pdo->beginTransaction()) {
+                    $rollbackReason = 'transaction_not_available';
+                    throw new \RuntimeException($rollbackReason);
+                } else {
+                    $transactionStarted = 1;
+                    $actualUpdatedCount = $this->executeUpdates($plan['updates']);
+                    $actualInsertedCount = $this->executeInserts($plan['inserts']);
+                    $sourceAliasRowsAfter = $this->countSourceAliasRows($plan['category_scope_ids']);
+                    $sourceAliasRowsPreserved = $sourceAliasRowsBefore === $sourceAliasRowsAfter ? 1 : 0;
+                    $plannedCanonicalRowsVerified = $this->plannedCanonicalRowsVerified($plan);
+                    $postApplyVerificationOk = $this->postApplyVerificationOk(
+                        $actualUpdatedCount,
+                        $actualInsertedCount,
+                        $plan,
+                        $sourceAliasRowsPreserved,
+                        $affectedOnlyCanonical,
+                        $affectedOnlyScope,
+                        $unresolvedNotApplied,
+                        $plannedCanonicalRowsVerified
+                    );
+
+                    if ($postApplyVerificationOk) {
+                        $this->pdo->commit();
+                        $transactionCommitted = 1;
+                    } else {
+                        $this->pdo->rollBack();
+                        $transactionRolledBack = 1;
+                        $rollbackReason = 'post_apply_verification_failed';
+                        throw new \RuntimeException($rollbackReason);
+                    }
+                }
+            } catch (\Exception $e) {
+                if ($transactionStarted === 1 && $this->pdo->inTransaction()) {
+                    $this->pdo->rollBack();
+                    $transactionRolledBack = 1;
+                }
+
+                $rollbackReason = 'exception: ' . $e->getMessage();
+                $actualUpdatedCount = 0;
+                $actualInsertedCount = 0;
+
+                throw new \RuntimeException('controlled_attribute_apply_failed: ' . $e->getMessage());
+            }
+        }
+
+        $sqlApplied = ($transactionCommitted && ($actualUpdatedCount > 0 || $actualInsertedCount > 0)) ? 1 : 0;
+        $productDataChanged = $sqlApplied;
 
         return array(
             'runtime_mode' => $runtimeMode,
             'command' => 'db_controlled_attribute_apply',
             'target_key' => (string) $this->contract['target_key'],
             'target_meaning' => (string) $this->contract['target_meaning'],
-            'dry_run' => 1,
-            'confirm_apply' => 0,
+            'dry_run' => $confirmApply ? 0 : 1,
+            'confirm_apply' => $confirmApply ? 1 : 0,
             'category_scope' => (int) $this->contract['category_scope_id'],
             'canonical_attribute_id' => (int) $this->contract['canonical_attribute_id'],
             'alias_attribute_ids' => $this->contract['alias_attribute_ids'],
@@ -63,23 +130,23 @@ final class DbControlledAttributeApplyCommand
             'expected_already_applied_count' => (int) $this->contract['expected_canonical_already_applied_count'],
             'expected_unresolved_excluded_count' => (int) $this->contract['expected_unresolved_excluded_count'],
             'expected_counts_match' => $expectedCountsMatch,
-            'actual_updated_count' => 0,
-            'actual_inserted_count' => 0,
-            'transaction_started' => 0,
-            'transaction_committed' => 0,
-            'transaction_rolled_back' => 0,
-            'rollback_reason' => 'none',
-            'post_apply_verification_ok' => $expectedCountsMatch,
+            'actual_updated_count' => $actualUpdatedCount,
+            'actual_inserted_count' => $actualInsertedCount,
+            'transaction_started' => $transactionStarted,
+            'transaction_committed' => $transactionCommitted,
+            'transaction_rolled_back' => $transactionRolledBack,
+            'rollback_reason' => $rollbackReason,
+            'post_apply_verification_ok' => $postApplyVerificationOk,
             'write_path_structure_present' => 1,
-            'confirm_apply_enabled' => 0,
-            'write_path_execution_enabled' => 0,
-            'implementation_only' => 1,
+            'confirm_apply_enabled' => $confirmApplyEnabled,
+            'write_path_execution_enabled' => ($confirmApply && $transactionStarted) ? 1 : 0,
+            'implementation_only' => 0,
             'safety_markers' => array(
                 'db_controlled' => 1,
-                'update_executed' => 0,
-                'insert_executed' => 0,
-                'sql_applied' => 0,
-                'product_data_changed' => 0,
+                'update_executed' => ($transactionCommitted && $actualUpdatedCount > 0) ? 1 : 0,
+                'insert_executed' => ($transactionCommitted && $actualInsertedCount > 0) ? 1 : 0,
+                'sql_applied' => $sqlApplied,
+                'product_data_changed' => $productDataChanged,
                 'production_ready' => 0,
                 'cache_rebuild_performed' => 0,
                 'touches_oc_attribute' => 0,
@@ -90,36 +157,181 @@ final class DbControlledAttributeApplyCommand
         );
     }
 
-    private function assertConfirmApplyDisabledForImplementationOnly()
+    private function assertConfirmApplyAllowed($runtimeMode, $expectedCountsMatch, $sourceBasedPlanAvailable, $affectedOnlyCanonical, $affectedOnlyScope, $unresolvedNotApplied)
     {
-        if (empty($this->contract['confirmation_required'])) {
-            throw new \RuntimeException('confirmation_not_allowed_by_contract');
-        }
-
-        if (empty($this->contract['runtime_allowlist']['controlled_local_dump']['allow_confirm_apply'])) {
+        if (!$this->confirmApplyAllowedByContractRuntime($runtimeMode)) {
             throw new \RuntimeException('confirm_apply_not_allowed_by_contract_runtime');
         }
 
-        throw new \RuntimeException('confirm_apply_not_enabled_for_generic_attribute_apply_implementation_only');
+        if (!$sourceBasedPlanAvailable) {
+            throw new \RuntimeException('source_based_plan_required_for_confirm_apply');
+        }
+
+        if (!$expectedCountsMatch) {
+            throw new \RuntimeException('expected_counts_mismatch');
+        }
+
+        if (!$affectedOnlyCanonical) {
+            throw new \RuntimeException('affected_rows_not_canonical_only');
+        }
+
+        if (!$affectedOnlyScope) {
+            throw new \RuntimeException('affected_rows_outside_category_scope');
+        }
+
+        if (!$unresolvedNotApplied) {
+            throw new \RuntimeException('unresolved_values_not_safely_excluded');
+        }
     }
 
-    private function beginFutureWritePathTransactionDisabled()
+    private function confirmApplyAllowedByContractRuntime($runtimeMode)
     {
-        throw new \RuntimeException('generic_attribute_apply_write_path_execution_disabled');
+        if (empty($this->contract['confirmation_required'])) {
+            return false;
+        }
+
+        if (!isset($this->contract['runtime_allowlist']['controlled_local_dump'])) {
+            return false;
+        }
+
+        $runtime = $this->contract['runtime_allowlist']['controlled_local_dump'];
+
+        if (empty($runtime['allow_confirm_apply'])) {
+            return false;
+        }
+
+        if (!isset($runtime['runtime_mode']) || (string) $runtime['runtime_mode'] !== (string) $runtimeMode) {
+            return false;
+        }
+
+        if (!empty($runtime['production_ready'])) {
+            return false;
+        }
+
+        if (!empty($runtime['cache_rebuild_allowed'])) {
+            return false;
+        }
+
+        return true;
     }
 
-    private function applyFutureCanonicalRowChangesDisabled(array $plannedRows)
+    private function assertStorageContract()
     {
-        unset($plannedRows);
+        if ((string) $this->contract['allowed_table'] !== $this->dbPrefix . 'product_attribute') {
+            throw new \RuntimeException('target_table_not_allowed');
+        }
 
-        throw new \RuntimeException('generic_attribute_apply_write_path_execution_disabled');
+        if (!$this->sameValues($this->contract['allowed_columns'], array('product_id', 'attribute_id', 'language_id', 'text'))) {
+            throw new \RuntimeException('target_columns_not_allowed');
+        }
     }
 
-    private function verifyFutureWritePathDisabled(array $plan, $actualChangedCount)
+    private function executeUpdates(array $updates)
     {
-        unset($plan, $actualChangedCount);
+        $statement = $this->pdo->prepare(
+            'UPDATE ' . $this->contract['allowed_table'] . ' SET text = :text WHERE product_id = :product_id AND attribute_id = :attribute_id AND language_id = :language_id'
+        );
+        $count = 0;
 
-        throw new \RuntimeException('generic_attribute_apply_write_path_execution_disabled');
+        foreach ($updates as $row) {
+            if ((int) $row['canonical_attribute_id'] !== (int) $this->contract['canonical_attribute_id']) {
+                throw new \RuntimeException('update_attribute_not_canonical');
+            }
+
+            $statement->execute(array(
+                ':text' => (string) $row['normalized_value'],
+                ':product_id' => (int) $row['product_id'],
+                ':attribute_id' => (int) $this->contract['canonical_attribute_id'],
+                ':language_id' => (int) $row['language_id'],
+            ));
+            $count += $statement->rowCount();
+        }
+
+        return $count;
+    }
+
+    private function executeInserts(array $inserts)
+    {
+        $statement = $this->pdo->prepare(
+            'INSERT INTO ' . $this->contract['allowed_table'] . ' (product_id, attribute_id, language_id, text) VALUES (:product_id, :attribute_id, :language_id, :text)'
+        );
+        $count = 0;
+
+        foreach ($inserts as $row) {
+            if ((int) $row['canonical_attribute_id'] !== (int) $this->contract['canonical_attribute_id']) {
+                throw new \RuntimeException('insert_attribute_not_canonical');
+            }
+
+            $statement->execute(array(
+                ':product_id' => (int) $row['product_id'],
+                ':attribute_id' => (int) $this->contract['canonical_attribute_id'],
+                ':language_id' => (int) $row['language_id'],
+                ':text' => (string) $row['normalized_value'],
+            ));
+            $count += $statement->rowCount();
+        }
+
+        return $count;
+    }
+
+    private function postApplyVerificationOk($actualUpdatedCount, $actualInsertedCount, array $plan, $sourceAliasRowsPreserved, $affectedOnlyCanonical, $affectedOnlyScope, $unresolvedNotApplied, $plannedCanonicalRowsVerified)
+    {
+        if (!$sourceAliasRowsPreserved || !$affectedOnlyCanonical || !$affectedOnlyScope || !$unresolvedNotApplied) {
+            return 0;
+        }
+
+        if (!$plannedCanonicalRowsVerified) {
+            return 0;
+        }
+
+        if ($actualUpdatedCount !== count($plan['updates']) || $actualInsertedCount !== count($plan['inserts'])) {
+            return 0;
+        }
+
+        return 1;
+    }
+
+    private function plannedCanonicalRowsVerified(array $plan)
+    {
+        $plannedRows = array_merge($plan['updates'], $plan['inserts']);
+        $foundRowsCount = 0;
+
+        foreach ($plannedRows as $row) {
+            $statement = $this->pdo->prepare(
+                'SELECT product_id, attribute_id, language_id, text FROM ' . $this->contract['allowed_table'] . ' WHERE product_id = :product_id AND attribute_id = :attribute_id AND language_id = :language_id'
+            );
+            $statement->execute(array(
+                ':product_id' => (int) $row['product_id'],
+                ':attribute_id' => (int) $this->contract['canonical_attribute_id'],
+                ':language_id' => (int) $row['language_id'],
+            ));
+            $canonicalRows = $statement->fetchAll(PDO::FETCH_ASSOC);
+            $foundRowsCount += count($canonicalRows);
+
+            if (count($canonicalRows) !== 1) {
+                return false;
+            }
+
+            $canonicalRow = $canonicalRows[0];
+
+            if ((int) $canonicalRow['product_id'] !== (int) $row['product_id']) {
+                return false;
+            }
+
+            if ((int) $canonicalRow['attribute_id'] !== (int) $this->contract['canonical_attribute_id']) {
+                return false;
+            }
+
+            if ((int) $canonicalRow['language_id'] !== (int) $row['language_id']) {
+                return false;
+            }
+
+            if (trim((string) $canonicalRow['text']) !== (string) $row['normalized_value']) {
+                return false;
+            }
+        }
+
+        return $foundRowsCount === count($plannedRows);
     }
 
     private function buildPlan()
@@ -220,6 +432,7 @@ final class DbControlledAttributeApplyCommand
             'canonical_only_verified_count' => $canonicalOnlyVerifiedCount,
             'unresolved_excluded_count' => $unresolvedExcludedCount,
             'duplicate_or_conflict_count' => $duplicateOrConflictCount,
+            'category_scope_ids' => $categoryScopeIds,
         );
     }
 
@@ -252,6 +465,92 @@ final class DbControlledAttributeApplyCommand
             && count($plan['inserts']) === (int) $this->contract['expected_canonical_insert_count_after_cleanup']
             && $plan['already_applied_count'] === (int) $this->contract['expected_canonical_already_applied_count']
             && $plan['unresolved_excluded_count'] === (int) $this->contract['expected_unresolved_excluded_count'];
+    }
+
+    private function affectedOnlyCanonicalAttribute(array $plan)
+    {
+        foreach ($plan['updates'] as $row) {
+            if ((int) $row['canonical_attribute_id'] !== (int) $this->contract['canonical_attribute_id']) {
+                return false;
+            }
+        }
+
+        foreach ($plan['inserts'] as $row) {
+            if ((int) $row['canonical_attribute_id'] !== (int) $this->contract['canonical_attribute_id']) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function affectedOnlyScope(array $plan, array $categoryScopeIds)
+    {
+        if (count($categoryScopeIds) === 0) {
+            return false;
+        }
+
+        $affectedProductIds = array();
+
+        foreach ($plan['updates'] as $row) {
+            $affectedProductIds[(int) $row['product_id']] = true;
+        }
+
+        foreach ($plan['inserts'] as $row) {
+            $affectedProductIds[(int) $row['product_id']] = true;
+        }
+
+        if (count($affectedProductIds) === 0) {
+            return true;
+        }
+
+        $scopeProductIds = $this->loadScopeProductIds($categoryScopeIds);
+
+        foreach ($affectedProductIds as $productId => $unused) {
+            if (!isset($scopeProductIds[$productId])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function countSourceAliasRows(array $categoryScopeIds)
+    {
+        $params = array();
+        $categoryPlaceholders = $this->buildPlaceholders('category_id', $categoryScopeIds, $params);
+        $attributePlaceholders = $this->buildPlaceholders('attribute_id', $this->contract['alias_attribute_ids'], $params);
+        $sql = 'SELECT COUNT(DISTINCT CONCAT(pa.product_id, ":", pa.attribute_id, ":", pa.language_id, ":", pa.text)) AS row_count ';
+        $sql .= 'FROM ' . $this->contract['allowed_table'] . ' pa ';
+        $sql .= 'WHERE pa.attribute_id IN (' . implode(', ', $attributePlaceholders) . ') ';
+        $sql .= 'AND EXISTS (';
+        $sql .= 'SELECT 1 FROM ' . $this->dbPrefix . 'product_to_category p2c ';
+        $sql .= 'WHERE p2c.product_id = pa.product_id ';
+        $sql .= 'AND p2c.category_id IN (' . implode(', ', $categoryPlaceholders) . ')';
+        $sql .= ')';
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute($params);
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+
+        return isset($row['row_count']) ? (int) $row['row_count'] : 0;
+    }
+
+    private function loadScopeProductIds(array $categoryScopeIds)
+    {
+        $params = array();
+        $categoryPlaceholders = $this->buildPlaceholders('category_id', $categoryScopeIds, $params);
+        $sql = 'SELECT DISTINCT product_id FROM ' . $this->dbPrefix . 'product_to_category ';
+        $sql .= 'WHERE category_id IN (' . implode(', ', $categoryPlaceholders) . ')';
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute($params);
+        $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
+        $productIds = array();
+
+        foreach ($rows as $row) {
+            $productIds[(int) $row['product_id']] = true;
+        }
+
+        return $productIds;
     }
 
     private function loadCategoryScopeIds()
@@ -349,5 +648,15 @@ final class DbControlledAttributeApplyCommand
         }
 
         return $placeholders;
+    }
+
+    private function sameValues(array $actual, array $expected)
+    {
+        $actual = array_values($actual);
+        $expected = array_values($expected);
+        sort($actual);
+        sort($expected);
+
+        return $actual === $expected;
     }
 }
