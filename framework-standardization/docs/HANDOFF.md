@@ -1,23 +1,24 @@
 # HANDOFF — framework-standardization
 
-Дата: 08.07.2026
+Дата: 09.07.2026
 
 ## Текущая стабильная точка
 
 Текущий stable point:
 
-`d2a2bea Document max head apply readiness`
+`88761da Document generic controlled attribute apply direction`
 
 Рабочее дерево после коммита должно быть чистым.
 
 Последняя цепочка коммитов:
 
 ```text
-d2a2bea Document max head apply readiness
-ce8b1a2 Document manual review of apply plan preview
-177bef4 Document DB readonly apply plan preview check
-b46d70f Add DB readonly apply plan preview command
-423355f Document manual review of SQL preview
+88761da Document generic controlled attribute apply direction
+e69f191 Document transactional max head local apply check
+3e2e0e8 Enable transactional max head local apply
+9213a24 Add bounded max head apply command shell
+81b9961 Document bounded max head apply command spec
+e984a0c SESSION END HANDOFF WRITE
 ```
 
 ## Контекст проекта
@@ -51,7 +52,7 @@ target attribute meaning
 → apply-plan preview
 → apply-plan preview review
 → apply readiness decision
-→ bounded apply command with explicit confirmation
+→ bounded/generic apply command with explicit confirmation
 → post-apply verification
 ```
 
@@ -67,7 +68,6 @@ target attribute meaning
 - docs/RULES.md должен читать и соблюдать ChatGPT.
 - Codex не должен получать docs/RULES.md как входной документ.
 - Если правило важно для Codex-step, ChatGPT явно включает его в prompt.
-- Не продолжать старую ветку `immediate pump_max_head fixture/job`.
 - Не делать production/cache изменения.
 - Не делать cache rebuild.
 - Не делать SQL apply без отдельного явного gate.
@@ -75,21 +75,7 @@ target attribute meaning
 - Не делать auto-merge.
 - Термин `gate` оставляем как рабочий термин проекта.
 
-## Paused / rejected path
-
-Старая ветка с immediate `pump_max_head` fixture/source/job считается остановленной и не продолжается.
-
-Не возвращаться к:
-
-```text
-immediate pump_max_head fixture/job
-автоматический merge
-автоматический canonical selection
-SQL apply без gate
-production/cache изменения
-```
-
-## Текущий target
+## Статус по максимальному напору
 
 Текущая характеристика:
 
@@ -111,204 +97,84 @@ Included aliases:
 81 — Max напор, м
 ```
 
-Excluded attributes:
-
-```text
-20 — Минимальный напор
-171 — Максимальный расход Qmax, м³/ч
-100 — Максимальный расход Qmax, м³/ч
-120 — Номинальный напор, м
-```
-
 Canonical unit:
 
 `m`
 
-Normalized value:
+Phase 1 canonical value apply выполнена на controlled local dump.
 
-`decimal meters`
+Transactional apply successful:
 
-## Что уже сделано
+- `post_apply_verification_ok: 1`
+- production/cache не трогались;
+- cache rebuild не выполнялся;
+- SQL files/diff не создавались.
 
-### Discovery / decision
+## Важное уточнение по Phase 1
 
-Реализованы и проверены DB-readonly discovery/inventory этапы.
+Выполнена только Phase 1: canonical value apply.
 
-Зафиксированы:
+Что сделано:
+
+- canonical rows `attribute_id = 12` обновлены/добавлены в controlled local dump;
+- source alias rows `101/119/81` были сохранены;
+- unresolved values не применялись;
+- repeat run определяет already-applied state.
+
+Что ещё не сделано:
+
+- alias cleanup / consolidation ещё НЕ выполнен;
+- source alias rows не удалялись;
+- задача стандартизации не считается полностью закрытой до отдельного alias cleanup gate, если цель — убрать синонимы из product attribute rows.
+
+## Alias cleanup future gate
+
+Следующий отдельный gate для max head:
+
+`DB-readonly alias cleanup preview`
+
+Он должен показать, какие `product_attribute` rows с `attribute_id` `101/119/81` можно безопасно удалить после наличия canonical row `12`.
+
+Границы alias cleanup:
+
+- удалять можно только product rows в scope;
+- не удалять сами attributes из `oc_attribute` / `oc_attribute_description`;
+- unresolved values не трогать;
+- real cleanup только через отдельный transactional confirm apply;
+- preview/review/confirm gate обязательны.
+
+## Architecture direction
+
+Зафиксирован документ:
+
+`framework-standardization/docs/GENERIC_CONTROLLED_ATTRIBUTE_APPLY_SPEC.md`
+
+Ключевое решение:
+
+- max-head command является prototype/proof-of-concept;
+- не копировать `db-controlled-apply-max-head.php` под каждую характеристику;
+- следующий architectural direction: generic controlled attribute apply engine;
+- characteristic-specific data должны перейти в explicit contract/input.
+
+Human gates остаются обязательными:
 
 - canonical selection;
-- included aliases;
-- excluded non-target attributes;
-- raw values inventory;
+- aliases include/exclude;
 - unit contract;
-- range policy.
+- unresolved policy;
+- review;
+- final confirm.
 
-### Range policy
+## Paused / rejected
 
-Диапазоны и upper-bound/mixed values остаются unresolved.
+Не продолжать:
 
-Примеры unresolved:
-
-```text
-100-104
-104–118
-50–51,5
-до 51 м
-```
-
-Они не нормализуются автоматически и не попадают в SQL/apply.
-
-### Proposals / review-chain
-
-Сгенерированы proposals:
-
-```text
-481 accepted simple proposals
-14 unresolved values
-```
-
-Review-chain:
-
-```text
-481 pending_review
-14 unresolved
-```
-
-Sample review:
-
-```text
-50 строк sample просмотрены вручную
-sample выглядит корректно
-```
-
-Human review decision:
-
-```text
-481 accepted simple proposals получили review-approved на уровне ревью
-14 unresolved values остаются unresolved
-```
-
-Важно:
-
-```text
-review-approved не означает SQL/apply permission
-```
-
-### SQL preview
-
-Реализована DB-readonly SQL preview command:
-
-```text
-framework-standardization/bin/db-readonly-sql-preview.php
-framework-standardization/src/Preview/DbReadOnlySqlPreview.php
-```
-
-SQL preview summary:
-
-```text
-preview_update_existing_canonical_row_count: 400
-preview_insert_missing_canonical_row_count: 81
-keep_existing_source_row_count: 81
-unresolved_excluded_count: 14
-schema_blocker_count: 0
-conflicts_count: 0
-```
-
-Схема хранения подтверждена:
-
-```text
-table_name: oc_product_attribute
-relevant_columns: product_id,attribute_id,language_id,text
-schema_status: ok
-```
-
-SQL preview вручную просмотрен.
-
-Подтверждено:
-
-- UPDATE только `oc_product_attribute`;
-- UPDATE только `attribute_id = 12`;
-- INSERT только `attribute_id = 12`;
-- `language_id` сохраняется;
-- unresolved values не попали в SQL preview;
-- DELETE/ALTER/DROP/TRUNCATE/CREATE TABLE отсутствуют;
-- SQL не выполнялся;
-- SQL files не создавались.
-
-### Apply-plan preview
-
-Реализована DB-readonly apply-plan preview command:
-
-```text
-framework-standardization/bin/db-readonly-apply-plan-preview.php
-framework-standardization/src/ApplyPlan/DbReadOnlyApplyPlanPreview.php
-```
-
-Apply-plan preview summary:
-
-```text
-apply_plan_preview_generated: 1
-update_existing_canonical_row_count: 400
-insert_missing_canonical_row_count: 81
-keep_existing_source_row_count: 81
-unresolved_excluded_count: 14
-schema_blocker_count: 0
-conflicts_count: 0
-executable_apply_plan: 0
-sql_apply_allowed: 0
-```
-
-Short-check выполнен.
-
-Проверено:
-
-- preflight checks ok;
-- UPDATE group = 400;
-- INSERT group = 81;
-- keep source alias rows = 81;
-- unresolved excluded = 14;
-- executable_apply_plan = 0;
-- sql_apply_allowed = 0;
-- sql_applied = 0;
-- product_data_changed = 0;
-- опасный SQL не найден, кроме текстовых rollback notes;
-- первые UPDATE имеют ожидаемый формат:
-
-```sql
-UPDATE oc_product_attribute SET text = '46.5' WHERE product_id = 1068 AND attribute_id = 12 AND language_id = 1;
-```
-
-INSERT формат ранее подтверждён:
-
-```sql
-INSERT INTO oc_product_attribute (product_id, attribute_id, language_id, text) VALUES (..., 12, 1, '...');
-```
-
-### Apply readiness
-
-Зафиксирован decision-документ:
-
-```text
-framework-standardization/docs/APPLY_READINESS_MAX_HEAD_SCOPE_11900213.md
-```
-
-Решение:
-
-```text
-apply-ready for local dump / staging-like controlled DB only
-```
-
-Важно:
-
-- production apply запрещён;
-- cache rebuild запрещён;
-- SQL apply ещё не выполнялся;
-- следующий gate — bounded apply command with explicit confirmation;
-- apply-команда должна иметь dry-run/preview режим по умолчанию;
-- apply-команда должна требовать явный флаг, например `--confirm-apply`;
-- без явного флага команда должна завершаться без изменений;
-- перед apply нужен backup или dump snapshot;
-- после apply нужен отдельный verification step.
+- characteristic-specific commands как основной pattern;
+- production/cache;
+- cache rebuild;
+- auto-merge;
+- auto-canonical selection;
+- alias cleanup без preview/review/confirm gate.
 
 ## Документы, которые обязательно читать в новом чате
 
@@ -329,66 +195,31 @@ apply-ready for local dump / staging-like controlled DB only
    - `framework-standardization/docs/HUMAN_REVIEW_MAX_HEAD_PROPOSALS_SCOPE_11900213.md`
    - `framework-standardization/docs/SQL_PREVIEW_PLAN_MAX_HEAD_SCOPE_11900213.md`
    - `framework-standardization/docs/APPLY_READINESS_MAX_HEAD_SCOPE_11900213.md`
+   - `framework-standardization/docs/BOUNDED_APPLY_COMMAND_MAX_HEAD_SCOPE_11900213.md`
+   - `framework-standardization/docs/GENERIC_CONTROLLED_ATTRIBUTE_APPLY_SPEC.md`
 
-## Следующий рекомендуемый direction
+## Следующий рекомендуемый step
 
-Следующий gate:
+Есть два возможных directions. Не начинать новую характеристику до решения, какой из них выбран.
 
-```text
-bounded apply command with explicit confirmation
-```
-
-Но это не значит немедленный apply.
-
-Рекомендуемый следующий маленький шаг:
+Если продолжаем max head до полного закрытия:
 
 ```text
-реализовать apply-команду, которая по умолчанию работает в dry-run/preview режиме,
-а реальные изменения делает только при явном --confirm-apply
-и только на local dump / staging-like controlled DB
+doc-only alias cleanup spec / DB-readonly alias cleanup preview
 ```
 
-Границы будущей apply-команды:
-
-Разрешено только при explicit confirmation:
-
-- UPDATE `oc_product_attribute.text` для existing canonical rows;
-- INSERT missing canonical rows в `oc_product_attribute`;
-- только `attribute_id = 12`;
-- только конкретные `product_id`;
-- только конкретный `language_id`;
-- только review-approved values;
-- только category_scope `11900213`.
-
-Запрещено:
-
-- DELETE;
-- ALTER;
-- DROP;
-- TRUNCATE;
-- CREATE TABLE;
-- wide UPDATE без `product_id`;
-- production/cache;
-- cache rebuild;
-- unresolved values;
-- source alias rows modification;
-- auto-merge;
-- auto-canonical selection;
-- apply без `--confirm-apply`.
-
-После apply нужен отдельный gate:
+Если продолжаем framework architecture:
 
 ```text
-post-apply verification
+generic controlled attribute apply implementation spec/refactor
 ```
 
-Минимальная verification:
+## Boundaries
 
-- updated count = 400;
-- inserted count = 81;
-- affected rows только `attribute_id = 12`;
-- affected products только scope `11900213`;
-- unresolved не применены;
-- source alias rows сохранены;
-- product data changed only expected rows;
-- no conflicts/duplicates.
+Этот HANDOFF update:
+
+- только documentation handoff update;
+- не меняет PHP/code;
+- не выполняет SQL/apply;
+- не трогает production/cache;
+- не делает cache rebuild.
