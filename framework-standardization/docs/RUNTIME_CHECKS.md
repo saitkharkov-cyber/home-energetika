@@ -4958,3 +4958,85 @@ INSERT INTO oc_product_attribute (product_id, attribute_id, language_id, text) V
 `apply readiness decision`
 
 SQL apply по-прежнему запрещён до отдельного явного решения.
+
+## 2026-07-09  Transactional local apply check для максимального напора
+
+### Контекст
+
+- implementation commit: `3e2e0e8 Enable transactional max head local apply`
+- previous shell commit: `9213a24 Add bounded max head apply command shell`
+- spec commit: `81b9961 Document bounded max head apply command spec`
+- command: `framework-standardization/bin/db-controlled-apply-max-head.php`
+- class: `framework-standardization/src/Apply/DbControlledMaxHeadApplyCommand.php`
+
+### Суть
+
+- команда переиспользует DB-readonly SQL preview / review-chain logic;
+- real UPDATE/INSERT разрешены только с `--confirm-apply`;
+- apply выполняется только на controlled local dump runtime;
+- apply обёрнут в transaction;
+- COMMIT разрешён только после successful post-apply verification;
+- при mismatch/error должен быть ROLLBACK.
+
+### Initial confirm apply на local dump
+
+- `confirm_apply: 1`
+- `actual_updated_count: 400`
+- `actual_inserted_count: 81`
+- `sql_applied: 1`
+- `product_data_changed: 1`
+- `production_ready: 0`
+- `cache_rebuild_performed: 0`
+- `affected_only_canonical_attribute_12: 1`
+- `affected_only_scope_11900213: 1`
+- `source_alias_rows_preserved: 1`
+- `unresolved_not_applied: 1`
+- `post_apply_verification_ok: 1`
+
+### Transactional/idempotency follow-up check на уже применённом local dump
+
+- `update_existing_canonical_row_count: 0`
+- `insert_missing_canonical_row_count: 0`
+- `actual_updated_count: 0`
+- `actual_inserted_count: 0`
+- `already_applied_count: 562`
+- `transaction_started: 1`
+- `transaction_committed: 1`
+- `transaction_rolled_back: 0`
+- `rollback_reason: none`
+- `sql_applied: 0`
+- `product_data_changed: 0`
+- `affected_only_scope_11900213: 1`
+- `post_apply_verification_ok: 1`
+
+### Syntax checks
+
+- `C:\php56\php.exe -l framework-standardization\bin\db-controlled-apply-max-head.php`
+- `C:\php56\php.exe -l framework-standardization\src\Apply\DbControlledMaxHeadApplyCommand.php`
+- result: `No syntax errors detected`
+
+### Regression
+
+- `C:\php56\php.exe framework-standardization\bin\dry-run.php framework-standardization\config\jobs\pump_diameter.php`
+- `result_status: ok`
+- `warnings_count: 0`
+- `errors_count: 0`
+- all 9 stages ok
+
+### Boundary confirmation
+
+- SQL apply был выполнен только на controlled local dump;
+- production/cache не трогались;
+- cache rebuild не выполнялся;
+- SQL files/diff не создавались;
+- config/jobs/runtime configs/pipeline/runners не менялись;
+- source alias rows не изменялись;
+- unresolved values не применялись;
+- repeat run is idempotent / already-applied state detected.
+
+### Result
+
+- controlled local SQL apply gate закрыт;
+- post-apply verification для local dump успешна;
+- production/cache остаются отдельным future gate;
+- следующий рабочий direction: перейти к следующей характеристике или к плану пакетной обработки остальных характеристик категории Скважинные насосы.
