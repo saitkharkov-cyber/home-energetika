@@ -135,6 +135,10 @@ function printPlain(array $result)
     echo "transaction_rolled_back: " . $result['transaction_rolled_back'] . "\n";
     echo "rollback_reason: " . $result['rollback_reason'] . "\n";
     echo "post_apply_verification_ok: " . $result['post_apply_verification_ok'] . "\n";
+    echo "write_path_structure_present: " . $result['write_path_structure_present'] . "\n";
+    echo "confirm_apply_enabled: " . $result['confirm_apply_enabled'] . "\n";
+    echo "write_path_execution_enabled: " . $result['write_path_execution_enabled'] . "\n";
+    echo "implementation_only: " . $result['implementation_only'] . "\n";
     echo "\nsafety_markers:\n";
 
     foreach ($result['safety_markers'] as $marker => $value) {
@@ -174,6 +178,10 @@ function printMarkdown(array $result)
     echo "- transaction_rolled_back: " . $result['transaction_rolled_back'] . "\n";
     echo "- rollback_reason: " . markdownCell($result['rollback_reason']) . "\n";
     echo "- post_apply_verification_ok: " . $result['post_apply_verification_ok'] . "\n\n";
+    echo "- write_path_structure_present: " . $result['write_path_structure_present'] . "\n";
+    echo "- confirm_apply_enabled: " . $result['confirm_apply_enabled'] . "\n";
+    echo "- write_path_execution_enabled: " . $result['write_path_execution_enabled'] . "\n";
+    echo "- implementation_only: " . $result['implementation_only'] . "\n\n";
     echo "## Маркеры безопасности\n\n";
     echo "```text\n";
 

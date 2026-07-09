@@ -26,16 +26,8 @@ final class DbControlledAttributeApplyCommand
             throw new \RuntimeException('normalizer_not_supported');
         }
 
-        if ($confirmApply && empty($this->contract['confirmation_required'])) {
-            throw new \RuntimeException('confirmation_not_allowed_by_contract');
-        }
-
-        if ($confirmApply && empty($this->contract['runtime_allowlist']['controlled_local_dump']['allow_confirm_apply'])) {
-            throw new \RuntimeException('confirm_apply_not_allowed_by_contract_runtime');
-        }
-
         if ($confirmApply) {
-            throw new \RuntimeException('confirm_apply_not_enabled_for_generic_attribute_apply_step_d');
+            $this->assertConfirmApplyDisabledForImplementationOnly();
         }
 
         $plan = $this->buildPlan();
@@ -78,6 +70,10 @@ final class DbControlledAttributeApplyCommand
             'transaction_rolled_back' => 0,
             'rollback_reason' => 'none',
             'post_apply_verification_ok' => $expectedCountsMatch,
+            'write_path_structure_present' => 1,
+            'confirm_apply_enabled' => 0,
+            'write_path_execution_enabled' => 0,
+            'implementation_only' => 1,
             'safety_markers' => array(
                 'db_controlled' => 1,
                 'update_executed' => 0,
@@ -92,6 +88,38 @@ final class DbControlledAttributeApplyCommand
                 'canonical_rows_deleted' => 0,
             ),
         );
+    }
+
+    private function assertConfirmApplyDisabledForImplementationOnly()
+    {
+        if (empty($this->contract['confirmation_required'])) {
+            throw new \RuntimeException('confirmation_not_allowed_by_contract');
+        }
+
+        if (empty($this->contract['runtime_allowlist']['controlled_local_dump']['allow_confirm_apply'])) {
+            throw new \RuntimeException('confirm_apply_not_allowed_by_contract_runtime');
+        }
+
+        throw new \RuntimeException('confirm_apply_not_enabled_for_generic_attribute_apply_implementation_only');
+    }
+
+    private function beginFutureWritePathTransactionDisabled()
+    {
+        throw new \RuntimeException('generic_attribute_apply_write_path_execution_disabled');
+    }
+
+    private function applyFutureCanonicalRowChangesDisabled(array $plannedRows)
+    {
+        unset($plannedRows);
+
+        throw new \RuntimeException('generic_attribute_apply_write_path_execution_disabled');
+    }
+
+    private function verifyFutureWritePathDisabled(array $plan, $actualChangedCount)
+    {
+        unset($plan, $actualChangedCount);
+
+        throw new \RuntimeException('generic_attribute_apply_write_path_execution_disabled');
     }
 
     private function buildPlan()
