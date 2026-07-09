@@ -229,7 +229,58 @@ Generic canonical value apply должен:
 - `unresolved_excluded_count: 14`;
 - `post_apply_verification_ok: 1`.
 
-## 9. Generic Phase 2: alias cleanup
+## 9. Requirement before generic canonical write-path
+
+Текущий статус generic canonical apply:
+
+- generic canonical apply command существует;
+- command читает explicit contract;
+- command строит diagnostic dry-run;
+- `--confirm-apply` сейчас hard-stop;
+- generic UPDATE/INSERT write-path ещё не реализован.
+
+Нельзя сразу включать generic write-path на текущем local dump:
+
+- текущий local dump уже находится after Phase 1 canonical apply и after Phase 2 alias cleanup;
+- source alias rows для 481 already-applied canonical rows удалены;
+- canonical-only verification не является source-based proof;
+- нельзя доказывать generic canonical apply только на canonical rows;
+- `expected_counts_match: 0` в diagnostic dry-run является честным ограничением текущего state, а не ошибкой.
+
+Перед implementation/enable generic write-path нужен отдельный source-based dataset:
+
+- pre-alias-cleanup dump;
+- или controlled fixture;
+- или другой воспроизводимый dataset, где source alias rows ещё существуют.
+
+Dataset должен позволять получить source-based plan:
+
+- `update_existing_canonical_row_count`;
+- `insert_missing_canonical_row_count`;
+- `already_applied_count`;
+- `unresolved_excluded_count`;
+- `duplicate_or_conflict_count`.
+
+Dataset должен быть bounded по scope/category/contract, должен быть воспроизводимым и не должен трогать production/cache.
+
+Минимальные acceptance criteria для future Step E/F:
+
+- dry-run на pre-cleanup fixture показывает `source_based_plan_available: 1`;
+- `expected_counts_match: 1` только если counts доказаны source-based;
+- `--confirm-apply` запрещён до успешного source-based dry-run;
+- real UPDATE/INSERT можно включать только после отдельного gate;
+- source alias rows не меняются в Phase 1;
+- alias cleanup остаётся Phase 2;
+- rollback/transaction/verification обязательны для future confirm apply.
+
+Explicit boundary:
+
+- этот документ НЕ разрешает SQL/apply;
+- этот документ НЕ разрешает `--confirm-apply`;
+- этот документ НЕ разрешает production/cache;
+- это только requirement перед переносом write-path из prototype в generic engine.
+
+## 10. Generic Phase 2: alias cleanup
 
 Generic alias cleanup preview должен:
 
@@ -271,7 +322,7 @@ Generic alias cleanup apply должен:
 - `remaining_not_removable_rows: 14`;
 - `post_cleanup_verification_ok: 1`.
 
-## 10. Migration plan
+## 11. Migration plan
 
 ### Step A: contract-only
 
@@ -333,7 +384,7 @@ Generic alias cleanup apply должен:
 - не обходить safety checks engine-а;
 - не выполнять production/cache actions без отдельного production gate.
 
-## 11. Human-gated decisions
+## 12. Human-gated decisions
 
 Остаются human-gated:
 
@@ -348,7 +399,7 @@ Generic alias cleanup apply должен:
 
 Generic engine должен исполнять approved contract. Он не должен сам выбирать canonical attribute, aliases, unit semantics, range policy или production/cache actions.
 
-## 12. Что можно универсализировать
+## 13. Что можно универсализировать
 
 Можно универсализировать:
 
@@ -361,7 +412,7 @@ Generic engine должен исполнять approved contract. Он не до
 - controlled apply;
 - post-apply verification.
 
-## 13. Что нельзя универсализировать без contract
+## 14. Что нельзя универсализировать без contract
 
 Нельзя универсализировать без explicit contract:
 
@@ -372,7 +423,7 @@ Generic engine должен исполнять approved contract. Он не до
 - canonical identity;
 - production/cache decisions.
 
-## 14. Boundaries
+## 15. Boundaries
 
 Этот spec:
 
@@ -388,7 +439,7 @@ Generic engine должен исполнять approved contract. Он не до
 - не меняет `RUNTIME_CHECKS.md`;
 - не меняет `DECISIONS.md`.
 
-## 15. Что этот документ НЕ делает
+## 16. Что этот документ НЕ делает
 
 Этот документ:
 
