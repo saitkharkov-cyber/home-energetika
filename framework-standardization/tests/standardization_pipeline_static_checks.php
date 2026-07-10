@@ -175,6 +175,25 @@ $samplePackage = array(
     'proposals' => array(
         'items' => array(),
     ),
+    'scope_diagnostics' => array(
+        'root_category_id' => 11900213,
+        'scope_pattern' => 'hierarchical_category_path_exists',
+        'counts' => array(
+            'hierarchical_scope_rows' => 1,
+            'direct_parent_rows' => 0,
+            'rows_without_direct_parent' => 1,
+            'products_without_direct_parent' => 1,
+        ),
+        'products_without_direct_parent' => array(
+            array(
+                'product_id' => 900001,
+                'product_name' => 'Fixture product',
+                'direct_category_ids' => array(11900214),
+                'target_attribute_row_count' => 1,
+                'attribute_ids' => array(15),
+            ),
+        ),
+    ),
     'manifest' => array(
         'job_contract_version' => 1,
         'job_key' => 'submersible_pumps_voltage',
@@ -201,9 +220,11 @@ $samplePackage = array(
             'discovery.md' => 'framework-standardization/runtime/reports/submersible_pumps_voltage/20260710160000_test/discovery.md',
             'inventory.md' => 'framework-standardization/runtime/reports/submersible_pumps_voltage/20260710160000_test/inventory.md',
             'proposals.md' => 'framework-standardization/runtime/reports/submersible_pumps_voltage/20260710160000_test/proposals.md',
+            'scope_diagnostics.md' => 'framework-standardization/runtime/reports/submersible_pumps_voltage/20260710160000_test/scope_diagnostics.md',
             'manifest.json' => 'framework-standardization/runtime/reports/submersible_pumps_voltage/20260710160000_test/manifest.json',
             'inventory.json' => 'framework-standardization/runtime/reports/submersible_pumps_voltage/20260710160000_test/inventory.json',
             'proposals.json' => 'framework-standardization/runtime/reports/submersible_pumps_voltage/20260710160000_test/proposals.json',
+            'scope_diagnostics.json' => 'framework-standardization/runtime/reports/submersible_pumps_voltage/20260710160000_test/scope_diagnostics.json',
         ),
         'discovery' => array(
             'configured_candidates_found_in_scope' => array(15),
@@ -233,6 +254,12 @@ $samplePackage = array(
                 'unsupported' => 0,
                 'invalid' => 0,
             ),
+            'scope_diagnostics' => array(
+                'hierarchical_scope_rows' => 1,
+                'direct_parent_rows' => 0,
+                'rows_without_direct_parent' => 1,
+                'products_without_direct_parent' => 1,
+            ),
         ),
         'warnings' => array(),
         'safety_markers' => array(
@@ -261,7 +288,10 @@ check_true('summary_contains_canonical_attribute', strpos($files['summary.md'], 
 check_true('summary_contains_proposal_counts', strpos($files['summary.md'], '- normalized: 1') !== false);
 check_true('summary_contains_safety_markers', strpos($files['summary.md'], 'sql_generated: 0') !== false);
 check_true('summary_contains_artifact_links', strpos($files['summary.md'], '(discovery.md)') !== false && strpos($files['summary.md'], '(manifest.json)') !== false);
+check_true('summary_contains_scope_diagnostics', strpos($files['summary.md'], 'rows_without_direct_parent: 1') !== false);
 check_true('manifest_contains_summary', strpos($files['manifest.json'], 'summary.md') !== false);
+check_true('package_contains_scope_diagnostics', isset($files['scope_diagnostics.md']) && isset($files['scope_diagnostics.json']));
+check_true('scope_diagnostics_contains_product', strpos($files['scope_diagnostics.md'], '900001') !== false);
 check_true('summary_no_sensitive_markers', !preg_match('/password|secret|username|dsn|credential/i', $files['summary.md']));
 check_true('manifest_no_sensitive_markers', !preg_match('/password|secret|username|dsn|credential/i', $files['manifest.json']));
 check_true('partial_marker_not_success', strpos($files['summary.md'], 'review_package_created: 0') !== false);

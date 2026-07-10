@@ -70,7 +70,8 @@ final class StandardizationPipeline
             throw new \RuntimeException('pipeline_canonical_attribute_not_found');
         }
 
-        $proposals = $this->buildProposals($db, $dbPrefix, $job, $configuredCandidateIds, $normalizer);
+        $scopeDiagnostics = $this->buildScopeDiagnostics($db, $dbPrefix, $job, $configuredCandidateIds, $languageId);
+        $proposals = $this->buildProposals($db, $dbPrefix, $job, $configuredCandidateIds, $normalizer, $languageId);
         $proposalStatusCounts = $this->countProposalStatuses($proposals['items']);
         $proposalValueTypeCounts = $this->countProposalValueTypes($proposals['items']);
         $inventoryCounts = $this->buildInventoryCounts($inventory);
@@ -115,6 +116,7 @@ final class StandardizationPipeline
                 'proposals_total' => count($proposals['items']),
                 'proposal_statuses' => $proposalStatusCounts,
                 'proposal_value_types' => $proposalValueTypeCounts,
+                'scope_diagnostics' => $scopeDiagnostics['counts'],
             ),
             'warnings' => $warnings,
             'safety_markers' => $safetyMarkers,
@@ -127,6 +129,7 @@ final class StandardizationPipeline
             'discovery' => $discoveryResult,
             'inventory' => $inventory,
             'proposals' => $proposals,
+            'scope_diagnostics' => $scopeDiagnostics,
             'manifest' => $manifest,
         );
 
@@ -216,9 +219,8 @@ final class StandardizationPipeline
         $sql = 'SELECT COUNT(*) AS products_count FROM (';
         $sql .= 'SELECT pa.product_id, COUNT(DISTINCT pa.attribute_id) AS attribute_count ';
         $sql .= 'FROM ' . $dbPrefix . 'product_attribute pa ';
-        $sql .= 'INNER JOIN ' . $dbPrefix . 'product_to_category p2c ';
-        $sql .= 'ON p2c.product_id = pa.product_id AND p2c.category_id = :category_id ';
         $sql .= 'WHERE pa.attribute_id IN (' . implode(', ', $attributePlaceholders) . ') ';
+        $sql .= 'AND ' . $this->hierarchicalScopeExistsSql($dbPrefix, 'pa', ':category_id') . ' ';
         $sql .= 'GROUP BY pa.product_id HAVING attribute_count > 1) x';
         $multiple = $db->fetchOne($sql, $params);
 
@@ -253,27 +255,25 @@ final class StandardizationPipeline
         $attributePlaceholders = $this->buildPlaceholders('attribute_id', $attributeIds, $params);
         $sql = 'SELECT COUNT(DISTINCT pa.product_id) AS products_count ';
         $sql .= 'FROM ' . $dbPrefix . 'product_attribute pa ';
-        $sql .= 'INNER JOIN ' . $dbPrefix . 'product_to_category p2c ';
-        $sql .= 'ON p2c.product_id = pa.product_id AND p2c.category_id = :category_id ';
-        $sql .= 'WHERE pa.attribute_id IN (' . implode(', ', $attributePlaceholders) . ')';
+        $sql .= 'WHERE pa.attribute_id IN (' . implode(', ', $attributePlaceholders) . ') ';
+        $sql .= 'AND ' . $this->hierarchicalScopeExistsSql($dbPrefix, 'pa', ':category_id');
         $row = $db->fetchOne($sql, $params);
 
         return isset($row['products_count']) ? (int) $row['products_count'] : 0;
     }
 
-    private function buildProposals(PdoReadOnlyDbConnection $db, $dbPrefix, array $job, array $configuredCandidateIds, $normalizer)
+    private function buildProposals(PdoReadOnlyDbConnection $db, $dbPrefix, array $job, array $configuredCandidateIds, $normalizer, $languageId)
     {
-        $params = array(':category_id' => (int) $job['scope']['category_ids'][0], ':language_id' => 1);
+        $params = array(':category_id' => (int) $job['scope']['category_ids'][0], ':language_id' => (int) $languageId);
         $attributePlaceholders = $this->buildPlaceholders('attribute_id', $configuredCandidateIds, $params);
-        $sql = 'SELECT DISTINCT pa.product_id, pa.attribute_id, ad.name AS attribute_name, TRIM(pa.text) AS raw_value ';
+        $sql = 'SELECT DISTINCT pa.product_id, pa.language_id, pa.attribute_id, ad.name AS attribute_name, TRIM(pa.text) AS raw_value ';
         $sql .= 'FROM ' . $dbPrefix . 'product_attribute pa ';
-        $sql .= 'INNER JOIN ' . $dbPrefix . 'product_to_category p2c ';
-        $sql .= 'ON p2c.product_id = pa.product_id AND p2c.category_id = :category_id ';
         $sql .= 'INNER JOIN ' . $dbPrefix . 'attribute_description ad ';
         $sql .= 'ON ad.attribute_id = pa.attribute_id AND ad.language_id = pa.language_id ';
         $sql .= 'WHERE pa.language_id = :language_id ';
         $sql .= 'AND pa.attribute_id IN (' . implode(', ', $attributePlaceholders) . ') ';
-        $sql .= 'ORDER BY pa.product_id ASC, pa.attribute_id ASC, raw_value ASC';
+        $sql .= 'AND ' . $this->hierarchicalScopeExistsSql($dbPrefix, 'pa', ':category_id') . ' ';
+        $sql .= 'ORDER BY pa.product_id ASC, pa.language_id ASC, pa.attribute_id ASC, raw_value ASC';
         $rows = $db->fetchAll($sql, $params);
         $items = array();
 
@@ -293,6 +293,7 @@ final class StandardizationPipeline
 
             $items[] = array(
                 'product_id' => (int) $row['product_id'],
+                'language_id' => (int) $row['language_id'],
                 'source_attribute_id' => (int) $row['attribute_id'],
                 'source_attribute_name' => (string) $row['attribute_name'],
                 'raw_value' => isset($row['raw_value']) ? (string) $row['raw_value'] : '',
@@ -310,6 +311,111 @@ final class StandardizationPipeline
             'items' => $items,
             'status_counts' => $this->countProposalStatuses($items),
         );
+    }
+
+    private function buildScopeDiagnostics(
+        PdoReadOnlyDbConnection $db,
+        $dbPrefix,
+        array $job,
+        array $configuredCandidateIds,
+        $languageId
+    ) {
+        $rootCategoryId = (int) $job['scope']['category_ids'][0];
+        $params = array(':category_id' => $rootCategoryId, ':language_id' => (int) $languageId);
+        $attributePlaceholders = $this->buildPlaceholders('attribute_id', $configuredCandidateIds, $params);
+        $attributeFilter = 'pa.attribute_id IN (' . implode(', ', $attributePlaceholders) . ') ';
+        $hierarchicalScope = $this->hierarchicalScopeExistsSql($dbPrefix, 'pa', ':category_id');
+        $directParent = $this->directParentExistsSql($dbPrefix, 'pa', ':category_id');
+
+        $hierarchicalRows = $this->countTargetRows($db, $dbPrefix, $attributeFilter, $hierarchicalScope, $params);
+        $directParentRows = $this->countTargetRows($db, $dbPrefix, $attributeFilter, $directParent, $params);
+        $withoutDirectParentRows = $this->countTargetRows($db, $dbPrefix, $attributeFilter, $hierarchicalScope . ' AND NOT ' . $directParent, $params);
+
+        $sql = 'SELECT pa.product_id, COALESCE(pd.name, \'\') AS product_name, ';
+        $sql .= 'COUNT(*) AS target_attribute_row_count, ';
+        $sql .= 'GROUP_CONCAT(DISTINCT pa.attribute_id ORDER BY pa.attribute_id SEPARATOR \',\') AS attribute_ids, ';
+        $sql .= '(SELECT GROUP_CONCAT(DISTINCT p2c_all.category_id ORDER BY p2c_all.category_id SEPARATOR \',\') ';
+        $sql .= 'FROM ' . $dbPrefix . 'product_to_category p2c_all ';
+        $sql .= 'WHERE p2c_all.product_id = pa.product_id) AS direct_category_ids ';
+        $sql .= 'FROM ' . $dbPrefix . 'product_attribute pa ';
+        $sql .= 'LEFT JOIN ' . $dbPrefix . 'product_description pd ';
+        $sql .= 'ON pd.product_id = pa.product_id AND pd.language_id = pa.language_id ';
+        $sql .= 'WHERE pa.language_id = :language_id ';
+        $sql .= 'AND ' . $attributeFilter;
+        $sql .= 'AND ' . $hierarchicalScope . ' ';
+        $sql .= 'AND NOT ' . $directParent . ' ';
+        $sql .= 'GROUP BY pa.product_id, pd.name ';
+        $sql .= 'ORDER BY pa.product_id ASC';
+
+        $rows = $db->fetchAll($sql, $params);
+        $products = array();
+
+        foreach ($rows as $row) {
+            $products[] = array(
+                'product_id' => (int) $row['product_id'],
+                'product_name' => isset($row['product_name']) ? (string) $row['product_name'] : '',
+                'direct_category_ids' => $this->splitCsvInts(isset($row['direct_category_ids']) ? $row['direct_category_ids'] : ''),
+                'target_attribute_row_count' => isset($row['target_attribute_row_count']) ? (int) $row['target_attribute_row_count'] : 0,
+                'attribute_ids' => $this->splitCsvInts(isset($row['attribute_ids']) ? $row['attribute_ids'] : ''),
+            );
+        }
+
+        return array(
+            'root_category_id' => $rootCategoryId,
+            'scope_pattern' => 'hierarchical_category_path_exists',
+            'counts' => array(
+                'hierarchical_scope_rows' => $hierarchicalRows,
+                'direct_parent_rows' => $directParentRows,
+                'rows_without_direct_parent' => $withoutDirectParentRows,
+                'products_without_direct_parent' => count($products),
+            ),
+            'products_without_direct_parent' => $products,
+        );
+    }
+
+    private function countTargetRows(PdoReadOnlyDbConnection $db, $dbPrefix, $attributeFilter, $scopePredicate, array $params)
+    {
+        $sql = 'SELECT COUNT(*) AS rows_count ';
+        $sql .= 'FROM ' . $dbPrefix . 'product_attribute pa ';
+        $sql .= 'WHERE pa.language_id = :language_id ';
+        $sql .= 'AND ' . $attributeFilter;
+        $sql .= 'AND ' . $scopePredicate;
+        $row = $db->fetchOne($sql, $params);
+
+        return isset($row['rows_count']) ? (int) $row['rows_count'] : 0;
+    }
+
+    private function hierarchicalScopeExistsSql($dbPrefix, $productAlias, $categoryPlaceholder)
+    {
+        return 'EXISTS (SELECT 1 FROM ' . $dbPrefix . 'product_to_category scope_p2c '
+            . 'INNER JOIN ' . $dbPrefix . 'category_path scope_cp '
+            . 'ON scope_cp.category_id = scope_p2c.category_id AND scope_cp.path_id = ' . $categoryPlaceholder . ' '
+            . 'WHERE scope_p2c.product_id = ' . $productAlias . '.product_id)';
+    }
+
+    private function directParentExistsSql($dbPrefix, $productAlias, $categoryPlaceholder)
+    {
+        return 'EXISTS (SELECT 1 FROM ' . $dbPrefix . 'product_to_category direct_p2c '
+            . 'WHERE direct_p2c.product_id = ' . $productAlias . '.product_id '
+            . 'AND direct_p2c.category_id = ' . $categoryPlaceholder . ')';
+    }
+
+    private function splitCsvInts($value)
+    {
+        $result = array();
+        $parts = explode(',', (string) $value);
+
+        foreach ($parts as $part) {
+            $part = trim($part);
+
+            if ($part === '') {
+                continue;
+            }
+
+            $result[] = (int) $part;
+        }
+
+        return $result;
     }
 
     private function countProposalStatuses(array $items)

@@ -47,9 +47,11 @@ final class ReviewPackageWriter
             'discovery.md' => $this->renderDiscovery($package),
             'inventory.md' => $this->renderInventory($package),
             'proposals.md' => $this->renderProposals($package),
+            'scope_diagnostics.md' => $this->renderScopeDiagnostics($package),
             'manifest.json' => $this->renderJson($package['manifest']),
             'inventory.json' => $this->renderJson($package['inventory']),
             'proposals.json' => $this->renderJson($package['proposals']),
+            'scope_diagnostics.json' => $this->renderJson($package['scope_diagnostics']),
         );
     }
 
@@ -60,9 +62,11 @@ final class ReviewPackageWriter
             'discovery.md',
             'inventory.md',
             'proposals.md',
+            'scope_diagnostics.md',
             'manifest.json',
             'inventory.json',
             'proposals.json',
+            'scope_diagnostics.json',
         );
     }
 
@@ -74,6 +78,7 @@ final class ReviewPackageWriter
         $discovery = isset($manifest['discovery']) ? $manifest['discovery'] : array();
         $inventoryCounts = isset($manifest['inventory']) ? $manifest['inventory'] : array();
         $proposalTypes = isset($counts['proposal_value_types']) ? $counts['proposal_value_types'] : array();
+        $scopeCounts = isset($counts['scope_diagnostics']) ? $counts['scope_diagnostics'] : array();
         $target = $manifest['target'];
         $lines[] = '# Standardization review summary';
         $lines[] = '';
@@ -137,6 +142,15 @@ final class ReviewPackageWriter
         foreach ($manifest['counts']['proposal_statuses'] as $status => $count) {
             $lines[] = '- ' . $status . ': ' . $count;
         }
+
+        $lines[] = '';
+        $lines[] = '## Scope diagnostics';
+        $lines[] = '';
+        $lines[] = '- root_category_id: ' . $this->readNested($package, array('scope_diagnostics', 'root_category_id'), 'unknown');
+        $lines[] = '- hierarchical_scope_rows: ' . $this->readValue($scopeCounts, 'hierarchical_scope_rows', 0);
+        $lines[] = '- direct_parent_rows: ' . $this->readValue($scopeCounts, 'direct_parent_rows', 0);
+        $lines[] = '- rows_without_direct_parent: ' . $this->readValue($scopeCounts, 'rows_without_direct_parent', 0);
+        $lines[] = '- products_without_direct_parent: ' . $this->readValue($scopeCounts, 'products_without_direct_parent', 0);
 
         $lines[] = '';
         $lines[] = '## Review warnings';
@@ -249,6 +263,37 @@ final class ReviewPackageWriter
                 . ' | ' . $this->cell($proposal['normalized_result']['canonical_value'])
                 . ' | ' . $this->cell(implode(', ', $proposal['warnings']))
                 . ' | ' . $this->cell($proposal['ambiguity_reason']) . ' |';
+        }
+
+        return implode("\n", $lines) . "\n";
+    }
+
+    private function renderScopeDiagnostics(array $package)
+    {
+        $diagnostics = isset($package['scope_diagnostics']) ? $package['scope_diagnostics'] : array();
+        $counts = isset($diagnostics['counts']) ? $diagnostics['counts'] : array();
+        $products = isset($diagnostics['products_without_direct_parent']) ? $diagnostics['products_without_direct_parent'] : array();
+        $lines = array('# Scope diagnostics', '');
+        $lines[] = '- root_category_id: ' . $this->readValue($diagnostics, 'root_category_id', 'unknown');
+        $lines[] = '- scope_pattern: ' . $this->readValue($diagnostics, 'scope_pattern', 'unknown');
+        $lines[] = '- hierarchical_scope_rows: ' . $this->readValue($counts, 'hierarchical_scope_rows', 0);
+        $lines[] = '- direct_parent_rows: ' . $this->readValue($counts, 'direct_parent_rows', 0);
+        $lines[] = '- rows_without_direct_parent: ' . $this->readValue($counts, 'rows_without_direct_parent', 0);
+        $lines[] = '- products_without_direct_parent: ' . $this->readValue($counts, 'products_without_direct_parent', 0);
+        $lines[] = '';
+        $lines[] = '| product_id | product_name | direct_category_ids | target_attribute_row_count | attribute_ids |';
+        $lines[] = '| --- | --- | --- | --- | --- |';
+
+        if (count($products) === 0) {
+            $lines[] = '| none | none | none | 0 | none |';
+        }
+
+        foreach ($products as $product) {
+            $lines[] = '| ' . $this->cell($product['product_id'])
+                . ' | ' . $this->cell($product['product_name'])
+                . ' | ' . $this->cell(implode(',', $product['direct_category_ids']))
+                . ' | ' . $this->cell($product['target_attribute_row_count'])
+                . ' | ' . $this->cell(implode(',', $product['attribute_ids'])) . ' |';
         }
 
         return implode("\n", $lines) . "\n";
