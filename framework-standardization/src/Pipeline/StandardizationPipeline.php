@@ -36,13 +36,13 @@ final class StandardizationPipeline
         $normalizer = $this->normalizers->get($job['normalization']['normalizer_key']);
         $categoryId = (int) $job['scope']['category_ids'][0];
         $configuredCandidateIds = $this->filterExcluded(
-            $job['target']['candidate_attribute_ids'],
+            $this->getConfiguredCandidateIds($job),
             $job['target']['excluded_attribute_ids']
         );
 
         $discoveryResult = $this->runDiscovery($discovery, $job, $categoryId);
         $discoveredIds = $this->extractDiscoveredIds($discoveryResult);
-        $discoveryBreakdown = $this->buildDiscoveryBreakdown($discoveredIds, $job['target']['candidate_attribute_ids'], $job['target']['excluded_attribute_ids']);
+        $discoveryBreakdown = $this->buildDiscoveryBreakdown($discoveredIds, $this->getConfiguredCandidateIds($job), $job['target']['excluded_attribute_ids']);
 
         if (count($discoveryBreakdown['unconfigured_discovered_candidates']) > 0) {
             $warnings[] = 'discovery_found_unconfigured_attributes:' . implode(',', $discoveryBreakdown['unconfigured_discovered_candidates']);
@@ -279,10 +279,11 @@ final class StandardizationPipeline
 
         foreach ($rows as $row) {
             $normalized = $normalizer->normalize(isset($row['raw_value']) ? $row['raw_value'] : '');
+            $normalized = $this->enforceCanonicalValueContract($normalized, $job);
             $status = isset($normalized['status']) ? (string) $normalized['status'] : 'unsupported';
 
             if ($status === 'normalized') {
-                $proposalStatus = ((int) $row['attribute_id'] === (int) $job['target']['canonical_attribute_id']) ? 'unchanged' : 'normalized';
+                $proposalStatus = $this->isUnchangedCanonicalValue($row, $normalized, $job) ? 'unchanged' : 'normalized';
             } elseif ($status === 'review_required') {
                 $proposalStatus = 'review_required';
             } elseif ($status === 'invalid') {
@@ -557,6 +558,60 @@ final class StandardizationPipeline
         }
 
         return $filtered;
+    }
+
+    private function getConfiguredCandidateIds(array $job)
+    {
+        if (isset($job['target']['included_alias_attribute_ids']) && is_array($job['target']['included_alias_attribute_ids'])) {
+            return array_merge(array((int) $job['target']['canonical_attribute_id']), $job['target']['included_alias_attribute_ids']);
+        }
+
+        return $job['target']['candidate_attribute_ids'];
+    }
+
+    private function isUnchangedCanonicalValue(array $row, array $normalized, array $job)
+    {
+        $rawValue = trim(isset($row['raw_value']) ? (string) $row['raw_value'] : '');
+        $canonicalValue = isset($normalized['canonical_value']) ? (string) $normalized['canonical_value'] : '';
+
+        return (int) $row['attribute_id'] === (int) $job['target']['canonical_attribute_id']
+            && ($rawValue === '220' || $rawValue === '380')
+            && $canonicalValue === $rawValue;
+    }
+
+    private function enforceCanonicalValueContract(array $normalized, array $job)
+    {
+        if (!isset($normalized['canonical_value']) || $normalized['canonical_value'] === null) {
+            return $normalized;
+        }
+
+        if (!isset($job['normalization']['allowed_canonical_values'])
+            || !is_array($job['normalization']['allowed_canonical_values'])
+        ) {
+            return $normalized;
+        }
+
+        $canonicalValue = (string) $normalized['canonical_value'];
+
+        if (in_array($canonicalValue, $job['normalization']['allowed_canonical_values'], true)) {
+            $normalized['canonical_value'] = $canonicalValue;
+            return $normalized;
+        }
+
+        $warnings = isset($normalized['warnings']) && is_array($normalized['warnings'])
+            ? $normalized['warnings']
+            : array();
+
+        if (!in_array('canonical_value_outside_contract', $warnings, true)) {
+            $warnings[] = 'canonical_value_outside_contract';
+        }
+
+        $normalized['status'] = 'review_required';
+        $normalized['canonical_value'] = null;
+        $normalized['warnings'] = $warnings;
+        $normalized['ambiguity_reason'] = 'canonical_value_outside_contract';
+
+        return $normalized;
     }
 
     private function extractDiscoveredIds(array $discovery)

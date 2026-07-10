@@ -81,7 +81,22 @@ final class StandardizationJobContractLoader
         }
 
         $canonicalAttributeId = (int) $job['target']['canonical_attribute_id'];
-        $candidateAttributeIds = $this->readPositiveIntList($job['target'], 'candidate_attribute_ids', 'pipeline_candidate_attribute_ids_invalid');
+        $includedAliasAttributeIds = array();
+
+        if (isset($job['target']['included_alias_attribute_ids'])) {
+            $this->assertRawIntListUnique($job['target'], 'included_alias_attribute_ids', 'pipeline_included_alias_attribute_ids_duplicate');
+            $includedAliasAttributeIds = $this->readPositiveIntList($job['target'], 'included_alias_attribute_ids', 'pipeline_included_alias_attribute_ids_invalid');
+            $candidateAttributeIds = array_merge(array($canonicalAttributeId), $includedAliasAttributeIds);
+        } else {
+            $candidateAttributeIds = $this->readPositiveIntList($job['target'], 'candidate_attribute_ids', 'pipeline_candidate_attribute_ids_invalid');
+
+            foreach ($candidateAttributeIds as $candidateAttributeId) {
+                if ((int) $candidateAttributeId !== $canonicalAttributeId) {
+                    $includedAliasAttributeIds[] = (int) $candidateAttributeId;
+                }
+            }
+        }
+
         $excludedAttributeIds = $this->readPositiveIntList($job['target'], 'excluded_attribute_ids', 'pipeline_excluded_attribute_ids_invalid');
 
         if (count($candidateAttributeIds) === 0) {
@@ -90,6 +105,20 @@ final class StandardizationJobContractLoader
 
         if (!in_array($canonicalAttributeId, $candidateAttributeIds, true)) {
             throw new \InvalidArgumentException('pipeline_canonical_not_in_candidates');
+        }
+
+        if (in_array($canonicalAttributeId, $includedAliasAttributeIds, true)) {
+            throw new \InvalidArgumentException('pipeline_canonical_in_aliases');
+        }
+
+        if (in_array($canonicalAttributeId, $excludedAttributeIds, true)) {
+            throw new \InvalidArgumentException('pipeline_canonical_also_excluded');
+        }
+
+        foreach ($includedAliasAttributeIds as $aliasAttributeId) {
+            if (in_array($aliasAttributeId, $excludedAttributeIds, true)) {
+                throw new \InvalidArgumentException('pipeline_alias_also_excluded');
+            }
         }
 
         foreach ($candidateAttributeIds as $candidateAttributeId) {
@@ -112,6 +141,26 @@ final class StandardizationJobContractLoader
 
         if (!isset($job['normalization']['canonical_unit']) || trim((string) $job['normalization']['canonical_unit']) === '') {
             throw new \InvalidArgumentException('pipeline_canonical_unit_required');
+        }
+
+        if (isset($job['normalization']['normalized_value_type'])) {
+            $normalizedValueType = trim((string) $job['normalization']['normalized_value_type']);
+
+            if ($normalizedValueType === '') {
+                throw new \InvalidArgumentException('pipeline_normalized_value_type_invalid');
+            }
+
+            $job['normalization']['normalized_value_type'] = $normalizedValueType;
+        }
+
+        if (isset($job['normalization']['allowed_canonical_values'])) {
+            $allowedCanonicalValues = $this->readCanonicalValueList($job['normalization'], 'allowed_canonical_values', 'pipeline_allowed_canonical_values_invalid');
+
+            if (count($allowedCanonicalValues) === 0) {
+                throw new \InvalidArgumentException('pipeline_allowed_canonical_values_required');
+            }
+
+            $job['normalization']['allowed_canonical_values'] = $allowedCanonicalValues;
         }
 
         if (!isset($job['output']) || !is_array($job['output'])) {
@@ -140,6 +189,7 @@ final class StandardizationJobContractLoader
         $job['target']['search_terms'] = $searchTerms;
         $job['target']['canonical_attribute_id'] = $canonicalAttributeId;
         $job['target']['candidate_attribute_ids'] = $candidateAttributeIds;
+        $job['target']['included_alias_attribute_ids'] = $includedAliasAttributeIds;
         $job['target']['excluded_attribute_ids'] = $excludedAttributeIds;
 
         return $job;
@@ -193,6 +243,58 @@ final class StandardizationJobContractLoader
             if (!in_array($intValue, $values, true)) {
                 $values[] = $intValue;
             }
+        }
+
+        return $values;
+    }
+
+    private function assertRawIntListUnique(array $source, $key, $error)
+    {
+        if (!isset($source[$key]) || !is_array($source[$key])) {
+            return;
+        }
+
+        $seen = array();
+
+        foreach ($source[$key] as $value) {
+            $value = (int) $value;
+
+            if (isset($seen[$value])) {
+                throw new \InvalidArgumentException($error);
+            }
+
+            $seen[$value] = true;
+        }
+    }
+
+    private function readCanonicalValueList(array $source, $key, $error)
+    {
+        if (!isset($source[$key]) || !is_array($source[$key])) {
+            throw new \InvalidArgumentException($error);
+        }
+
+        $values = array();
+        $seen = array();
+
+        foreach ($source[$key] as $value) {
+            $value = trim((string) $value);
+
+            if ($value === '' || !preg_match('/^[0-9]+$/', $value)) {
+                throw new \InvalidArgumentException($error);
+            }
+
+            $value = (string) (int) $value;
+
+            if ($value === '0') {
+                throw new \InvalidArgumentException($error);
+            }
+
+            if (isset($seen[$value])) {
+                throw new \InvalidArgumentException('pipeline_allowed_canonical_values_duplicate');
+            }
+
+            $seen[$value] = true;
+            $values[] = $value;
         }
 
         return $values;
