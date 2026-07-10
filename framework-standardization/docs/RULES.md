@@ -165,23 +165,53 @@ Codex в этом процессе:
 
 Если нужно показать внутри `.md` документа команды, пути или значения, использовать inline-code или plain text, а не вложенные code fences.
 
-## 7. Правило команд
+## 7. Правило команд и редактора
 
-Команды давать под PowerShell 7.
+Команды давать под PowerShell 7+.
 
 Предпочтительно:
 
-- одной строкой;
-- без многострочных скриптов, если это не требуется;
-- git add и git commit можно объединять через `&&`.
+* одной строкой;
+* через `&&`, если нужно выполнить последовательность проверок;
+* без многострочных скриптов, если это не требуется.
 
-Пример:
+Команды commit / push должны даваться одной строкой и включать финальный проверочный хвост:
 
-`git add path/to/file && git commit -m "Commit message"`
+```powershell
+git add path/to/file && git commit -m "Commit message" && git push && git log --oneline --decorate -5 && git status --short
+```
+
+Если `push` не нужен, команда commit всё равно должна завершаться проверкой:
+
+```powershell
+git add path/to/file && git commit -m "Commit message" && git log --oneline --decorate -5 && git status --short
+```
+
+Не давать commit-команды без финального `git status --short`.
 
 PHP syntax checks выполнять так:
 
-`C:\php56\php.exe -l path\to\file.php`
+```powershell
+C:\php56\php.exe -l path\to\file.php
+```
+
+Пользователь правит файлы через Notepad++.
+
+Не предлагать команды вида:
+
+```powershell
+notepad path\to\file.md
+```
+
+Если нужно открыть файл для ручной правки, писать нейтрально:
+
+```text
+Открой файл в Notepad++:
+path\to\file.md
+```
+
+или давать только путь к файлу без команды открытия.
+
 
 ## 8. Git / commit discipline
 
