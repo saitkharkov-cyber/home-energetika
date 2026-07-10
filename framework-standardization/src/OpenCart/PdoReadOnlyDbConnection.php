@@ -14,6 +14,20 @@ final class PdoReadOnlyDbConnection implements ReadOnlyDbConnectionInterface
         $this->pdo = $pdo;
     }
 
+    public static function fromRuntimeConfig(OpenCartRuntimeConfig $runtimeConfig)
+    {
+        $database = $runtimeConfig->getDatabase();
+        $dsn = 'mysql:host=' . $database['host'];
+        $dsn .= ';port=' . $database['port'];
+        $dsn .= ';dbname=' . $database['dbname'];
+        $dsn .= ';charset=' . $database['charset'];
+
+        $pdo = new PDO($dsn, $database['username'], $database['password']);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        return new self($pdo);
+    }
+
     public function fetchOne($sql, array $params)
     {
         $this->assertReadOnlySql($sql);

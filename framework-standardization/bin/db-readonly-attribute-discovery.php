@@ -40,9 +40,9 @@ try {
     }
 
     $runtimeConfig = OpenCartRuntimeConfig::fromArray($rawRuntime);
-    assertLocalRuntime($runtimeConfig);
+    assertReadOnlyRuntime($runtimeConfig);
 
-    $db = new PdoReadOnlyDbConnection(createPdo($runtimeConfig));
+    $db = PdoReadOnlyDbConnection::fromRuntimeConfig($runtimeConfig);
     $discovery = new DbReadOnlyAttributeDiscovery($db, $runtimeConfig->getDbPrefix(), 1);
     $result = $discovery->discover($targetText, $limit, $categoryId);
 
@@ -154,43 +154,13 @@ function normalizeCliText($value)
     return $value;
 }
 
-function assertLocalRuntime(OpenCartRuntimeConfig $runtimeConfig)
+function assertReadOnlyRuntime(OpenCartRuntimeConfig $runtimeConfig)
 {
-    $database = $runtimeConfig->getDatabase();
+    $runtimeMode = $runtimeConfig->getRuntimeMode();
 
-    if ($runtimeConfig->getRuntimeMode() !== 'db_readonly') {
-        throw new \InvalidArgumentException('runtime_mode_not_db_readonly');
+    if ($runtimeMode !== 'db_readonly' && $runtimeMode !== 'live_db_readonly') {
+        throw new \InvalidArgumentException('runtime_mode_not_readonly');
     }
-
-    if (!isset($database['driver']) || $database['driver'] !== 'pdo_mysql') {
-        throw new \InvalidArgumentException('runtime_driver_not_supported');
-    }
-
-    if (!isset($database['host']) || $database['host'] !== '127.0.1.19') {
-        throw new \InvalidArgumentException('runtime_host_not_allowed');
-    }
-
-    if (!isset($database['dbname']) || $database['dbname'] !== 'he_framework_local_dump') {
-        throw new \InvalidArgumentException('runtime_dbname_not_allowed');
-    }
-
-    if ($runtimeConfig->getDbPrefix() !== 'oc_') {
-        throw new \InvalidArgumentException('runtime_db_prefix_not_allowed');
-    }
-}
-
-function createPdo(OpenCartRuntimeConfig $runtimeConfig)
-{
-    $database = $runtimeConfig->getDatabase();
-    $dsn = 'mysql:host=' . $database['host'];
-    $dsn .= ';port=' . $database['port'];
-    $dsn .= ';dbname=' . $database['dbname'];
-    $dsn .= ';charset=' . $database['charset'];
-
-    $pdo = new \PDO($dsn, $database['username'], $database['password']);
-    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-    return $pdo;
 }
 
 function printDiscoveryResult($targetText, array $result)
