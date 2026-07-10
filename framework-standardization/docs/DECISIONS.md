@@ -4144,3 +4144,118 @@ Proposal generation нужен как явный bridge между approved unit
 Следующий safe step после этого decision может быть только отдельный spec/decision или explicit implementation step для proposal generation.
 
 Implementation, parser/normalizer work, `config/jobs`, pipeline/runners, SQL/apply and production/cache actions остаются blocked до отдельного explicit approval.
+
+
+## 10-07-2026 - Live DB read-only path основной путь обычной стандартизации
+
+### Решение
+
+Для обычной стандартизации характеристик active workflow должен использовать актуальную live DB в строго read-only режиме.
+
+Через live DB read-only path выполняются:
+
+- discovery;
+- attribute inventory;
+- raw values inventory;
+- normalization proposals;
+- review-chain;
+- диагностический dry-run.
+
+Framework должен получать фактическое текущее состояние каталога напрямую, без обязательного предварительного восстановления dump.
+
+Dump/restore/isolated DB не являются обязательной частью обычной стандартизации характеристик.
+
+Shared-hosting runtime должен работать через PHP/PDO.
+
+Системный MySQL CLI, Windows services, локальный MySQL server и OSPanel tooling не являются обязательными runtime dependencies.
+
+### Разрешённые операции active path
+
+Только чтение:
+
+- `SELECT`;
+- `SHOW`;
+- `DESCRIBE`, если требуется.
+
+Разрешённые workflow stages:
+
+- attribute discovery;
+- canonical candidate review;
+- scope verification;
+- raw values inventory;
+- normalization proposals;
+- manual review preparation;
+- diagnostic preview/dry-run без записи.
+
+### Запрещённые операции
+
+Без отдельного explicit gate запрещены:
+
+- `INSERT`;
+- `UPDATE`;
+- `DELETE`;
+- `REPLACE`;
+- `ALTER`;
+- `DROP`;
+- `TRUNCATE`;
+- `CREATE`;
+- SQL/apply;
+- `--confirm-apply`;
+- изменение product data;
+- изменение attribute definitions;
+- alias cleanup;
+- production cache changes;
+- cache rebuild;
+- OpenCart runtime integration.
+
+### Изолированный dump path
+
+Статус isolated dump path:
+
+`paused auxiliary path`
+
+Он может использоваться только для отдельных будущих задач:
+
+- воспроизведение historical/pre-cleanup state;
+- write-path verification;
+- rollback/transaction testing;
+- controlled integration testing.
+
+Он не должен блокировать текущую стандартизацию остальных характеристик.
+
+Документы остаются действительными как вспомогательная документация, но не задают текущий active workflow:
+
+- `GENERIC_CANONICAL_APPLY_ISOLATED_DUMP_VERIFICATION_SPEC.md`;
+- `ISOLATED_DUMP_RESTORE_PLAN_AND_COMMAND_REVIEW.md`;
+- `SHARED_HOSTING_ISOLATED_DUMP_VERIFICATION_SPEC.md`.
+
+### Причина
+
+Обычная стандартизация требует актуальных фактов из текущего каталога.
+
+Restore старого dump добавляет лишние инфраструктурные шаги, замедляет работу и не нужен для read-only stages.
+
+Безопасность обеспечивается разделением live DB read-only workflow и отдельного write/apply gate.
+
+### Последствие
+
+Текущий следующий рабочий direction:
+
+`continue attribute standardization through live DB read-only workflow`
+
+Это решение не выбирает конкретную новую характеристику и не является implementation prompt.
+
+### Границы
+
+Это documentation/decision only.
+
+На этом шаге не разрешаются:
+
+- PHP/code changes;
+- runtime config;
+- DB connection;
+- SQL execution;
+- framework commands;
+- SQL/apply;
+- production/cache changes;
+- cache rebuild.
