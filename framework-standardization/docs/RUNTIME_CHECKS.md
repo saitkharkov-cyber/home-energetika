@@ -5655,6 +5655,101 @@ Synthetic fixture source-based dry-run остаётся зелёным:
 
 SQL/apply по-прежнему запрещён до отдельного явного решения.
 
+## 10-07-2026 - Hierarchical category scope для pipeline по напряжению
+
+### Контекст
+
+Target: `Напряжение`.
+
+Root category: `11900213`.
+
+Implementation commit: `53b7570 Align pipeline hierarchical category scope`.
+
+Проверялось исправление category-scoped read-only запросов generic standardization pipeline после обнаруженного расхождения:
+
+```text
+inventory_rows: 618
+proposals_total: 595
+difference: 23
+```
+
+### Причина расхождения
+
+Установленная причина:
+
+* inventory использовал иерархический scope категории через `oc_category_path`;
+* proposals и часть внутренних запросов `StandardizationPipeline` использовали только прямую связь `oc_product_to_category.category_id = 11900213`;
+* 23 строки относились к товарам из дочерних категорий без прямой связи с root category `11900213`.
+
+### Повторный read-only pipeline run
+
+Review package:
+
+```text
+framework-standardization/runtime/reports/submersible_pumps_voltage/20260710155454_6a5115ce3c26
+```
+
+Итог:
+
+```text
+inventory_rows: 618
+proposals_total: 618
+difference: 0
+```
+
+Распределение по `attribute_id`:
+
+```text
+15: inventory 400, proposals 400
+57: inventory 117, proposals 117
+79: inventory 88, proposals 88
+99: inventory 5, proposals 5
+118: inventory 1, proposals 1
+170: inventory 7, proposals 7
+```
+
+Дубли proposals по ключу `product_id + language_id + source_attribute_id + raw_value`:
+
+```text
+duplicates: 0
+```
+
+### Scope diagnostics
+
+Созданы generated artifacts:
+
+```text
+scope_diagnostics.md
+scope_diagnostics.json
+```
+
+Counts:
+
+```text
+hierarchical_scope_rows: 618
+direct_parent_rows: 595
+rows_without_direct_parent: 23
+products_without_direct_parent: 23
+```
+
+### Safety markers
+
+```text
+read_only: 1
+sql_generated: 0
+apply_plan_created: 0
+apply_performed: 0
+safe_to_apply: 0
+sql_apply_allowed: 0
+production_ready: 0
+cache_rebuild_allowed: 0
+```
+
+### Вывод
+
+Scope mismatch `618 vs 595` устранён: inventory и proposals используют единый иерархический category scope для root category `11900213`.
+
+Этот runtime check не разрешает SQL/apply, apply-plan, `--confirm-apply`, изменение product data, изменение category assignments, production/cache actions или cache rebuild.
 
 
 
