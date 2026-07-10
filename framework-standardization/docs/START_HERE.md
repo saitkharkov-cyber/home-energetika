@@ -25,15 +25,19 @@
 После этого документа новый ChatGPT должен читать документы в таком порядке:
 
 1. `glossary/!_README.md`
-2. `docs/HANDOFF.md`
-3. `docs/DECISIONS.md`
-4. `docs/RUNTIME_CHECKS.md`
-5. актуальные specs из `docs/`, если они нужны для конкретного шага
+2. `docs/DOCUMENTATION_BOUNDARIES.md`
+3. `docs/HANDOFF.md`
+4. `docs/DECISIONS.md`
+5. `docs/RUNTIME_CHECKS.md`
+6. актуальные specs из `docs/`, если они нужны для конкретного шага
 
 Глоссарий читается первым после `START_HERE.md`, чтобы дальнейшие термины проекта трактовались одинаково.
 
+`docs/DOCUMENTATION_BOUNDARIES.md` читается перед `HANDOFF.md`, чтобы новый ChatGPT понимал, какой документ за что отвечает, и не дублировал сведения между handoff, decisions, runtime checks и glossary.
+
 `docs/RULES.md` предназначен для работы ChatGPT. ChatGPT должен соблюдать эти правила.
 Codex не должен получать задачу в формате «соблюдай RULES.md». Если какое-то ограничение важно для Codex, ChatGPT должен явно включить его в prompt.
+
 
 ## 4. Текущая архитектура
 
