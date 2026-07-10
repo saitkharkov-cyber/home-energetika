@@ -56,9 +56,7 @@ final class OpenCartRuntimeConfig
 
         if ($runtimeMode === 'db_readonly') {
             self::validateControlledLocalDumpRuntime($database);
-        }
-
-        if ($runtimeMode === 'live_db_readonly') {
+        } elseif ($runtimeMode === 'live_db_readonly') {
             self::validateLiveReadOnlyRuntime($database, $safety);
         }
 
@@ -135,6 +133,10 @@ final class OpenCartRuntimeConfig
 
     private static function validateLiveReadOnlyRuntime(array $database, array $safety)
     {
+        if (!preg_match('/^[A-Za-z0-9_]+$/', (string) $database['dbname'])) {
+            throw new \InvalidArgumentException('runtime_dbname_invalid');
+        }
+
         $requiredSafety = array(
             'read_only' => true,
             'allow_write' => false,

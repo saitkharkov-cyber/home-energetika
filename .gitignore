@@ -12,4 +12,8 @@ framework-standardization/config/runtime/*.php
 
 # Framework Standardization local review fixtures
 framework-standardization/var/review-fixtures/*.json
+
+# Framework Standardization generated review reports
+/framework-standardization/runtime/reports/
+
 _local/
