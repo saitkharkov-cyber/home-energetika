@@ -9,6 +9,7 @@
 3. `framework-standardization/docs/HANDOFF.md`
 4. `framework-standardization/docs/DECISIONS.md`
 5. `framework-standardization/docs/RUNTIME_CHECKS.md`
+6. `framework-standardization/docs/LEGACY_DECISIONS.md`
 
 `CURRENT_OVERRIDE.md` является необязательным документом и может отсутствовать.
 
@@ -287,6 +288,31 @@
 * полный текст `CURRENT_OVERRIDE.md`.
 
 Если runtime check выявил существенную новую проблему, которая меняет текущую работу, сам результат фиксируется в `RUNTIME_CHECKS.md`, а временная оперативная корректива — отдельно в `CURRENT_OVERRIDE.md`.
+
+### `docs/LEGACY_DECISIONS.md`
+
+Отвечает за durable provenance и утверждённые предметные решения старого проекта `catalog-standardization`.
+
+Должен содержать:
+
+* repository-relative paths authoritative legacy sources;
+* provenance источников;
+* source hierarchy для legacy decisions;
+* утверждённые legacy contracts;
+* различение approved aliases и newly discovered candidates;
+* unresolved gaps, которые требуют human decision.
+
+Не должен содержать:
+
+* текущий следующий шаг;
+* handoff state;
+* runtime check output;
+* generated reports;
+* SQL/apply permission;
+* machine-readable runtime config;
+* credentials или secrets.
+
+`LEGACY_DECISIONS.md` не заменяет `HANDOFF.md`, `RUNTIME_CHECKS.md` или explicit SQL/apply gate.
 
 ## 3. Порядок чтения и приоритет
 

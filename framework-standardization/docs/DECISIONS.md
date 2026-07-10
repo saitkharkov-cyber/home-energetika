@@ -4259,3 +4259,50 @@ Restore старого dump добавляет лишние инфраструк
 - SQL/apply;
 - production/cache changes;
 - cache rebuild.
+
+## 10-07-2026 - Legacy human-approved decisions are required input
+
+### Решение
+
+Human-approved decisions из `catalog-standardization` являются обязательным входным слоем для `framework-standardization`, если текущая характеристика уже присутствует в legacy sources.
+
+Durable register:
+
+`framework-standardization/docs/LEGACY_DECISIONS.md`
+
+Framework не должен заново выбирать уже утверждённый canonical attribute.
+
+Framework не должен расширять approved aliases по результатам одного discovery.
+
+Normalizer не может выдавать значения вне approved contract как final canonical values.
+
+Legacy contract сначала переносится в human-readable и machine-readable слой, затем проверяется против live DB read-only.
+
+Новые candidates рассматриваются отдельно от approved aliases.
+
+SQL/apply остаётся отдельным explicit gate.
+
+### Source hierarchy
+
+Приоритет источников:
+
+1. Явное human-approved решение для конкретной характеристики.
+2. Более новое явное решение пользователя или framework decision.
+3. Нормативные общие правила legacy-проекта.
+4. Текущие live DB facts.
+5. Generated discovery, inventory и review packages.
+6. Implementation defaults и текущее поведение normalizer.
+
+Implementation behavior никогда не отменяет approved contract.
+
+Новый discovery candidate не становится alias автоматически.
+
+Live DB показывает текущее состояние данных, но не переопределяет утверждённый стандарт.
+
+Generated SQL, CSV и reports являются evidence, а не самостоятельным источником решения.
+
+### Границы
+
+Это documentation/decision only.
+
+Это решение не создаёт machine-readable contracts, не меняет normalizers, не запускает pipeline и не разрешает SQL/apply.
