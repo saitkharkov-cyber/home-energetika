@@ -4429,3 +4429,72 @@ Invalid product:
 ### Границы
 
 Это решение не разрешает SQL preview, apply-plan, SQL/apply, `--confirm-apply`, product/category changes, production/cache actions or cache rebuild.
+
+## 11-07-2026 - Submersible pumps batch automation scope approved
+
+### Решение
+
+Пользователь утвердил документ:
+
+`framework-standardization/docs/SUBMERSIBLE_PUMPS_BATCH_AUTOMATION_SPEC.md`
+
+как постоянную planning/safety-границу будущей batch-автоматизации остальных характеристик категории `Скважинные насосы`.
+
+Цель:
+
+```text
+автоматизировать повторяющуюся техническую подготовку, сохраняя human approval для всех семантических решений
+```
+
+### Основные границы
+
+* root category: `11900213`;
+* scope mode: `hierarchical_category_path_exists`;
+* semantic contracts утверждаются отдельно для каждой характеристики;
+* discovery не утверждает canonical attribute или aliases;
+* status markers разделены по независимым dimensions;
+* read-only batch authorization требует одновременно:
+  * `contract_approved`;
+  * `normalizer_ready`;
+* generated reports являются evidence, а не human approval и не apply authorization;
+* unresolved и blocked cases автоматически не преобразуются.
+
+### Следствие
+
+Первый будущий implementation step должен быть отдельным bounded step.
+
+Его scope ограничен только:
+
+```text
+read-only characteristic registry builder
+```
+
+Он должен:
+
+* собрать реестр характеристик;
+* сопоставить их с legacy decisions;
+* показать proposed markers.
+
+Он не должен:
+
+* выполнять normalization;
+* автоматически создавать approved contracts;
+* запускать per-characteristic pipelines;
+* создавать SQL/apply artifacts.
+
+Это решение не разрешает:
+
+* implementation;
+* DB connection;
+* pipeline execution;
+* SQL preview;
+* apply-plan;
+* SQL/apply;
+* `--confirm-apply`;
+* product/category changes;
+* production/cache actions;
+* cache rebuild.
+
+### Ссылка
+
+`framework-standardization/docs/SUBMERSIBLE_PUMPS_BATCH_AUTOMATION_SPEC.md`

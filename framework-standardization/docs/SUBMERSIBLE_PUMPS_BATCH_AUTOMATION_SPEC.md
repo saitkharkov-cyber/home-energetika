@@ -2,7 +2,13 @@
 
 Дата: 11-07-2026
 
-Specification status: draft
+Specification status: approved
+
+Approved by: user
+
+Approval date: 11-07-2026
+
+Approval scope: planning and safety boundaries for future batch preparation workflow
 
 Documentation only
 
