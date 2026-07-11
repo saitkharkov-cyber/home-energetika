@@ -4390,3 +4390,42 @@ All alias rows and all formatting/nominal/range transformations are `normalized`
 ### Границы
 
 Это решение не разрешает SQL/apply, `--confirm-apply`, product/category changes, production/cache actions or cache rebuild.
+
+## 10-07-2026 - Voltage exception review outcome
+
+### Решение
+
+По package:
+
+`framework-standardization/runtime/reports/submersible_pumps_voltage/20260710190844_6a51433c8f43`
+
+утверждён outcome conservative evidence gate для исключений характеристики `Напряжение`.
+
+Approved manual resolutions:
+
+* `8231 -> 220`;
+* `8233 -> 220`;
+* `8277 -> 380`.
+
+Unresolved products:
+
+* `8192`;
+* `8218`;
+* `8219`;
+* `8226`;
+* `8227`.
+
+Invalid product:
+
+* `8243`.
+
+`8226` и `8227` не утверждены, потому что evidence level только `medium`.
+
+Постоянные документы:
+
+* `framework-standardization/docs/VOLTAGE_EXCEPTION_REVIEW.md`;
+* `framework-standardization/docs/VOLTAGE_MANUAL_RESOLUTION_PLAN.md`.
+
+### Границы
+
+Это решение не разрешает SQL preview, apply-plan, SQL/apply, `--confirm-apply`, product/category changes, production/cache actions or cache rebuild.

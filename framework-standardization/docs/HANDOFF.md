@@ -1,575 +1,1226 @@
-# HANDOFF — framework-standardization / generic canonical apply
+# HANDOFF — framework-standardization / voltage normalization and exception review
 
 Дата: 10-07-2026
 Проект: `saitkharkov-cyber/home-energetika`
+Локальный репозиторий: `D:\Git\home-energetika`
 Рабочая область: `framework-standardization`
-Functional stable point before this handoff update:
-
-`85862c6 Document project date time output format`
 
 Codex resume:  `codex resume 019f35ab-7752-7251-a297-f16421ea092a`
+
+Актуальная стабильная точка:
+
+```text
+896db38 Implement approved voltage normalization policy
+```
+
+Ветка:
+
+```text
+main
+```
+
+На момент последней проверки:
+
+```text
+HEAD -> main
+origin/main
+origin/HEAD
+```
 
 ## 1. Общий контекст
 
 Работа ведётся над framework для безопасной стандартизации характеристик OpenCart-каталога.
 
-Текущая целевая характеристика:
+Framework должен обеспечивать:
 
-* target meaning: `максимальный напор`
-* category scope: `11900213` / Скважинные насосы
-* canonical attribute: `12`
-* alias attributes: `101,119,81`
-* normalizer: `simple_meters`
-* contract: `framework-standardization/config/attribute-contracts/max_head_11900213.php`
+* явный contract для каждой характеристики;
+* иерархический category scope;
+* discovery атрибутов;
+* inventory исходных значений;
+* нормализацию;
+* статусы предложений;
+* review package;
+* human decision gates;
+* строгий запрет изменений данных без отдельного apply gate;
+* повторное использование generic-компонентов для следующих характеристик.
 
-Цель последних этапов — перейти от hardcoded max_head prototype к generic contract-driven canonical apply engine.
+Текущая активная характеристика:
+
+```text
+Напряжение
+```
+
+Scope:
+
+```text
+root category: 11900213
+category: Скважинные насосы
+scope mode: hierarchical_category_path_exists
+```
+
+Текущий этап — не разработка normalizer и не SQL/apply.
+
+Текущий documentation этап:
+
+```text
+documentation-only фиксация human review исключений напряжения завершена локально
+```
 
 ## 2. Важные правила работы
 
-Вся документация, комментарии, пояснения и отчёты — только на русском языке.
+Вся документация, пояснения, рабочие команды и отчёты — на русском языке.
 
-Английский допускается только для технических идентификаторов:
+Английский допускается для:
 
 * PHP array keys;
-* class names;
+* классов;
 * namespaces;
 * CLI options;
 * file paths;
 * SQL identifiers;
-* literal / enum-like values.
+* enum-like значений;
+* названий status/warning markers.
 
-Команды для PowerShell 7+ давать одной строкой через `&&`.
+Команды для PowerShell 7+ давать одной строкой через:
 
-Команды commit должны включать tail:
+```text
+&&
+```
 
-`&& git log --oneline --decorate -5 && git status --short`
+Команда commit должна завершаться:
 
-Не просить Codex читать `docs/RULES.md`; нужные правила вставлять в prompt явно.
+```powershell
+git log --oneline --decorate -5 && git status --short
+```
 
-Не менять `HANDOFF.md` в середине работы. `HANDOFF` обновляется только при закрытии / переносе чата.
+Пользователь редактирует файлы через Notepad++. Не предлагать Windows `notepad`.
 
-Не выполнять SQL/apply/production/cache/cache rebuild без отдельного явного gate.
+Не просить Codex читать:
 
-## 3. Последние стабильные коммиты
+```text
+framework-standardization/docs/RULES.md
+```
+
+Все ограничения конкретного шага нужно вставлять непосредственно в Codex prompt.
+
+Не менять:
+
+```text
+framework-standardization/docs/HANDOFF.md
+```
+
+в середине рабочего этапа. HANDOFF обновляется только при закрытии или переносе сессии.
+
+Не выполнять без отдельного явного gate:
+
+* SQL preview;
+* executable apply-plan;
+* SQL/apply;
+* `--confirm-apply`;
+* production mutation;
+* изменение product/category data;
+* cache rebuild;
+* другие cache actions.
+
+Не использовать без крайней необходимости:
+
+```text
+git reset
+git restore
+git checkout --
+git stash
+```
+
+Не смешивать посторонние файлы в commit.
+
+## 3. Правило временного override
+
+Используется файл:
+
+```text
+framework-standardization/docs/CURRENT_OVERRIDE.md
+```
+
+Модель:
+
+* файл существует — временный override действует;
+* файла нет — override отсутствует;
+* не использовать lifecycle-поля:
+
+  * `Status:`
+  * `Статус:`
+  * `ACTIVE`
+  * `RESOLVED`
+* файл не коммитится;
+* файл удаляется только после того, как решение:
+
+  1. перенесено в постоянную документацию;
+  2. проверено;
+  3. соответствующий bounded step закрыт.
+
+На момент закрытия voltage exception review решение перенесено в постоянные документы, а `CURRENT_OVERRIDE.md` удалён.
+
+## 4. Последние стабильные коммиты
 
 Последний подтверждённый log:
 
 ```text
-85862c6 Document project date time output format
-e48abda Update framework glossary
-5b03a9e Document generic controlled attribute apply write path
-b4ce8be Implement generic controlled attribute apply write path
-7ef6975 Document generic attribute apply write-path structure
+896db38 Implement approved voltage normalization policy
+5d6b410 Import legacy standardization decisions
+3be362a Close hierarchical scope override
+53b7570 Align pipeline hierarchical category scope
+b6de7ad Add generic standardization review pipeline
 ```
 
-## 4. Что уже сделано по max_head
+### `896db38`
 
-### 4.1 Human decision / contract / policy
+Завершил:
 
-Были зафиксированы решения по max_head:
+* approved voltage policy;
+* рабочий voltage job contract;
+* `VoltageNormalizer`;
+* loader validation;
+* strict contract enforcement;
+* исправленную semantics `unchanged`;
+* phase-voltage conflict handling;
+* tests.
 
-* canonical attribute: `12`
-* aliases: `101,119,81`
-* category scope: `11900213`
-* canonical unit: meters
-* accepted simple values normalize to decimal meters
-* ranges / upper-bound / mixed ambiguous values remain unresolved
+### `5d6b410`
 
-Unresolved values:
-
-* всего `14`
-* не применяются
-* не попадают в SQL preview/apply-plan/apply
-
-### 4.2 DB-readonly stages
-
-Были реализованы и проверены standalone DB-readonly команды:
-
-* attribute discovery;
-* raw values inventory;
-* normalization proposals;
-* normalization review-chain;
-* normalization review sample;
-* SQL preview;
-* apply-plan preview.
-
-Все эти команды работали только read-only / console output.
-
-SQL/apply не выполнялся на этих этапах.
-
-### 4.3 Manual review gates
-
-Закрыты ручные gates:
-
-* sample review generated proposals;
-* SQL preview review;
-* apply-plan preview review.
-
-Подтверждено:
-
-* simple normalized values выглядят корректно;
-* unresolved ranges / upper-bound / mixed values исключены;
-* SQL preview корректен;
-* apply-plan preview корректен;
-* `UPDATE` только по `oc_product_attribute`;
-* `INSERT` только canonical rows;
-* `DELETE/ALTER/TRUNCATE/DROP/CREATE TABLE` отсутствуют;
-* source alias rows не удаляются на Phase 1;
-* SQL/apply по-прежнему запрещён до отдельного gate.
-
-## 5. Prototype max_head apply уже был выполнен на controlled local dump
-
-Hardcoded prototype:
-
-* `framework-standardization/bin/db-controlled-apply-max-head.php`
-* `framework-standardization/src/Apply/DbControlledMaxHeadApplyCommand.php`
-
-Результат prototype controlled local apply:
-
-* `actual_updated_count: 400`
-* `actual_inserted_count: 81`
-* `sql_applied: 1`
-* `product_data_changed: 1`
-* `post_apply_verification_ok: 1`
-* production/cache не трогались
-
-Idempotency follow-up на already-applied local dump:
-
-* `actual_updated_count: 0`
-* `actual_inserted_count: 0`
-* `already_applied_count: 562`
-* `sql_applied: 0`
-* `product_data_changed: 0`
-* `post_apply_verification_ok: 1`
-
-Важно: это был hardcoded prototype, не generic path.
-
-## 6. Alias cleanup по max_head уже был выполнен на controlled local dump
-
-Hardcoded alias cleanup:
-
-* удалено `81` safely removable alias rows;
-* осталось `14` unresolved/excluded alias rows;
-* source unresolved rows намеренно сохранены;
-* canonical rows не удалялись;
-* production/cache не трогались.
-
-Generic alias cleanup через contract также был реализован как dry-run / diagnostic path и подтвердил current already-cleaned state:
-
-* `planned_delete_count: 0`
-* `remaining_alias_rows: 14`
-* `remaining_not_removable_rows: 14`
-* `post_cleanup_verification_ok: 1`
-* `sql_applied: 0`
-
-## 7. Generic canonical apply diagnostic dry-run
-
-Generic command/class:
-
-* `framework-standardization/bin/db-controlled-attribute-apply.php`
-* `framework-standardization/src/Apply/DbControlledAttributeApplyCommand.php`
-
-На already-cleaned local dump diagnostic dry-run показывает:
+Перенёс в framework решения из старого проекта:
 
 ```text
-update_existing_canonical_row_count: 0
-insert_missing_canonical_row_count: 0
-already_applied_count: 0
-source_based_already_applied_count: 0
-canonical_only_verified_count: 481
-source_based_plan_available: 0
-dry_run_limitation: canonical apply dry-run after alias cleanup has limited source rows
-unresolved_excluded_count: 14
-duplicate_or_conflict_count: 0
-expected_counts_match: 0
-post_apply_verification_ok: 0
-sql_applied: 0
-product_data_changed: 0
+catalog-standardization
 ```
 
-Это ожидаемо, потому что local dump уже after alias cleanup: source alias rows для 481 applied canonical values удалены, поэтому source-based proof невозможен на текущем dump.
-
-Нельзя искусственно делать `expected_counts_match: 1` для этого состояния.
-
-## 8. Synthetic fixture для source-based generic apply
-
-Создан fixture-only dry-run:
-
-* `framework-standardization/bin/fixture-canonical-apply-dry-run.php`
-* `framework-standardization/src/Fixture/GenericCanonicalApplyFixtureDryRun.php`
-* `framework-standardization/config/attribute-contracts/fixtures/max_head_synthetic_fixture.php`
-* `framework-standardization/fixtures/generic-canonical-apply/max_head_synthetic_rows.php`
-
-Fixture подтверждает source-based plan logic без DB:
+Добавлен постоянный слой:
 
 ```text
-update_existing_canonical_row_count: 1
-insert_missing_canonical_row_count: 1
-already_applied_count: 1
-unresolved_excluded_count: 1
-duplicate_or_conflict_count: 2
-out_of_scope_ignored_count: 1
-source_based_plan_available: 1
-expected_counts_match: 1
-dry_run_expected_counts_ok: 1
-post_apply_verification_ok: 0
-sql_applied: 0
-product_data_changed: 0
+framework-standardization/docs/LEGACY_DECISIONS.md
 ```
 
-`--confirm-apply` в fixture запрещён:
+### `53b7570` и `3be362a`
+
+Исправили scope на иерархический через:
 
 ```text
-fixture_canonical_apply_dry_run_error: fixture_confirm_apply_not_allowed
+oc_category_path
 ```
 
-## 9. Generic write-path plan / structure / implementation
+и закрыли временный override по hierarchical scope.
 
-### 9.1 План
+## 5. Источники решений и их приоритет
 
-Документирован plan:
+В проекте зафиксирована следующая логика доверия к источникам:
 
-`9572f0e Document generic canonical write-path implementation plan`
+1. explicit human-approved решение по характеристике;
+2. более новое explicit framework/user decision;
+3. legacy project decisions;
+4. live DB facts;
+5. generated discovery/inventory/review evidence;
+6. implementation defaults.
+
+Live DB facts не должны самостоятельно отменять human-approved contract.
+
+Generated package является evidence, но не apply authorization.
+
+## 6. Legacy project
+
+Старый проект:
+
+```text
+catalog-standardization
+```
+
+содержит:
+
+```text
+catalog-standardization/Catalog_Standardization.xlsx
+catalog-standardization/CATALOG_STANDARD.md
+catalog-standardization/PROJECT_MASTER_SUMMARY.md
+catalog-standardization/HANDOFF.md
+catalog-standardization/README.md
+```
+
+Legacy decisions были системно перенесены в framework в commit:
+
+```text
+5d6b410 Import legacy standardization decisions
+```
+
+Legacy files не изменять без отдельной причины.
+
+## 7. Approved contract характеристики «Напряжение»
+
+Canonical contract:
+
+```text
+canonical_attribute_id: 15
+canonical_name: Напряжение (В)
+canonical_unit: В
+normalized_value_type: integer_enum
+allowed_canonical_values: "220", "380"
+```
+
+Approved aliases:
+
+```text
+57
+79
+99
+118
+170
+```
+
+Excluded attribute:
+
+```text
+73
+```
+
+Причина исключения `73`:
+
+```text
+Параметры котла
+```
+
+Job:
+
+```text
+framework-standardization/config/jobs/submersible_pumps_voltage.php
+```
+
+В job используется явная модель:
+
+```php
+'target' => array(
+    'canonical_attribute_id' => 15,
+    'included_alias_attribute_ids' => array(57, 79, 99, 118, 170),
+    'excluded_attribute_ids' => array(73),
+),
+```
+
+Старая модель:
+
+```text
+candidate_attribute_ids
+```
+
+не используется как замена approved aliases.
+
+## 8. Approved voltage normalization policy
+
+Постоянный документ:
+
+```text
+framework-standardization/docs/VOLTAGE_NORMALIZATION_POLICY.md
+```
+
+Статус:
+
+```text
+Policy status: approved
+Approved by: user
+Approval date: 10-07-2026
+```
+
+### Класс 220
+
+Нормализуются в `"220"`:
+
+```text
+220
+220V
+220 В
+230
+230 В
+1 × 230 В
+1x230 В
+1~230 В
+200–240 В
+210–240 В
+210..240
+220–230 В
+220-230 В
+220–240 В
+220-240 В
+```
+
+### Класс 380
+
+Нормализуются в `"380"`:
+
+```text
+380
+380V
+380 В
+400
+400 В
+3 × 400 В
+3x400 В
+3~400 В
+380–400 В
+380-400 В
+380–420 В
+380..420
+```
+
+### Фазность
+
+Однофазные markers подтверждают класс `220`:
+
+```text
+1 ×
+1x
+1~
+однофазный
+однофазное
+1 фаза
+```
+
+Трёхфазные markers подтверждают класс `380`:
+
+```text
+3 ×
+3x
+3~
+трёхфазный
+трехфазный
+трёхфазное
+трехфазное
+3 фазы
+```
+
+Если phase evidence противоречит voltage class:
+
+```text
+status: review_required
+canonical_value: null
+warning: phase_voltage_class_conflict
+ambiguity_reason: phase_voltage_class_conflict
+```
+
+Примеры конфликтов:
+
+```text
+3 × 230 В
+230 В (трёхфазный)
+1 × 400 В
+400 В (однофазный)
+```
+
+### Frequency
+
+Значения:
+
+```text
+50 Гц
+60 Гц
+```
+
+не входят в canonical voltage value.
+
+Они сохраняются в diagnostics, но не используются как voltage evidence.
+
+### Mixed classes
+
+Если строка содержит одновременно классы `220` и `380`:
+
+```text
+status: review_required
+canonical_value: null
+warning: mixed_voltage_classes
+ambiguity_reason: mixed_voltage_classes
+```
+
+### Outside policy
+
+Значения вроде:
+
+```text
+110
+127
+480
+```
+
+не преобразуются в `220` или `380`.
+
+Результат:
+
+```text
+status: review_required
+canonical_value: null
+warning: voltage_outside_allowed_classes
+ambiguity_reason: voltage_outside_allowed_classes
+```
+
+### Empty / unsupported
+
+Пустое значение:
+
+```text
+status: invalid
+```
+
+Текст без voltage evidence:
+
+```text
+status: unsupported
+```
+
+## 9. Status semantics
+
+`unchanged` допустим только если одновременно:
+
+```text
+source_attribute_id = 15
+trim(raw_value) = "220" или "380"
+canonical_value совпадает с raw
+```
+
+Примеры:
+
+```text
+attribute 15 + raw 220 → unchanged
+attribute 15 + raw 380 → unchanged
+attribute 15 + raw " 220 " → unchanged
+```
+
+Все другие успешно преобразованные значения:
+
+```text
+status: normalized
+```
+
+Alias row никогда не получает `unchanged`, даже если raw уже равен `220` или `380`.
+
+Примеры:
+
+```text
+attribute 15 + 220V → normalized / 220
+attribute 15 + 230 → normalized / 220
+attribute 15 + 400 → normalized / 380
+attribute 57 + 220 → normalized / 220
+attribute 79 + 380 → normalized / 380
+```
+
+## 10. Contract type consistency и safety
+
+Canonical enum хранится строками:
+
+```php
+'allowed_canonical_values' => array('220', '380'),
+```
+
+`StandardizationJobContractLoader`:
+
+* приводит enum к строкам;
+* удаляет внешние пробелы;
+* блокирует пустые значения;
+* блокирует дубли после type normalization;
+* не содержит hardcode под `220/380`;
+* проверяет пересечения canonical/aliases/excluded.
+
+Pipeline строго проверяет каждый ненулевой normalizer output против:
+
+```text
+allowed_canonical_values
+```
+
+через strict comparison.
+
+Если normalizer возвращает значение вне contract:
+
+```text
+status: review_required
+canonical_value: null
+warning: canonical_value_outside_contract
+ambiguity_reason: canonical_value_outside_contract
+```
+
+Главный инвариант:
+
+```text
+canonical_value === null
+или canonical_value === "220"
+или canonical_value === "380"
+```
+
+## 11. Реализация
+
+Основные файлы:
+
+```text
+framework-standardization/config/jobs/submersible_pumps_voltage.php
+framework-standardization/src/Normalizer/VoltageNormalizer.php
+framework-standardization/src/Pipeline/StandardizationJobContractLoader.php
+framework-standardization/src/Pipeline/StandardizationPipeline.php
+framework-standardization/tests/standardization_pipeline_static_checks.php
+framework-standardization/docs/VOLTAGE_NORMALIZATION_POLICY.md
+framework-standardization/docs/DECISIONS.md
+```
+
+Реализация находится в commit:
+
+```text
+896db38 Implement approved voltage normalization policy
+```
+
+Не нужно повторно проектировать или переписывать voltage normalizer без нового evidence.
+
+Не добавлять product-specific exceptions в `VoltageNormalizer`.
+
+Не hardcode product IDs в коде.
+
+## 12. Tests
+
+Доступный no-DB framework test suite:
+
+```text
+framework-standardization/tests/standardization_pipeline_static_checks.php
+```
+
+Запуск через PHP 5.6:
+
+```powershell
+C:\php56\php.exe framework-standardization/tests/standardization_pipeline_static_checks.php
+```
+
+Результат последней проверки:
+
+```text
+static_checks_completed: ok
+```
+
+Проверены:
+
+* approved aliases;
+* duplicate aliases;
+* canonical ID inside aliases;
+* alias/excluded overlap;
+* string enum normalization;
+* duplicate enum после type normalization;
+* empty enum;
+* все основные формы `220`;
+* все основные формы `380`;
+* mixed values;
+* outside-policy values;
+* phase conflicts;
+* valid phase combinations;
+* frequency parsing;
+* arbitrary model numbers;
+* `unchanged` semantics;
+* strict output contract;
+* global canonical invariant.
+
+Для syntax использовать:
+
+```text
+C:\php56\php.exe
+```
+
+Bare `php` может ссылаться на `C:\php84\php.exe` и завершаться с `Access is denied`.
+
+## 13. Последний успешный live DB read-only rerun
+
+Команда:
+
+```powershell
+C:\php56\php.exe framework-standardization\bin\standardization-pipeline.php framework-standardization\config\jobs\submersible_pumps_voltage.php --format=markdown
+```
+
+Runtime:
+
+```text
+runtime_mode: live_db_readonly
+database_name: he_framework_prod_snapshot_20260710
+```
+
+Package:
+
+```text
+framework-standardization/runtime/reports/submersible_pumps_voltage/20260710190844_6a51433c8f43
+```
+
+Package ID:
+
+```text
+20260710190844_6a51433c8f43
+```
+
+Scope:
+
+```text
+root category: 11900213
+scope mode: hierarchical_category_path_exists
+```
+
+Volumes:
+
+```text
+source rows: 618
+source products: 618
+source attributes: 6
+proposals total: 618
+```
+
+Counts по source attributes:
+
+```text
+15: 400
+57: 117
+79: 88
+99: 5
+118: 1
+170: 7
+```
+
+Attribute `73` в package не вошёл.
+
+Другие source attributes не вошли.
+
+Scope diagnostics:
+
+```text
+hierarchical_scope_rows: 618
+direct_parent_rows: 595
+rows_without_direct_parent: 23
+products_without_direct_parent: 23
+```
+
+Иерархические 23 товара без direct parent корректно включены.
+
+## 14. Результаты последнего package
+
+Status counts:
+
+```text
+unchanged: 98
+normalized: 511
+review_required: 8
+invalid: 1
+unsupported: 0
+```
+
+Safety invariants:
+
+```text
+non-null canonical values outside contract: 0
+mixed values with non-null canonical value: 0
+outside-policy values with non-null canonical value: 0
+phase-conflict values with non-null canonical value: 0
+alias rows marked unchanged: 0
+```
+
+Package не содержит:
+
+* SQL apply;
+* executed SQL;
+* apply result;
+* mutation result;
+* production write;
+* cache operation;
+* `--confirm-apply`;
+* UPDATE/INSERT/DELETE/ALTER/DROP/TRUNCATE.
+
+SQL preview и apply-plan для напряжения не создавались.
+
+## 15. Полный список исключений package
+
+### `review_required`
+
+```text
+8192
+8218
+8219
+8226
+8227
+8231
+8233
+8277
+```
+
+### `invalid`
+
+```text
+8243
+```
+
+### Причины
+
+`8192`:
+
+```text
+1~230 В, 50 Гц / 1~220 В, 60 Гц / 1~110 В, 60 Гц* (номинальное)
+```
+
+Причина:
+
+```text
+voltage_outside_allowed_classes
+```
+
+`8218`, `8219`, `8226`, `8227`, `8231`, `8233`, `8277` содержат mixed `220/380` evidence.
+
+Причина:
+
+```text
+mixed_voltage_classes
+```
+
+`8243` имеет пустое voltage value.
+
+Причина:
+
+```text
+empty_value
+```
+
+## 16. Выполненный evidence review исключений
+
+Был проведён отдельный read-only review девяти товаров.
+
+Использовались:
+
+* новый review package;
+* read-only snapshot DB;
+* product names;
+* model/SKU;
+* категории;
+* атрибуты напряжения;
+* phase/frequency evidence;
+* короткие релевантные description snippets;
+* внутренний поиск legacy/import evidence.
+
+Интернет не использовался как источник решений.
+
+Pipeline повторно не запускался.
+
+DB не изменялась.
+
+Созданы постоянные документы:
+
+```text
+framework-standardization/docs/VOLTAGE_EXCEPTION_REVIEW.md
+framework-standardization/docs/VOLTAGE_MANUAL_RESOLUTION_PLAN.md
+```
+
+`VOLTAGE_EXCEPTION_REVIEW.md` переведён из draft/evidence state в approved review outcome.
+
+## 17. Итог evidence review по товарам
+
+### `8192`
+
+Evidence:
+
+* карточка DAVIS;
+* перечислено несколько voltage/frequency executions;
+* присутствуют `230`, `220` и `110`;
+* точная версия SKU не доказана.
+
+Решение:
+
+```text
+canonical: null
+confidence: insufficient
+keep_review_required
+```
+
+### `8218`
+
+Evidence:
+
+* описание содержит трёхфазную и однофазную версии;
+* SKU-to-phase mapping не доказан.
+
+Решение:
+
+```text
+canonical: null
+confidence: insufficient
+keep_review_required
+```
+
+### `8219`
+
+Evidence:
+
+* card name не подтверждает точную однофазную версию;
+* описание перечисляет оба исполнения.
+
+Решение:
+
+```text
+canonical: null
+confidence: insufficient
+keep_review_required
+```
+
+### `8226`
+
+Evidence:
+
+* обозначение модели указывает на вероятное однофазное исполнение;
+* независимого подтверждения в description/import evidence нет.
+
+Решение:
+
+```text
+canonical: null
+confidence: medium
+keep_review_required
+```
+
+Не утверждать `220` только на основании medium evidence.
+
+### `8227`
+
+Evidence:
+
+* обозначение модели указывает на вероятное однофазное исполнение;
+* независимого подтверждения нет.
+
+Решение:
+
+```text
+canonical: null
+confidence: medium
+keep_review_required
+```
+
+### `8231`
+
+Evidence:
+
+* точная модель;
+* description evidence подтверждает однофазное исполнение `220 В`.
+
+Human-approved manual resolution:
+
+```text
+8231 → 220
+confidence: high
+```
+
+### `8233`
+
+Evidence:
+
+* description evidence явно указывает однофазное исполнение `220 В`.
+
+Human-approved manual resolution:
+
+```text
+8233 → 220
+confidence: high
+```
+
+### `8277`
+
+Evidence:
+
+* название модели;
+* raw value;
+* description evidence подтверждают трёхфазное исполнение `380–415 В`;
+* однофазная версия указана только как альтернативно доступная.
+
+Human-approved manual resolution:
+
+```text
+8277 → 380
+confidence: high
+```
+
+### `8243`
+
+Evidence:
+
+* voltage attribute пуст;
+* найденное упоминание `380 В` является сравнительным;
+* оно не доказывает напряжение точной версии товара.
+
+Решение:
+
+```text
+canonical: null
+confidence: insufficient
+keep invalid
+```
+
+## 18. Явное human decision по исключениям
+
+Пользователь утвердил консервативный evidence gate:
+
+Автоматически или вручную разрешается планировать только high-confidence cases.
+
+Approved manual resolutions:
+
+```text
+8231 → 220
+8233 → 220
+8277 → 380
+```
+
+Остаются unresolved:
+
+```text
+8192
+8218
+8219
+8226
+8227
+```
+
+Остаётся invalid:
+
+```text
+8243
+```
+
+Medium-confidence товары:
+
+```text
+8226
+8227
+```
+
+не разрешены к изменению данных.
+
+Это решение не является:
+
+* SQL preview authorization;
+* apply-plan authorization;
+* SQL/apply authorization;
+* production authorization.
+
+## 19. Текущее незакоммиченное состояние
+
+Последний фактически показанный `git status --short`:
+
+```text
+ M framework-standardization/config/runtime/local.dump.example.php
+?? framework-standardization/docs/CURRENT_OVERRIDE.md
+?? framework-standardization/docs/VOLTAGE_EXCEPTION_REVIEW.md
+```
+
+Перед любым продолжением нужно заново проверить:
+
+```powershell
+git status --short
+```
+
+Не считать приведённый выше status актуальным без свежего вывода.
+
+### Отдельное пользовательское изменение
 
 Файл:
 
-`framework-standardization/docs/GENERIC_CANONICAL_WRITE_PATH_IMPLEMENTATION_PLAN.md`
+```text
+framework-standardization/config/runtime/local.dump.example.php
+```
 
-Он фиксирует:
+не относится к текущему шагу.
 
-* future generic UPDATE/INSERT write-path;
-* contract-driven behavior;
-* transaction/rollback/verification requirements;
-* SQL boundaries;
-* no production/cache;
-* no SQL/apply без separate gate.
+Его:
 
-### 9.2 Structure
+* не менять;
+* не индексировать;
+* не включать в commit;
+* не использовать как повод для очистки working tree.
 
-Коммит:
+## 20. Закрытый documentation outcome
 
-`50fe53b Add generic attribute apply write-path structure`
+Постоянная документационная фиксация final exception decision выполнена локально.
 
-Добавлено:
+Зафиксировано:
 
-* implementation-only structure;
-* output markers:
+1. `VOLTAGE_EXCEPTION_REVIEW.md` переведён в approved review outcome.
+2. В `DECISIONS.md` добавлено решение `10-07-2026 - Voltage exception review outcome`.
+3. Создан:
 
-  * `write_path_structure_present`
-  * `confirm_apply_enabled`
-  * `write_path_execution_enabled`
-  * `implementation_only`
+   ```text
+   framework-standardization/docs/VOLTAGE_MANUAL_RESOLUTION_PLAN.md
+   ```
+4. `CURRENT_OVERRIDE.md` удалён после переноса outcome.
+5. SQL preview не создавался.
+6. Apply-plan не создавался.
+7. SQL/apply не выполнялся.
+8. Product data не менялись.
+9. Category assignments не менялись.
+10. Production/cache не затрагивались.
 
-Runtime check:
+## 21. Следующий рекомендуемый bounded step
 
-`7ef6975 Document generic attribute apply write-path structure`
-
-### 9.3 Real generic controlled write-path
-
-Коммит:
-
-`b4ce8be Implement generic controlled attribute apply write path`
-
-Изменён файл:
-
-`framework-standardization/src/Apply/DbControlledAttributeApplyCommand.php`
-
-Реализовано:
-
-* real generic controlled canonical apply write-path через explicit contract;
-* bounded UPDATE existing canonical rows;
-* bounded INSERT missing canonical rows;
-* transaction;
-* rollback on verification mismatch;
-* rollback on exception;
-* post-apply verification before commit;
-* hard fail / non-zero behavior через exception;
-* rollback в catch только если transaction была начата этой command.
-
-Runtime check:
-
-`5b03a9e Document generic controlled attribute apply write path`
-
-## 10. Generic controlled write-path details
-
-Generic write-path contract-driven.
-
-Параметры берутся из contract:
-
-* `category_scope_id`
-* `canonical_attribute_id`
-* `alias_attribute_ids`
-* `allowed_table`
-* `allowed_columns`
-* expected counts
-* `runtime_allowlist`
-* `confirmation_required`
-* `allow_confirm_apply`
-* `normalizer_key`
-
-Hardcoded max_head behavior в generic write-path не добавлялся.
-
-Confirm path gated через checks:
-
-* runtime должен соответствовать controlled local dump;
-* contract должен требовать confirmation;
-* runtime allowlist должен разрешать `allow_confirm_apply`;
-* `production_ready` disabled;
-* `cache_rebuild_allowed` disabled;
-* source-based plan available;
-* expected counts match;
-* affected rows canonical-only;
-* affected products inside category scope;
-* unresolved values excluded.
-
-Разрешённые write operations внутри confirm path:
-
-* `UPDATE oc_product_attribute`
-* `INSERT INTO oc_product_attribute`
-
-UPDATE ограничен:
-
-* concrete `product_id`;
-* concrete `attribute_id`;
-* concrete `language_id`.
-
-INSERT пишет:
-
-* concrete `product_id`;
-* canonical `attribute_id`;
-* concrete `language_id`;
-* normalized `text`.
-
-Запрещено и не добавлено:
-
-* DELETE;
-* ALTER;
-* TRUNCATE;
-* DROP;
-* CREATE TABLE;
-* writes в `oc_attribute`;
-* writes в `oc_attribute_description`;
-* source alias row changes;
-* canonical row delete;
-* cache rebuild;
-* production/cache actions.
-
-## 11. Важный safety review по generic write-path
-
-Перед коммитом `b4ce8be` diff был несколько раз проверен и исправлен.
-
-Ключевые исправления:
-
-1. Post-apply verification теперь перечитывает planned canonical rows из DB и сверяет:
-
-   * `product_id`;
-   * `attribute_id`;
-   * `language_id`;
-   * `text`.
-
-2. Если `transaction_already_active` или `transaction_not_available`, confirm apply падает hard fail.
-
-3. В `catch` rollback делается только если transaction была начата этой command:
-
-   * `$transactionStarted === 1`.
-
-4. Если `post_apply_verification_failed`, после rollback бросается `RuntimeException`.
-
-5. Confirm apply должен завершаться non-zero при exception / verification failure.
-
-6. Dry-run без `--confirm-apply` не входит в write path.
-
-## 12. Последние проверки после implementation
-
-Syntax checks:
+Следующий шаг после проверки текущего diff должен быть отдельным bounded decision/planning step:
 
 ```text
-No syntax errors detected in framework-standardization\src\Apply\DbControlledAttributeApplyCommand.php
-No syntax errors detected in framework-standardization\bin\db-controlled-attribute-apply.php
+определить следующий safe gate после voltage exception documentation outcome
 ```
 
-DB dry-run без `--confirm-apply`:
+Не выбирать SQL preview/apply-plan без отдельного explicit gate.
+
+Не возвращать основной фокус к `max_head` без отдельного решения пользователя.
+
+## 22. Запрещённые изменения следующего шага
+
+Не менять:
 
 ```text
-transaction_started: 0
-sql_applied: 0
-product_data_changed: 0
-source_based_plan_available: 0
-canonical_only_verified_count: 481
-post_apply_verification_ok: 0
+framework-standardization/config/*
+framework-standardization/src/*
+framework-standardization/tests/*
+framework-standardization/docs/VOLTAGE_NORMALIZATION_POLICY.md
+framework-standardization/docs/LEGACY_DECISIONS.md
+framework-standardization/docs/HANDOFF.md
+framework-standardization/docs/RUNTIME_CHECKS.md
+framework-standardization/docs/RULES.md
+framework-standardization/docs/START_HERE.md
+framework-standardization/docs/DOCUMENTATION_BOUNDARIES.md
+catalog-standardization/*
+generated reports
 ```
 
-Fixture dry-run:
+Не подключаться к DB.
+
+Не запускать pipeline.
+
+Не создавать новый review package.
+
+Не создавать SQL preview.
+
+Не создавать executable apply-plan.
+
+Не выполнять SQL/apply.
+
+Не менять product/category data.
+
+Не менять production/cache.
+
+Не выполнять cache rebuild.
+
+Не делать commit/push до проверки diff.
+
+## 23. Ранее реализованный max_head path
+
+В репозитории также существует более ранняя работа по:
 
 ```text
-source_based_plan_available: 1
-expected_counts_match: 1
-dry_run_expected_counts_ok: 1
-sql_applied: 0
-product_data_changed: 0
+максимальный напор
 ```
 
-Safety search:
-
-* UPDATE / INSERT только в confirm write-path;
-* DELETE / ALTER / TRUNCATE / DROP / CREATE TABLE не добавлены;
-* `oc_attribute` / `oc_attribute_description` не используются как write target;
-* cache rebuild не добавлен;
-* production/cache actions не добавлены;
-* UPDATE содержит `WHERE product_id + attribute_id + language_id`;
-* INSERT пишет только canonical attribute row;
-* source alias rows не меняются.
-
-## 13. Что НЕ сделано
-
-Важно:
-
-* generic `--confirm-apply` ещё НЕ запускался;
-* generic SQL/apply ещё НЕ выполнялся;
-* generic UPDATE/INSERT ещё НЕ применялись;
-* product data generic path не менял;
-* production/cache не трогались;
-* cache rebuild не выполнялся.
-
-Текущий шаг не является production readiness.
-
-## 14. Следующий gate
-
-Следующий gate должен быть отдельным и явным:
+Исторический contract:
 
 ```text
-controlled local generic --confirm-apply decision
+canonical attribute: 12
+aliases: 101, 119, 81
+normalizer: simple_meters
+scope: 11900213
 ```
 
-Перед запуском apply нужно сделать preflight.
-
-Минимальный preflight перед любым `--confirm-apply`:
-
-1. Проверить clean working tree:
-
-```powershell
-git status --short && git log --oneline --decorate -8
-```
-
-2. Проверить syntax:
-
-```powershell
-C:\php56\php.exe -l framework-standardization\src\Apply\DbControlledAttributeApplyCommand.php && C:\php56\php.exe -l framework-standardization\bin\db-controlled-attribute-apply.php
-```
-
-3. DB dry-run без `--confirm-apply`:
-
-```powershell
-C:\php56\php.exe framework-standardization\bin\db-controlled-attribute-apply.php framework-standardization\config\runtime\local.dump.php framework-standardization\config\attribute-contracts\max_head_11900213.php
-```
-
-Ожидаемо на current already-cleaned dump:
+Ранее на controlled local dump были выполнены:
 
 ```text
-source_based_plan_available: 0
-canonical_only_verified_count: 481
-expected_counts_match: 0
-post_apply_verification_ok: 0
-sql_applied: 0
-product_data_changed: 0
+hardcoded prototype canonical apply:
+updated: 400
+inserted: 81
 ```
 
-Это означает, что current local dump уже после alias cleanup и не подходит для proving source-based generic apply.
-
-4. Fixture dry-run:
-
-```powershell
-C:\php56\php.exe framework-standardization\bin\fixture-canonical-apply-dry-run.php framework-standardization\config\attribute-contracts\fixtures\max_head_synthetic_fixture.php framework-standardization\fixtures\generic-canonical-apply\max_head_synthetic_rows.php
-```
-
-Ожидаемо:
+И alias cleanup:
 
 ```text
-source_based_plan_available: 1
-expected_counts_match: 1
-dry_run_expected_counts_ok: 1
-sql_applied: 0
-product_data_changed: 0
+deleted safely removable aliases: 81
+remaining unresolved aliases: 14
 ```
 
-## 15. Важное предупреждение про current local dump
-
-Текущий controlled local dump уже находится после:
-
-1. hardcoded prototype canonical apply;
-2. hardcoded alias cleanup.
-
-Поэтому generic canonical apply на этом dump в dry-run показывает:
-
-* `source_based_plan_available: 0`;
-* `expected_counts_match: 0`;
-* `post_apply_verification_ok: 0`.
-
-Это нормальное diagnostic state, но такой dump не подходит для реального generic source-based apply, потому что source alias rows для 481 applied canonical values уже удалены.
-
-Для реального controlled generic `--confirm-apply` нужен либо:
-
-* pre-alias-cleanup dump;
-* либо другой controlled fixture / local dump state, где source-based plan available.
-
-Нельзя запускать `--confirm-apply` на current already-cleaned dump, ожидая 400 UPDATE / 81 INSERT.
-
-Команда должна быть gated и, вероятно, упадёт из-за:
+Generic canonical write-path был реализован, но generic:
 
 ```text
-source_based_plan_required_for_confirm_apply
+--confirm-apply
 ```
 
-или
+не запускался.
+
+Текущий local dump уже находится после prototype apply и alias cleanup, поэтому не подходит для source-based proof generic apply.
+
+Этот path сейчас не является активным следующим шагом.
+
+Не возвращаться к max_head apply, пока не закрыта текущая documentation-only фиксация voltage exceptions и не принято новое явное решение.
+
+## 24. Более широкое направление после закрытия напряжения
+
+Не нужно повторять всю voltage-процедуру вручную для каждой характеристики.
+
+Напряжение было пилотной характеристикой, на которой одновременно были построены и проверены:
+
+* hierarchical scope;
+* legacy decision import;
+* explicit contract;
+* aliases/excluded model;
+* enum validation;
+* generic proposal statuses;
+* strict output contract;
+* review package;
+* exception evidence review;
+* human gate.
+
+После закрытия документации по напряжению рекомендуется отдельный planning step:
 
 ```text
-expected_counts_mismatch
+batch-автоматизация остальных характеристик категории Скважинные насосы
 ```
 
-Это ожидаемо и безопасно, но запуск без смысла.
+Целевой будущий workflow:
 
-## 16. Рекомендуемый следующий шаг в новом чате
+1. общий discovery всех характеристик;
+2. общий raw-values inventory;
+3. импорт legacy decisions;
+4. классификация характеристик по типу;
+5. привязка generic normalizers;
+6. генерация и validation job contracts;
+7. batch read-only runs;
+8. единая сводка конфликтов;
+9. human review только исключений;
+10. отдельные apply gates.
 
-Не начинать сразу с apply.
+Не начинать эту автоматизацию до аккуратного закрытия текущих voltage exception documents.
 
-Рекомендуемый bounded step:
-
-```text
-preflight / decision: определить подходящее состояние controlled local dump для generic source-based apply
-```
-
-Задачи:
-
-1. Проверить, есть ли pre-cleanup dump / backup before alias cleanup.
-2. Если есть — подключать его как controlled local runtime config.
-3. Если нет — не запускать generic confirm apply на current dump.
-4. Рассмотреть отдельный fixture-backed controlled integration test или восстановление local dump до состояния before Phase 1/Phase 2.
-5. Только после этого принимать explicit decision на `--confirm-apply`.
-
-## 17. Начальный prompt для нового чата
+## 25. Начальный prompt для нового чата
 
 ```text
 Подключись к GitHub repo `saitkharkov-cyber/home-energetika`.
 
-Рабочий проект: `framework-standardization`.
+Рабочая область: `framework-standardization`.
 
-Сначала прочитай `framework-standardization/docs/START_HERE.md`.
+Сначала прочитай:
 
-Дальше следуй порядку чтения документов, указанному в `START_HERE.md`.
+1. `framework-standardization/docs/START_HERE.md`;
+2. документы далее в порядке, указанном в START_HERE;
+3. актуальный HANDOFF;
+4. `framework-standardization/docs/DECISIONS.md`;
+5. `framework-standardization/docs/VOLTAGE_NORMALIZATION_POLICY.md`;
+6. если существуют:
+   - `framework-standardization/docs/CURRENT_OVERRIDE.md`;
+   - `framework-standardization/docs/VOLTAGE_EXCEPTION_REVIEW.md`.
 
-Актуальные stable point, текущий target, статус проекта, paused/rejected path, runtime checks, decisions и следующий рекомендуемый bounded step бери из документов репозитория, а не из памяти и не из этого prompt.
+`docs/RULES.md` не читай. Ограничения рабочего шага будут даны отдельно.
 
-После чтения документов подтверди:
+Сначала не изменяй файлы.
 
-1. текущую stable point;
-2. актуальную workflow-модель;
-3. paused/rejected path;
-4. текущий target и статус;
-5. что уже реализовано;
-6. что ещё не выполнялось;
-7. следующий рекомендуемый маленький bounded step.
+Попроси меня выполнить:
 
-Пока не формулируй Codex prompt на implementation.
+`git status --short`
 
-Сначала только подтверди понимание проекта и предложи один следующий маленький bounded step.
+После свежего статуса подтверди:
+
+1. текущий stable point;
+2. текущую активную характеристику;
+3. что уже завершено по voltage policy и implementation;
+4. последний успешный live DB read-only package;
+5. текущие исключения;
+6. утверждённые manual resolutions;
+7. какие документы ещё не зафиксированы;
+8. какое отдельное пользовательское изменение нельзя трогать;
+9. следующий один маленький documentation-only bounded step.
+
+Пока не создавай SQL preview, apply-plan или implementation prompt.
 ```
