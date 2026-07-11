@@ -26,31 +26,34 @@
 
 1. `glossary/!_README.md`
 2. `docs/DOCUMENTATION_BOUNDARIES.md`
-3. `docs/CURRENT_OVERRIDE.md` — только если файл существует
-4. `docs/HANDOFF.md`
-5. `docs/DECISIONS.md`
-6. `docs/RUNTIME_CHECKS.md`
-7. актуальные specs из `docs/`, если они нужны для конкретного шага
+3. `docs/HANDOFF.md` — только если файл существует
+4. `docs/DECISIONS.md`
+5. `docs/RUNTIME_CHECKS.md`
+6. актуальные specs из `docs/`, если они нужны для конкретного шага
 
 Глоссарий читается первым после `START_HERE.md`, чтобы дальнейшие термины проекта трактовались одинаково.
 
 `docs/DOCUMENTATION_BOUNDARIES.md` читается перед остальными рабочими документами, чтобы новый ChatGPT понимал, какой документ за что отвечает, и не дублировал сведения между current override, handoff, decisions, runtime checks и glossary.
 
-`docs/CURRENT_OVERRIDE.md` — необязательный оперативный документ. Если файл существует, прочитать его после `DOCUMENTATION_BOUNDARIES.md` и применять с высшим приоритетом в части текущей задачи, gate и следующего шага. Если файла нет, продолжить обычный порядок чтения.
+`docs/CURRENT_OVERRIDE.md` — внутренний временный инструмент активной сессии. Он не участвует в startup/inter-session reading order новой сессии, не передаётся между сессиями и должен быть закрыт и удалён до создания `HANDOFF.md`.
 
-`CURRENT_OVERRIDE.md` имеет приоритет над `HANDOFF.md`, `DECISIONS.md`, актуальными specs и ранее выбранным следующим шагом в части:
+`docs/HANDOFF.md` читается только если файл существует. Это временный tracked transport artifact между сессиями, а не постоянный status-документ.
 
-* текущей задачи;
-* текущего состояния;
-* scope;
-* gate;
-* блокировок;
-* последовательности действий;
-* следующего шага.
+Если `docs/HANDOFF.md` существует, новая сессия должна:
 
-`CURRENT_OVERRIDE.md` не может отменять пользовательские инструкции, safety rules, запрет SQL/apply без отдельного explicit gate, production/cache restrictions и обязательные проверки.
+1. прочитать его после `DOCUMENTATION_BOUNDARIES.md`;
+2. получить свежий `git log --oneline --decorate -5` и `git status --short`;
+3. считать свежий git state фактом;
+4. восстановить контекст по `Session close base commit`, target, stage, gates, protected files и одному next bounded step;
+5. при blocking inconsistency не удалять handoff до восстановления и запросить у пользователя недостающий факт;
+6. после успешного восстановления сообщить, что `HANDOFF.md` выполнил функцию передачи и готов к lifecycle cleanup;
+7. не удалять файл, не делать commit и не выполнять push без отдельного пользовательского `+`;
+8. после отдельного `+` выполнить только bounded cleanup handoff: удалить `HANDOFF.md`, сделать отдельный documentation lifecycle commit и push;
+9. продолжить активную сессию без handoff-файла.
 
-`docs/HANDOFF.md` является gate между рабочими сессиями. Он описывает состояние проекта на момент завершения или переноса предыдущей сессии. Временная пауза внутри текущей сессии сама по себе не является основанием для обновления `HANDOFF.md`.
+Если `docs/HANDOFF.md` отсутствует, это штатное состояние активной сессии. Нужно продолжить по постоянной документации и не придумывать handoff-specific состояние.
+
+Правила создания будущего `HANDOFF.md` описаны в `docs/HANDOFF_SPEC.md`. Этот spec не входит в обязательный reading order каждой сессии; его читать нужно при создании или проверке handoff lifecycle.
 
 Если текущая характеристика присутствует в `catalog-standardization` или `docs/LEGACY_DECISIONS.md`, после `docs/DECISIONS.md` необходимо прочитать `docs/LEGACY_DECISIONS.md` до discovery, contract drafting и normalizer work.
 
@@ -138,7 +141,7 @@ Codex получает конкретный ограниченный prompt:
 
 Обычно Codex не делает commit. После отчёта Codex ChatGPT проверяет scope и отдельно даёт команду для commit.
 
-`HANDOFF.md` обновлять только при закрытии, паузе, переносе работы или существенной смене стабильной точки.
+`HANDOFF.md` не поддерживается во время активной сессии. При завершении или переносе новый handoff создаётся по `docs/HANDOFF_SPEC.md` только после отдельного пользовательского `+` на lifecycle action. После успешного восстановления cleanup handoff также требует отдельного `+`.
 
 PowerShell-команды давать одной строкой - PowerShell 7+.
 

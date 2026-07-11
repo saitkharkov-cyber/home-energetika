@@ -4498,3 +4498,75 @@ read-only characteristic registry builder
 ### Ссылка
 
 `framework-standardization/docs/SUBMERSIBLE_PUMPS_BATCH_AUTOMATION_SPEC.md`
+
+## 11-07-2026 - HANDOFF.md lifecycle and strict template
+
+### Решение
+
+Повторяющаяся ошибочная трактовка `HANDOFF.md` как устаревающего status-документа закрыта отдельной process/spec моделью.
+
+`HANDOFF.md` утверждён как временный tracked transport artifact между завершаемой и новой ChatGPT-сессией.
+
+`HANDOFF.md` является компактным MASTER SUMMARY завершаемой сессии, но не полным MASTER SUMMARY проекта.
+
+Он создаётся заново только при завершении текущей сессии или при явном переносе работы в новый чат.
+
+Во время активной сессии `HANDOFF.md` обычно отсутствует.
+
+Новая сессия читает `HANDOFF.md`, восстанавливает контекст и после успешного восстановления сообщает пользователю, что файл выполнил функцию передачи и готов к lifecycle cleanup.
+
+`HANDOFF.md` сам по себе не authorizes file changes, commit или push.
+
+Создание `HANDOFF.md`, transport commit создания и push требуют отдельного пользовательского `+`.
+
+Удаление `HANDOFF.md`, documentation lifecycle commit удаления и push также требуют отдельного пользовательского `+` после успешного восстановления контекста.
+
+Cleanup handoff и следующий engineering step требуют разных пользовательских `+`.
+
+При blocking inconsistency новая сессия не удаляет `HANDOFF.md` преждевременно, не обновляет его как status-документ и запрашивает у пользователя недостающий факт.
+
+Создание и удаление `HANDOFF.md` фиксируются отдельными documentation lifecycle commits только после соответствующего пользовательского `+`.
+
+Перед созданием handoff завершённая project-scope работа должна быть committed, pushed и clean.
+
+Protected user-owned dirty files вне текущего scope допустимы, если они явно классифицированы.
+
+В repository snapshot используется одно sync-state поле:
+
+```text
+Remote sync state before handoff
+```
+
+### Git-модель
+
+`Session close base commit` — это `HEAD` непосредственно до transport commit, создающего `HANDOFF.md`.
+
+Transport commit создания handoff ожидаемо делает текущий `HEAD` новее `Session close base commit`.
+
+SHA transport commit внутрь `HANDOFF.md` не записывается.
+
+После transport commit нельзя редактировать handoff только ради обновления base SHA.
+
+### CURRENT_OVERRIDE.md
+
+`CURRENT_OVERRIDE.md` живёт только внутри активной сессии.
+
+Он должен быть закрыт и удалён до создания `HANDOFF.md`.
+
+Он не передаётся новой сессии, не коммитится вместе с handoff, не включается в metadata handoff и не входит в startup/inter-session reading order.
+
+### Границы ответственности
+
+Startup prompt, `START_HERE.md` и `HANDOFF.md` имеют разные зоны ответственности:
+
+* startup prompt задаёт repository identity, working project и bootstrap-вход;
+* `START_HERE.md` задаёт постоянный reading order и общие правила входа;
+* `HANDOFF.md` содержит только dynamic inter-session snapshot конкретной завершённой сессии.
+
+Постоянный spec:
+
+`framework-standardization/docs/HANDOFF_SPEC.md`
+
+### Границы
+
+Это решение не разрешает DB connection, pipeline execution, SQL preview, apply-plan, SQL/apply, `--confirm-apply`, product/category changes, production/cache actions or cache rebuild.
