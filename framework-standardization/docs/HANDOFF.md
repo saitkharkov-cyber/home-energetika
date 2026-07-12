@@ -42,7 +42,7 @@ d7380e1 Allow approved contracts without normalizers
 dc73efc Clarify runtime checks documentation scope
 ```
 
-Exact git status --short before handoff transport commit:
+Exact `git status --short` before handoff transport commit:
 
 ```text
  M framework-standardization/config/runtime/local.dump.example.php
@@ -52,11 +52,13 @@ Project-scope uncommitted changes: none
 
 ## 4. Current Target And Stage
 
-Current target: `dry_run_protection` — выбор канонического target между `attribute_id 47` и `attribute_id 82`
+Current engineering target: `dry_run_protection` — выбор канонического target между `attribute_id 47` и `attribute_id 82`.
 
-Current scope: `root_category_id 11900213`, `hierarchical_category_path_exists`, `language_id 1`
+Immediate operational target: после восстановления контекста и отдельного lifecycle cleanup создать `framework-standardization/docs/SESSION_START_PROMPT_SPEC.md`.
 
-Current stage: `blocked` — точный read-only анализ был разрешён пользовательским `+`, но не выполнен из-за исчерпания лимита Codex
+Current scope for the deferred engineering target: `root_category_id 11900213`, `hierarchical_category_path_exists`, `language_id 1`.
+
+Current stage: `handoff` — инженерный анализ `47/82` не выполнен из-за исчерпания лимита Codex и отложен до завершения отдельной документационной операции.
 
 ## 5. Completed In This Session
 
@@ -73,22 +75,24 @@ Current stage: `blocked` — точный read-only анализ был разр
 * Mapping/alias/exclusion layer ещё не создан; связанные ID для `max_flow` и `voltage` не зарегистрированы формально.
 * Unit contracts, normalized value contracts и normalizer assignments для четырёх канонов ещё не утверждены.
 * Runtime evidence создания таблицы и четырёх регистраций ещё не перенесён в `docs/RUNTIME_CHECKS.md`.
+* Создать `framework-standardization/docs/SESSION_START_PROMPT_SPEC.md` по согласованному GitHub-first шаблону стартового промпта; это отдельная документационная операция, которую нельзя объединять с lifecycle cleanup `HANDOFF.md` или анализом `attribute_id 47/82`.
 
 ## 7. Gates And Safety
 
-| Gate                                      | Authorized | Note                                                                                              |
-| ----------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
-| New user + required before implementation | yes        | Handoff alone never authorizes implementation.                                                    |
-| DB read-only                              | yes        | Существующий closing-session `+` разрешает только точный анализ ID `47/82`; без расширения scope. |
-| Pipeline run                              | no         | Отдельный пользовательский `+` обязателен.                                                        |
-| SQL preview                               | no         | Текущий шаг не включает preview регистрации.                                                      |
-| Apply-plan                                | no         | Не разрешён.                                                                                      |
-| SQL/apply                                 | no         | Не разрешены CREATE/INSERT/UPDATE/DELETE и product data changes.                                  |
-| Production/cache actions                  | no         | Production не подключать; cache не трогать и не перестраивать.                                    |
-| Commit/push for next engineering step     | no         | Требует отдельного пользовательского `+`.                                                         |
-| Handoff deletion commit/push              | no         | Requires separate user + after successful context restoration.                                    |
+| Gate                                      | Authorized | Note                                                                                                                              |
+| ----------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| New user + required before implementation | yes        | Handoff alone never authorizes implementation.                                                                                    |
+| DB read-only                              | no         | Предыдущее разрешение на анализ `47/82` не было реализовано и не переносится через handoff; требуется новый пользовательский `+`. |
+| Pipeline run                              | no         | Отдельный пользовательский `+` обязателен.                                                                                        |
+| SQL preview                               | no         | Не разрешён.                                                                                                                      |
+| Apply-plan                                | no         | Не разрешён.                                                                                                                      |
+| SQL/apply                                 | no         | Не разрешены CREATE/INSERT/UPDATE/DELETE и product data changes.                                                                  |
+| Production/cache actions                  | no         | Production не подключать; cache не трогать и не перестраивать.                                                                    |
+| Commit/push for documentation step        | no         | Создание `SESSION_START_PROMPT_SPEC.md` требует отдельного пользовательского `+`.                                                 |
+| Commit/push for next engineering step     | no         | Анализ `47/82` требует отдельного пользовательского `+`.                                                                          |
+| Handoff deletion commit/push              | no         | Requires separate user `+` after successful context restoration.                                                                  |
 
-Lifecycle cleanup handoff и следующий engineering step требуют разных пользовательских `+`.
+Lifecycle cleanup `HANDOFF.md`, создание `SESSION_START_PROMPT_SPEC.md` и следующий engineering step являются тремя отдельными bounded operations и требуют трёх отдельных пользовательских `+`.
 
 ## 8. Protected Working Tree
 
@@ -113,15 +117,19 @@ Lifecycle cleanup handoff и следующий engineering step требуют 
 
 ## 11. Next Bounded Step
 
-Next bounded step: выполнить ранее разрешённый read-only анализ точных дублей «Защита от сухого хода» — `attribute_id 47` и `82`.
+Next bounded step: после успешного восстановления контекста и отдельного lifecycle cleanup создать `framework-standardization/docs/SESSION_START_PROMPT_SPEC.md`.
 
-Expected result: точные имена/группы, охват строками и непустыми значениями, пересечение товарных множеств, duplicate-row counters и conflict checks; без выбора канона.
+Expected result: постоянный GitHub-first шаблон запуска новой ChatGPT-сессии, включающий проверку HEAD, чтение `HANDOFF.md`, `HANDOFF_SPEC.md`, `START_HERE.md`, восстановление gates и обязательную остановку до отдельного пользовательского `+`.
 
-Allowed scope: `prod.snapshot.local.php`, только `SELECT`/`SHOW CREATE TABLE`/`information_schema`, временные runner/report только в `%TEMP%`.
+Allowed scope: создать только `framework-standardization/docs/SESSION_START_PROMPT_SPEC.md` по согласованному в завершаемой сессии содержимому; выполнить документационные проверки.
 
-Out of scope: DB writes, SQL preview, canonical selection, alias/exclusion decisions, raw values output, pipeline/apply, product changes, repository changes, commit и push.
+Out of scope: Codex engineering work, DB connection, анализ `attribute_id 47/82`, pipeline, SQL preview/apply, изменение runtime config и других файлов.
 
-New explicit user + required before implementation: yes
+New explicit user `+` required before implementation: yes
+
+Следующий engineering step после отдельного завершения этой документационной операции: read-only анализ дублей «Защита от сухого хода» — `attribute_id 47` и `82`.
+
+Для этого engineering step потребуется ещё один отдельный пользовательский `+`.
 
 ## 12. Actions After Reading This Handoff
 
@@ -129,9 +137,11 @@ New explicit user + required before implementation: yes
 2. Считать свежий git state фактом.
 3. Найти `Session close base commit` в истории текущего `HEAD`.
 4. Классифицировать изменения после base commit: handoff transport commit, user-owned changes, confirmed new changes, blocking inconsistency.
-5. Восстановить target, stage, gates, protected changes и один next bounded step.
+5. Восстановить engineering target, immediate operational target, current stage, gates, protected changes и один next bounded step.
 6. При blocking inconsistency остановить работу, не обновлять и не удалять handoff, запросить пользователя.
 7. После успешного восстановления подтвердить контекст и сообщить, что handoff готов к lifecycle cleanup.
 8. Не менять файлы, не делать commit и не выполнять push без отдельного пользовательского `+`.
-9. После отдельного `+` выполнить только bounded lifecycle cleanup handoff: удалить handoff, отдельный commit, push.
-10. Implementation следующего engineering step требует отдельного `+`.
+9. После отдельного `+` выполнить только bounded lifecycle cleanup handoff: удалить handoff, создать отдельный commit и выполнить push.
+10. Создание `SESSION_START_PROMPT_SPEC.md` требует следующего отдельного пользовательского `+`.
+11. Read-only анализ `attribute_id 47/82` требует ещё одного отдельного пользовательского `+`.
+12. Не объединять lifecycle cleanup, документационный шаг и engineering step в одну операцию.
