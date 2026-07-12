@@ -93,7 +93,7 @@ function cro_voltage_decision()
         'characteristic_key' => 'voltage',
         'decision_status' => 'approved',
         'canonical_attribute_id' => 15,
-        'included_alias_attribute_ids' => array(57, 79, 99, 118, 170),
+        'included_alias_attribute_ids' => array(57),
         'excluded_attribute_ids' => array(73),
         'normalizer_key' => 'voltage',
         'provenance' => 'framework-standardization/docs/LEGACY_DECISIONS.md',

@@ -73,7 +73,7 @@ function cr_voltage_decision()
         'characteristic_key' => 'voltage',
         'decision_status' => 'approved',
         'canonical_attribute_id' => 15,
-        'included_alias_attribute_ids' => array(57, 79, 99, 118, 170),
+        'included_alias_attribute_ids' => array(57),
         'excluded_attribute_ids' => array(73),
         'normalizer_key' => 'voltage',
         'provenance' => 'framework-standardization/docs/LEGACY_DECISIONS.md',
@@ -188,6 +188,35 @@ $result = $builder->build(cr_scope(), array(
 $row = cr_find_row($result, 15);
 cr_check_true('unknown_normalizer_required', cr_has_marker($row, 'normalizer', 'normalizer_required'));
 cr_check_true('unknown_normalizer_without_read_only_ready', !cr_has_marker($row, 'processing_review', 'read_only_ready'));
+
+$approvedWithoutNormalizer = array(
+    'characteristic_key' => 'pump_diameter',
+    'decision_status' => 'approved',
+    'canonical_attribute_id' => 44,
+    'included_alias_attribute_ids' => array(),
+    'excluded_attribute_ids' => array(),
+    'normalizer_key' => '',
+    'provenance' => 'framework-standardization/docs/LEGACY_DECISIONS.md',
+);
+$result = $builder->build(cr_scope(), array(
+    cr_discovery_row(44, 'Диаметр насоса', 'Параметры насоса', 50, 50),
+), array($approvedWithoutNormalizer));
+$row = cr_find_row($result, 44);
+cr_check_true('approved_without_normalizer_contract_approved', cr_has_marker($row, 'discovery_contract', 'contract_approved'));
+cr_check_true('approved_without_normalizer_required', cr_has_marker($row, 'normalizer', 'normalizer_required'));
+cr_check_true('approved_without_normalizer_without_ready', !cr_has_marker($row, 'normalizer', 'normalizer_ready'));
+cr_check_true('approved_without_normalizer_without_read_only_ready', !cr_has_marker($row, 'processing_review', 'read_only_ready'));
+cr_check_true('approved_without_normalizer_not_blocked', !cr_has_marker($row, 'discovery_contract', 'blocked') && !cr_has_marker($row, 'normalizer', 'blocked') && !cr_has_marker($row, 'processing_review', 'blocked'));
+cr_check_true('approved_without_normalizer_summary', $result['summary'] === array(
+    'total_discovered' => 1,
+    'contract_required' => 0,
+    'contract_draft' => 0,
+    'contract_approved' => 1,
+    'normalizer_required' => 1,
+    'normalizer_ready' => 0,
+    'read_only_ready' => 0,
+    'blocked' => 0,
+));
 
 $result = $builder->build(cr_scope(), array(
     cr_discovery_row(73, 'Напряжение', 'Параметры котла', 2, 2),

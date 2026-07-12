@@ -179,9 +179,6 @@ final class CharacteristicRegistryBuilder
         }
 
         $normalizerKey = trim($decision['normalizer_key']);
-        if ($decisionStatus === 'approved' && $normalizerKey === '') {
-            throw new \InvalidArgumentException('characteristic_registry_legacy_normalizer_key_required');
-        }
 
         if (!isset($decision['provenance']) || !is_string($decision['provenance']) || trim($decision['provenance']) === '') {
             throw new \InvalidArgumentException('characteristic_registry_legacy_provenance_required');
