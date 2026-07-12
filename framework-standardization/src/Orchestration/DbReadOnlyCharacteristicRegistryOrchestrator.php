@@ -21,7 +21,9 @@ final class DbReadOnlyCharacteristicRegistryOrchestrator
     public function build(array $scope, array $legacyDecisions)
     {
         $discoveredRows = $this->discovery->discover($scope);
+        $result = $this->registryBuilder->build($scope, $discoveredRows, $legacyDecisions);
+        $result['safety']['db_connected'] = 1;
 
-        return $this->registryBuilder->build($scope, $discoveredRows, $legacyDecisions);
+        return $result;
     }
 }

@@ -206,9 +206,9 @@ cro_check_true('summary_counts', $result['summary'] === array(
     'blocked' => 0,
 ));
 
-cro_check_true('safety_markers_unchanged', $result['safety'] === array(
+cro_check_true('orchestrator_marks_db_connected', $result['safety'] === array(
     'read_only' => 1,
-    'db_connected' => 0,
+    'db_connected' => 1,
     'pipeline_executed' => 0,
     'normalization_performed' => 0,
     'sql_generated' => 0,
@@ -218,6 +218,7 @@ cro_check_true('safety_markers_unchanged', $result['safety'] === array(
     'production_touched' => 0,
     'cache_rebuild_performed' => 0,
 ));
+cro_check_true('orchestrator_keeps_mutation_safety_markers_zero', $result['safety']['pipeline_executed'] === 0 && $result['safety']['normalization_performed'] === 0 && $result['safety']['sql_generated'] === 0 && $result['safety']['apply_plan_created'] === 0 && $result['safety']['apply_performed'] === 0 && $result['safety']['product_data_changed'] === 0 && $result['safety']['production_touched'] === 0 && $result['safety']['cache_rebuild_performed'] === 0);
 cro_check_true('no_pipeline_normalization_sql_apply_product_or_cache_fields', !cro_result_contains_forbidden_key($result));
 
 $emptyFixture = cro_orchestrator(array());
@@ -233,6 +234,7 @@ cro_check_true('empty_discovery_registry', $emptyResult['rows'] === array() && $
     'read_only_ready' => 0,
     'blocked' => 0,
 ));
+cro_check_true('empty_discovery_marks_db_connected', $emptyResult['safety']['db_connected'] === 1);
 cro_check_true('empty_safety_markers_unchanged', $emptyResult['safety'] === $result['safety']);
 
 echo "characteristic_registry_orchestrator_checks_completed: ok\n";
