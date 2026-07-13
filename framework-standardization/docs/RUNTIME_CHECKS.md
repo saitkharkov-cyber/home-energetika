@@ -5897,3 +5897,86 @@ Implementation commit сам по себе не активирует normalizer.
 ### Вывод
 
 Реализация соответствует approved policy; PHP 5.6 syntax и static checks прошли. Изолированный normalizer технически реализован, но пока не доступен registry, contract или pipeline. Этот runtime check не разрешает DB access, catalog normalization, SQL/apply или production/cache actions.
+
+## 13-07-2026 — BooleanYesNoNormalizer registry registration and static checks
+
+### Контекст
+
+```text
+target_key: dry_run_protection
+normalizer_key: boolean_yes_no
+class: FrameworkStandardization\Normalizer\BooleanYesNoNormalizer
+registry: FrameworkStandardization\Normalizer\NormalizerRegistry
+registry_commit: e0bcd3a Register boolean yes-no normalizer
+runtime_mode: isolated_registry_static_check
+PHP compatibility: PHP 5.6
+```
+
+`boolean_yes_no` явно зарегистрирован в `NormalizerRegistry::createDefault()`. Существующие registrations `simple_meters` и `voltage` сохранены; normalizer теперь можно получить из default registry по ключу. Регистрация не активировала machine-readable contract и не запускала pipeline.
+
+### Зарегистрированное поведение
+
+Подтверждено: `has('simple_meters') === true`, `has('voltage') === true` и `has('boolean_yes_no') === true`; каждый ключ возвращает normalizer правильного класса. Повторный `get('boolean_yes_no')` возвращает тот же экземпляр, а boundary trim ключа работает для `has()` и `get()`.
+
+Неизвестный ключ по-прежнему выбрасывает `InvalidArgumentException` с сообщением `pipeline_normalizer_unknown`. Полученный через registry `BooleanYesNoNormalizer` корректно обрабатывает `Да`: `status = normalized`, `canonical_value = Да`, `value_type = boolean_enum`; повторный вызов детерминирован. Registry не выполняет DB access, contract loading, filesystem discovery или pipeline execution.
+
+### Syntax checks
+
+```text
+C:\php56\php.exe -l framework-standardization/src/Normalizer/NormalizerRegistry.php
+No syntax errors detected in framework-standardization/src/Normalizer/NormalizerRegistry.php
+
+C:\php56\php.exe -l framework-standardization/tests/boolean_yes_no_normalizer_registry_static_checks.php
+No syntax errors detected in framework-standardization/tests/boolean_yes_no_normalizer_registry_static_checks.php
+```
+
+### Static checks
+
+```text
+C:\php56\php.exe framework-standardization/tests/boolean_yes_no_normalizer_registry_static_checks.php
+boolean_yes_no_normalizer_registry_static_checks: ok
+
+C:\php56\php.exe framework-standardization/tests/boolean_yes_no_normalizer_static_checks.php
+boolean_yes_no_normalizer_static_checks: ok
+```
+
+Registry integration coverage подтверждает registrations, class identity, key trimming, unknown-key behavior, вызов normalizer через registry, детерминизм и source-level safety. Отдельный normalizer static check повторно подтверждает внутреннюю логику normalizer.
+
+### Safety markers
+
+```text
+normalizer_implemented: 1
+normalizer_registered: 1
+registry_changed: 1
+registry_static_checks_passed: 1
+normalizer_static_checks_passed: 1
+php56_syntax_ok: 1
+contract_changed: 0
+contract_activated: 0
+pipeline_wired: 0
+pipeline_executed: 0
+db_accessed: 0
+normalization_executed_on_catalog: 0
+sql_generated: 0
+apply_plan_created: 0
+apply_performed: 0
+product_data_changed: 0
+production_touched: 0
+cache_rebuild_performed: 0
+```
+
+### Contract and integration boundary
+
+```text
+normalizer_key = ''
+normalizer_ready = false
+processing_review_status = 'not_ready'
+read_only_ready = false
+apply_ready = false
+```
+
+Регистрация делает normalizer доступным default registry. Пустой `normalizer_key` означает, что contract пока не запрашивает этот normalizer; registry registration не равна contract activation. Pipeline не подключён, обработка товарных данных не выполнялась. Contract activation требует отдельного explicit bounded step; SQL/apply остаётся отдельным gate.
+
+### Вывод
+
+Registry registration успешно реализована; PHP 5.6 syntax и оба static-check набора прошли. Normalizer доступен через default registry, но contract и pipeline остаются неактивными. Этот runtime check не разрешает DB access, catalog normalization, SQL/apply либо production/cache actions.
