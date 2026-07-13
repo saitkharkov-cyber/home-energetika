@@ -24,25 +24,11 @@
 
 ## 2. Границы ответственности
 
-Startup prompt отвечает только за bootstrap новой сессии:
+Общие роли документов определены только в `docs/DOCUMENTATION_BOUNDARIES.md`.
 
-* указать repository identity;
-* указать working project;
-* направить к `START_HERE.md`;
-* поручить прочитать `HANDOFF.md`, если он существует;
-* запретить implementation и любые file changes без отдельного пользовательского `+`.
-
-`START_HERE.md` отвечает за постоянный общий порядок входа в проект, общий reading order и правила восстановления контекста.
+Эта спецификация определяет только структуру, содержание, validation и lifecycle временного `HANDOFF.md`.
 
 `HANDOFF.md` отвечает только за dynamic inter-session snapshot конкретной завершённой сессии. Он не authorizes file changes, commit или push.
-
-`DECISIONS.md` отвечает за постоянные архитектурные и процессные решения.
-
-`RUNTIME_CHECKS.md` отвечает за проверенные runtime/manual evidence.
-
-Инженерные specs отвечают за устойчивые границы конкретных workflow, services, contracts или tools.
-
-`CURRENT_OVERRIDE.md` отвечает только за временную оперативную коррективу внутри одной активной сессии и не участвует в межсессионной передаче.
 
 ## 3. Lifecycle HANDOFF.md
 
@@ -282,45 +268,7 @@ Lifecycle cleanup handoff и следующий engineering step требуют 
 * инструкции обновить прочитанный handoff;
 * автоматическое разрешение удалить handoff без отдельного `+`.
 
-## 13. Startup prompt
-
-Рекомендуемый startup prompt:
-
-```text
-Подключись к GitHub-репозиторию saitkharkov-cyber/home-energetika.
-
-Рабочий проект:
-framework-standardization
-
-Сначала прочитай:
-framework-standardization/docs/START_HERE.md
-
-Дальше следуй порядку чтения документов, указанному в START_HERE.md.
-
-Если существует:
-framework-standardization/docs/HANDOFF.md
-
-обязательно прочитай его как временную оперативную передачу контекста предыдущей сессии.
-
-Если HANDOFF.md существует, после чтения документации восстанови:
-- фактическое состояние репозитория;
-- Session close base commit;
-- текущий target;
-- текущий stage;
-- действующие gates;
-- защищённые пользовательские изменения;
-- один следующий bounded step.
-
-Если HANDOFF.md отсутствует, сообщи, что межсессионная оперативная передача отсутствует, и продолжай только по постоянной документации. Не придумывай handoff-specific состояние.
-
-Не начинай implementation и не меняй файлы без отдельного пользовательского +.
-
-Если HANDOFF.md существует и контекст успешно восстановлен, сообщи, что файл выполнил функцию передачи и готов к lifecycle cleanup. Не удаляй файл, не делай commit и не выполняй push без отдельного пользовательского +.
-```
-
-Startup prompt не должен содержать динамический status проекта.
-
-## 14. Exact HANDOFF.md template
+## 13. Exact HANDOFF.md template
 
 ````markdown
 # HANDOFF — <project> / <short session topic>
@@ -449,7 +397,7 @@ New explicit user + required before implementation: yes
 10. Implementation следующего engineering step требует отдельного `+`.
 ````
 
-## 15. Validation checklist
+## 14. Validation checklist
 
 Перед созданием `HANDOFF.md` проверить:
 
@@ -489,7 +437,7 @@ New explicit user + required before implementation: yes
 * exact template не превышает 160 строк;
 * заполненный файл не превышает 180 строк.
 
-## 16. Кто формирует завершающий HANDOFF.md
+## 15. Кто формирует завершающий HANDOFF.md
 
 Смысловое содержание завершающего `HANDOFF.md` формирует ChatGPT, ведущий текущую рабочую сессию.
 

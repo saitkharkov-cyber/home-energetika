@@ -6,11 +6,14 @@
 
 1. `framework-standardization/glossary/!_README.md`
 2. `framework-standardization/docs/CURRENT_OVERRIDE.md`
-3. `framework-standardization/docs/HANDOFF.md`
-4. `framework-standardization/docs/HANDOFF_SPEC.md`
-5. `framework-standardization/docs/DECISIONS.md`
-6. `framework-standardization/docs/RUNTIME_CHECKS.md`
-7. `framework-standardization/docs/LEGACY_DECISIONS.md`
+3. `framework-standardization/docs/SESSION_START_PROMPT.md`
+4. `framework-standardization/docs/SESSION_START_PROMPT_SPEC.md`
+5. `framework-standardization/docs/START_HERE.md`
+6. `framework-standardization/docs/HANDOFF.md`
+7. `framework-standardization/docs/HANDOFF_SPEC.md`
+8. `framework-standardization/docs/DECISIONS.md`
+9. `framework-standardization/docs/RUNTIME_CHECKS.md`
+10. `framework-standardization/docs/LEGACY_DECISIONS.md`
 
 `CURRENT_OVERRIDE.md` является необязательным внутренним документом активной сессии и обычно отсутствует.
 
@@ -27,6 +30,39 @@
 Временная оперативная корректива может быть зафиксирована в `CURRENT_OVERRIDE.md`, если она существенно меняет текущую работу до обновления постоянных документов.
 
 ## 2. Источники правды
+
+### Каноническое разделение startup и handoff
+
+Этот документ является единственным источником истины о ролях и границах ответственности документов ниже.
+
+| Документ | Тип | Единственная функция | За что не отвечает |
+| --- | --- | --- | --- |
+| `docs/SESSION_START_PROMPT.md` | постоянный copy-ready prompt | запускает новый ChatGPT-чат и направляет его к `START_HERE.md` | startup process, dynamic state и handoff lifecycle |
+| `docs/SESSION_START_PROMPT_SPEC.md` | постоянная спецификация | определяет форму `SESSION_START_PROMPT.md` | startup process, структура `HANDOFF.md` и dynamic state |
+| `docs/START_HERE.md` | постоянный протокол | определяет startup process новой ChatGPT-сессии | copy-ready prompt и dynamic state последней сессии |
+| `docs/HANDOFF.md` | временный dynamic snapshot | передаёт состояние одной завершённой ChatGPT-сессии | постоянный startup process и полная проектная документация |
+| `docs/HANDOFF_SPEC.md` | постоянная спецификация | определяет форму `HANDOFF.md` | startup prompt boundaries и общие роли документов |
+
+Каноническая цепочка:
+
+```text
+пользователь вставляет SESSION_START_PROMPT.md
+новый ChatGPT читает START_HERE.md
+START_HERE.md задаёт startup flow
+ChatGPT читает HANDOFF.md, если он существует
+ChatGPT сверяет snapshot со свежим Git-state
+ChatGPT отчитывается и останавливается
+```
+
+Жёсткое правило против дублирования:
+
+```text
+SESSION_START_PROMPT.md запускает процесс.
+START_HERE.md определяет постоянный startup process.
+HANDOFF.md передаёт временное состояние.
+Спецификации определяют форму своих артефактов.
+Общие роли определяет DOCUMENTATION_BOUNDARIES.md.
+```
 
 ### `glossary/!_README.md`
 
@@ -262,6 +298,10 @@ Cleanup handoff требует отдельного пользовательск
 
 `HANDOFF_SPEC.md` — постоянный process/spec документ.
 
+Общие роли документов определены только в `docs/DOCUMENTATION_BOUNDARIES.md`.
+
+`HANDOFF_SPEC.md` не отвечает за startup prompt boundaries.
+
 Он определяет:
 
 * назначение `HANDOFF.md`;
@@ -270,7 +310,6 @@ Cleanup handoff требует отдельного пользовательск
 * git-модель `Session close base commit`;
 * exact template;
 * validation checklist;
-* startup prompt boundaries.
 
 `HANDOFF_SPEC.md` не содержит текущий project status, текущий target, текущий next step или runtime evidence.
 
