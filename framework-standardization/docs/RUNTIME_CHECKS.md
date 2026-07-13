@@ -5980,3 +5980,125 @@ apply_ready = false
 ### Вывод
 
 Registry registration успешно реализована; PHP 5.6 syntax и оба static-check набора прошли. Normalizer доступен через default registry, но contract и pipeline остаются неактивными. Этот runtime check не разрешает DB access, catalog normalization, SQL/apply либо production/cache actions.
+
+## 13-07-2026 — Generic attribute contract readiness auditor
+
+### Контекст
+
+```text
+component: generic_attribute_contract_readiness_auditor
+service: FrameworkStandardization\Contract\AttributeContractReadinessAuditor
+cli: framework-standardization/bin/attribute-contract-readiness-audit.php
+static_checks: framework-standardization/tests/attribute_contract_readiness_auditor_static_checks.php
+contracts_directory: framework-standardization/config/attribute-contracts
+contract_activation_commit: bc561d0 Activate dry-run protection normalizer contract
+auditor_commit: dcdee0c Add attribute contract readiness auditor
+runtime_mode: filesystem_readonly_contract_audit
+PHP compatibility: PHP 5.6
+```
+
+Auditor принимает explicit contracts directory, сканирует только `*.php`, сортирует paths детерминированно, загружает каждый contract bounded `require` и использует `NormalizerRegistry::createDefault()`. Он допускает отсутствующие optional readiness fields, вычисляет `ready`, `not_ready` и `invalid`, собирает issues по каждой строке и не прекращает batch из-за одного `not_ready` или malformed contract. Ничего автоматически не исправляется и не активируется.
+
+Существующий строгий `AttributeContractLoader` предназначен для apply/runtime schema; auditor решает другую задачу - tolerant batch readiness inventory и не создаёт новую contract architecture.
+
+### Syntax checks
+
+```text
+C:\php56\php.exe -l framework-standardization/src/Contract/AttributeContractReadinessAuditor.php
+No syntax errors detected in framework-standardization/src/Contract/AttributeContractReadinessAuditor.php
+C:\php56\php.exe -l framework-standardization/bin/attribute-contract-readiness-audit.php
+No syntax errors detected in framework-standardization/bin/attribute-contract-readiness-audit.php
+C:\php56\php.exe -l framework-standardization/tests/attribute_contract_readiness_auditor_static_checks.php
+No syntax errors detected in framework-standardization/tests/attribute_contract_readiness_auditor_static_checks.php
+```
+
+### Static and regression checks
+
+```text
+C:\php56\php.exe framework-standardization/tests/attribute_contract_readiness_auditor_static_checks.php
+attribute_contract_readiness_auditor_static_checks: ok
+C:\php56\php.exe framework-standardization/tests/boolean_yes_no_normalizer_static_checks.php
+boolean_yes_no_normalizer_static_checks: ok
+C:\php56\php.exe framework-standardization/tests/boolean_yes_no_normalizer_registry_static_checks.php
+boolean_yes_no_normalizer_registry_static_checks: ok
+C:\php56\php.exe framework-standardization/tests/dry_run_protection_contract_activation_static_checks.php
+dry_run_protection_contract_activation_static_checks: ok
+```
+
+Подтверждено покрытие registered ready normalizer, approved contract без normalizer readiness, unknown normalizer key, normalizer-ready без registered normalizer, read-only-ready без normalizer readiness, apply-ready при readiness issues, invalid return type, отсутствующий `target_key`, deterministic ordering, summary counts, batch continuation, отсутствие запрещённых result fields и regression по реальным `dry_run_protection` и `max_head` contracts.
+
+### Реальный batch audit
+
+```text
+C:\php56\php.exe framework-standardization/bin/attribute-contract-readiness-audit.php framework-standardization/config/attribute-contracts
+attribute_contract_readiness_audit
+contracts_directory: framework-standardization/config/attribute-contracts
+total_contracts: 2
+ready_contracts: 1
+not_ready_contracts: 1
+invalid_contracts: 0
+contracts_with_issues: 0
+
+dry_run_protection
+contract_file: framework-standardization/config/attribute-contracts\dry_run_protection_11900213.php
+status: ready
+normalizer_key: boolean_yes_no
+normalizer_registered: 1
+declared_normalizer_ready: true
+declared_read_only_ready: true
+declared_apply_ready: false
+issues: none
+
+max_head
+contract_file: framework-standardization/config/attribute-contracts\max_head_11900213.php
+status: not_ready
+normalizer_key: simple_meters
+normalizer_registered: 1
+declared_normalizer_ready: NULL
+declared_read_only_ready: NULL
+declared_apply_ready: NULL
+issues: none
+attribute_contract_readiness_audit: ok
+```
+
+### Интерпретация
+
+`dry_run_protection` технически достиг read-only readiness, а `apply_ready` остаётся закрытым. `max_head` зарегистрирован в registry через `simple_meters`, но текущий contract не содержит readiness declarations; поэтому `max_head = not_ready` является инвентаризационным состоянием, а не malformed contract и не technical issue. `contracts_with_issues = 0`. Auditor не принимает human semantic decisions, не активирует `max_head` и не дописывает ему поля.
+
+### Safety markers
+
+```text
+auditor_implemented: 1
+auditor_cli_available: 1
+auditor_static_checks_passed: 1
+php56_syntax_ok: 1
+contracts_scanned: 2
+ready_contracts: 1
+not_ready_contracts: 1
+invalid_contracts: 0
+contracts_with_issues: 0
+filesystem_readonly: 1
+contracts_changed: 0
+normalizers_changed: 0
+registry_changed: 0
+pipeline_wired: 0
+pipeline_executed: 0
+db_accessed: 0
+normalization_executed_on_catalog: 0
+sql_generated: 0
+apply_plan_created: 0
+apply_performed: 0
+product_data_changed: 0
+production_touched: 0
+cache_rebuild_performed: 0
+```
+
+### Boundary
+
+Auditor читает PHP-contract files только из explicit directory; filesystem scan ограничен `*.php` внутри него. DB не используется, raw-values inventory и pipeline не запускаются, catalog normalization не выполняется, SQL и apply plan не создаются, contracts автоматически не изменяются, readiness автоматически не активируется, production/cache actions отсутствуют.
+
+Human-gated остаются смысл характеристики, canonical ID, aliases и exclusions, unit/domain policy, выбор normalizer policy, изменение readiness declarations, apply и production/cache gate.
+
+### Вывод
+
+Generic auditor успешно проверяет все существующие machine-readable attribute contracts одним read-only запуском и формирует детерминированную картину technical readiness. На момент проверки один contract имеет статус `ready`, один `not_ready`, malformed contracts и technical issues отсутствуют. Этот runtime check не разрешает DB access, pipeline execution, normalization, SQL/apply, product changes или production/cache actions.
