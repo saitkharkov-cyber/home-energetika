@@ -22,8 +22,8 @@ return array(
     'processing_review_status' => 'read_only_ready',
     'read_only_ready' => true,
     'apply_ready' => false,
-    'migration_applied' => false,
-    'alias_cleanup_applied' => false,
+    'migration_applied' => true,
+    'alias_cleanup_applied' => true,
 
     'source_alias_policy' => 'preserve_until_cleanup',
     'unresolved_policy' => 'exclude',
@@ -32,6 +32,20 @@ return array(
     'confirmation_required' => true,
 
     'evidence' => array(
+        'evidence_source' => 'controlled_local_dump_post_cleanup',
+        'scope_distinct_products' => 2467,
+        'canonical_attribute_47' => array(
+            'distinct_products' => 11,
+            'values' => array('Да' => 3, 'Нет' => 8),
+        ),
+        'alias_attribute_82' => array(
+            'distinct_products' => 0,
+            'values' => array('Да' => 0, 'Нет' => 0),
+        ),
+        'products_with_both_attributes' => 0,
+    ),
+
+    'pre_migration_evidence' => array(
         'evidence_source' => 'controlled_local_dump_read_only',
         'scope_distinct_products' => 2467,
         'canonical_attribute_47' => array(
@@ -45,10 +59,30 @@ return array(
         'products_with_both_attributes' => 0,
         'observed_alias_rows_before_migration' => 1,
     ),
+    'controlled_local_result' => array(
+        'runtime_key' => 'controlled_local_dump',
+        'completion_date' => '2026-07-13',
+        'product_id' => 8197,
+        'language_id' => 1,
+        'source_attribute_id' => 82,
+        'canonical_attribute_id' => 47,
+        'canonical_value' => 'Да',
+        'canonical_apply_first_action' => 'inserted',
+        'canonical_apply_idempotency_action' => 'already_applied',
+        'alias_cleanup_first_action' => 'deleted',
+        'alias_cleanup_idempotency_action' => 'already_cleaned',
+        'canonical_distinct_products_after' => 11,
+        'alias_rows_after' => 0,
+        'canonical_copy_preserved' => true,
+        'non_target_rows_unchanged' => true,
+        'transaction_committed' => true,
+        'production_touched' => false,
+        'cache_rebuild_performed' => false,
+    ),
 
-    'expected_canonical_already_applied_count' => 10,
+    'expected_canonical_already_applied_count' => 11,
     'expected_canonical_update_count_after_cleanup' => 0,
-    'expected_canonical_insert_count_after_cleanup' => 1,
+    'expected_canonical_insert_count_after_cleanup' => 0,
     'expected_unresolved_excluded_count' => 0,
     'expected_alias_total_rows_after_cleanup' => 0,
     'expected_alias_safely_removable_after_cleanup' => 0,

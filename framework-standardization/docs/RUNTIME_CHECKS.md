@@ -6102,3 +6102,13 @@ Human-gated остаются смысл характеристики, canonical 
 ### Вывод
 
 Generic auditor успешно проверяет все существующие machine-readable attribute contracts одним read-only запуском и формирует детерминированную картину technical readiness. На момент проверки один contract имеет статус `ready`, один `not_ready`, malformed contracts и technical issues отсутствуют. Этот runtime check не разрешает DB access, pipeline execution, normalization, SQL/apply, product changes или production/cache actions.
+
+## 13-07-2026 — Dry-run protection controlled-local canonical migration and alias cleanup
+
+Пользователь выполнил отдельными bounded controlled-local scripts canonical apply и alias cleanup для `product_id: 8197`, `language_id: 1`, `82 -> 47`, значение `Да`. Canonical registry был active и locked.
+
+Исходный снимок: 10 canonical rows и 1 alias row. Первый canonical apply: `inserted`; повторный: `already_applied`. Первый alias cleanup: `deleted`; повторный: `already_cleaned`.
+
+Финальное controlled-local состояние: canonical distinct products 11 (`Да: 3`, `Нет: 8`), alias rows 0, products with both 0. Canonical copy preserved, non-target rows unchanged, transaction committed, production untouched и cache rebuild не выполнялся.
+
+Contract отражает post-cleanup evidence и хранит pre-migration evidence отдельно. `apply_ready` остаётся `false`; allowed operations остаются SELECT-only; generic pipeline не выполнял migration или cleanup и production apply не разрешён.
