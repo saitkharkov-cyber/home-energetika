@@ -1,0 +1,113 @@
+<?php
+
+return array(
+    'target_key' => 'dry_run_protection',
+    'target_meaning' => 'защита от сухого хода',
+    'category_scope_id' => 11900213,
+    'scope_mode' => 'hierarchical_category_path_exists',
+    'canonical_attribute_id' => 47,
+    'canonical_name' => 'Защита от сухого хода',
+    'canonical_attribute_group' => 'Прочие',
+    'alias_attribute_ids' => array(82),
+    'excluded_attribute_ids' => array(),
+    'migration_direction' => '82 -> 47',
+    'canonical_unit' => '',
+    'value_type' => 'boolean_enum',
+    'allowed_canonical_values' => array('Да', 'Нет'),
+    'contract_status' => 'approved',
+    'contract_approved' => true,
+    'normalizer_key' => '',
+    'normalizer_status' => 'required',
+    'normalizer_ready' => false,
+    'processing_review_status' => 'not_ready',
+    'read_only_ready' => false,
+    'apply_ready' => false,
+    'migration_applied' => false,
+    'alias_cleanup_applied' => false,
+
+    'source_alias_policy' => 'preserve_until_cleanup',
+    'unresolved_policy' => 'exclude',
+    'canonical_apply_policy' => 'blocked_until_normalizer_ready_and_explicit_gate',
+    'alias_cleanup_policy' => 'blocked_until_canonical_apply_verified_and_explicit_gate',
+    'confirmation_required' => true,
+
+    'evidence' => array(
+        'evidence_source' => 'controlled_local_dump_read_only',
+        'scope_distinct_products' => 2467,
+        'canonical_attribute_47' => array(
+            'distinct_products' => 10,
+            'values' => array('Да' => 2, 'Нет' => 8),
+        ),
+        'alias_attribute_82' => array(
+            'distinct_products' => 1,
+            'values' => array('Да' => 1),
+        ),
+        'products_with_both_attributes' => 0,
+        'observed_alias_rows_before_migration' => 1,
+    ),
+
+    'expected_canonical_already_applied_count' => 10,
+    'expected_canonical_update_count_after_cleanup' => 0,
+    'expected_canonical_insert_count_after_cleanup' => 1,
+    'expected_unresolved_excluded_count' => 0,
+    'expected_alias_total_rows_after_cleanup' => 0,
+    'expected_alias_safely_removable_after_cleanup' => 0,
+    'expected_alias_not_removable_after_cleanup' => 0,
+    'expected_alias_unresolved_or_excluded_after_cleanup' => 0,
+
+    'allowed_table' => 'oc_product_attribute',
+    'allowed_columns' => array(
+        'product_id',
+        'attribute_id',
+        'language_id',
+        'text',
+    ),
+    'canonical_apply_allowed_operations' => array('SELECT'),
+    'alias_cleanup_allowed_operations' => array('SELECT'),
+
+    'forbidden_operations' => array(
+        'INSERT',
+        'UPDATE',
+        'DELETE',
+        'REPLACE',
+        'ALTER',
+        'DROP',
+        'TRUNCATE',
+        'CREATE',
+        'UPDATE oc_attribute',
+        'UPDATE oc_attribute_description',
+        'DELETE canonical rows',
+        'UPDATE alias rows',
+        'auto-canonical selection',
+        'auto-merge',
+        'SQL generation',
+        'SQL apply',
+        'production/cache actions',
+        'cache rebuild',
+    ),
+
+    'runtime_allowlist' => array(
+        'controlled_local_dump' => array(
+            'runtime_key' => 'controlled_local_dump',
+            'runtime_mode' => 'db_readonly',
+            'host' => '127.0.1.19',
+            'dbname' => 'he_framework_local_dump',
+            'db_prefix' => 'oc_',
+            'allow_confirm_apply' => false,
+            'production_ready' => false,
+            'cache_rebuild_allowed' => false,
+        ),
+    ),
+
+    'transport_allowed' => array(
+        'cli' => true,
+        'web_admin' => false,
+    ),
+    'web_admin_enable_requires_separate_gate' => true,
+
+    'references' => array(
+        'decisions' => 'framework-standardization/docs/DECISIONS.md',
+        'generic_engine_spec' => 'framework-standardization/docs/GENERIC_ATTRIBUTE_WORKFLOW_ENGINE_IMPLEMENTATION_SPEC.md',
+        'runtime_checks' => 'framework-standardization/docs/RUNTIME_CHECKS.md',
+    ),
+);
