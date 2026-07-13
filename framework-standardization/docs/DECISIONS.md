@@ -4570,3 +4570,68 @@ Startup prompt, `START_HERE.md` и `HANDOFF.md` имеют разные зоны
 ### Границы
 
 Это решение не разрешает DB connection, pipeline execution, SQL preview, apply-plan, SQL/apply, `--confirm-apply`, product/category changes, production/cache actions or cache rebuild.
+
+## 2026-07-13 - Dry-run protection canonical contract approved for scope 11900213
+
+### Решение
+
+Это framework human-approved characteristic-level решение для характеристики `Защита от сухого хода` в scope `11900213` с mode `hierarchical_category_path_exists`.
+
+Утверждён contract:
+
+* characteristic key: `dry_run_protection`;
+* characteristic meaning: `защита от сухого хода`;
+* canonical attribute: `47` — `Защита от сухого хода` из группы `Прочие`;
+* included alias: `82` — migration direction `82 -> 47`;
+* excluded attribute IDs: отсутствуют;
+* canonical unit: отсутствует;
+* value type: логическое перечисление;
+* allowed canonical values: `Да`, `Нет`;
+* contract status: approved;
+* normalizer status: required, но не ready; normalizer на этом шаге не утверждён.
+
+### Evidence
+
+Read-only evidence получен из controlled local dump. Scope содержит `2467` distinct products.
+
+* `47` имеет имя без завершающего пробела, группу `Прочие`, `10` distinct products и raw values: `Нет` — 8, `Да` — 2;
+* `82` имеет то же имя с завершающим пробелом, группу `Прочие`, `1` distinct product и raw value `Да` — 1;
+* normalized names совпадают; оба атрибута входят в одну Gate 1 exact duplicate group;
+* содержательных связанных candidates не найдено;
+* значение `82` входит в утверждённый canonical domain `Да`/`Нет`;
+* признаков различной семантики не обнаружено;
+* пересечение товаров `47` и `82` отсутствует. Это не позволило проверить pairwise conflicts, но при совокупности остальных фактов не блокирует human-approved выбор canonical.
+
+### Последствия
+
+`47` считается approved canonical для этой характеристики. `82` считается approved alias и migration source.
+
+Future registry input должен отражать:
+
+* `canonical_attribute_id = 47`;
+* `included_alias_attribute_ids = [82]`;
+* `excluded_attribute_ids = []`;
+* пустой или пока не назначенный `normalizer_key`.
+
+Approved contract без normalizer допустим. Processing/read-only readiness не считается достигнутой до отдельного normalizer/contract implementation step.
+
+Ожидаемые registry markers до реализации normalizer:
+
+* `contract_approved`;
+* `normalizer_required`;
+* отсутствие `normalizer_ready`;
+* отсутствие `read_only_ready`.
+
+### Ограничения
+
+Migration direction `82 -> 47` является semantic contract direction, а не разрешением немедленно выполнять SQL.
+
+Это решение не разрешает:
+
+* изменение БД, migration/apply или удаление alias rows;
+* изменение `oc_attribute` или `oc_attribute_description`;
+* утверждение или implementation normalizer;
+* SQL generation, apply plan или SQL/apply;
+* production/cache actions;
+* считать migration уже выполненной;
+* автоматически назначать `Да`/`Нет` другим похожим характеристикам.
