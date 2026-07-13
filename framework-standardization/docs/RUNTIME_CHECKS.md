@@ -5819,3 +5819,81 @@ cache_rebuild_performed: 0
 
 Characteristic registry успешно построен по реальным данным категории `11900213`; DB marker исправлен и подтверждён, а registry summary остался стабильным. Текущая готовность ограничена строками напряжения `15` и `57`. Проверка не разрешает pipeline, normalization, SQL/apply или изменение данных.
 
+## 13-07-2026 — BooleanYesNoNormalizer implementation and static checks
+
+### Контекст
+
+```text
+target_key: dry_run_protection
+normalizer_key: boolean_yes_no
+class: FrameworkStandardization\Normalizer\BooleanYesNoNormalizer
+implementation_commit: 3090b99 Implement boolean yes-no normalizer
+runtime_mode: isolated_static_check
+PHP compatibility: PHP 5.6
+```
+
+Normalizer реализован как изолированный pure-компонент; static checks реализованы отдельным файлом. Normalizer пока не зарегистрирован, machine-readable contract пока не активирован, pipeline execution не выполнялся.
+
+### Реализованное поведение
+
+Реализованы exact case-sensitive `Да` и `Нет`, approved Unicode boundary trim только по краям и `review_required` для `Да/Нет` и других строк с обоими standalone canonical tokens. Неподдерживаемые строки не угадываются и получают `unsupported`.
+
+`null`, non-string scalars, array, object и resource обрабатываются безопасно. Result содержит ровно утверждённые семь полей; отдельного поля `reason` нет. Source-aware `unchanged` против `normalized` остаётся вне normalizer.
+
+### Syntax checks
+
+```text
+C:\php56\php.exe -l framework-standardization/src/Normalizer/BooleanYesNoNormalizer.php
+No syntax errors detected in framework-standardization/src/Normalizer/BooleanYesNoNormalizer.php
+
+C:\php56\php.exe -l framework-standardization/tests/boolean_yes_no_normalizer_static_checks.php
+No syntax errors detected in framework-standardization/tests/boolean_yes_no_normalizer_static_checks.php
+```
+
+### Static checks
+
+```text
+C:\php56\php.exe framework-standardization/tests/boolean_yes_no_normalizer_static_checks.php
+boolean_yes_no_normalizer_static_checks: ok
+```
+
+Подтверждено покрытие exact canonical values, approved boundary whitespace, empty values, unsupported case/punctuation/synonyms/numeric strings, mixed standalone tokens, non-string scalar inputs и array/object/resource safety. Также проверены отсутствие вызова object methods и чтения resource, result schema и canonical domain, deterministic repeated calls, отсутствие запрещённых DB/filesystem/runtime/registry/pipeline dependencies.
+
+### Safety markers
+
+```text
+normalizer_implemented: 1
+static_checks_passed: 1
+php56_syntax_ok: 1
+registry_changed: 0
+contract_changed: 0
+normalizer_registered: 0
+contract_activated: 0
+pipeline_wired: 0
+pipeline_executed: 0
+db_accessed: 0
+normalization_executed_on_catalog: 0
+sql_generated: 0
+apply_plan_created: 0
+apply_performed: 0
+product_data_changed: 0
+production_touched: 0
+cache_rebuild_performed: 0
+```
+
+### Contract and integration boundary
+
+Текущее состояние contract:
+
+```text
+normalizer_key = ''
+normalizer_ready = false
+read_only_ready = false
+apply_ready = false
+```
+
+Implementation commit сам по себе не активирует normalizer. Registry и contract не менялись; normalizer не запускался для товарных данных. Регистрация и contract activation требуют отдельных explicit bounded steps. SQL/apply остаётся отдельным gate.
+
+### Вывод
+
+Реализация соответствует approved policy; PHP 5.6 syntax и static checks прошли. Изолированный normalizer технически реализован, но пока не доступен registry, contract или pipeline. Этот runtime check не разрешает DB access, catalog normalization, SQL/apply или production/cache actions.
