@@ -4635,3 +4635,62 @@ Migration direction `82 -> 47` является semantic contract direction, а 
 * production/cache actions;
 * считать migration уже выполненной;
 * автоматически назначать `Да`/`Нет` другим похожим характеристикам.
+
+## 2026-07-13 - Dry-run protection normalization policy approved
+
+### Решение
+
+Пользователь human-approved документ:
+
+`framework-standardization/docs/DRY_RUN_PROTECTION_NORMALIZER_SPEC.md`
+
+для характеристики `dry_run_protection` в scope `11900213`.
+
+Утверждены:
+
+* normalizer key: `boolean_yes_no`;
+* future class: `FrameworkStandardization\Normalizer\BooleanYesNoNormalizer`;
+* canonical value type: `boolean_enum`;
+* canonical unit: отсутствует;
+* allowed canonical values строго `Да`, `Нет`.
+
+Policy approved. Implementation not implemented. Normalizer not ready.
+
+### Approved behavior
+
+Разрешены только exact case-sensitive `Да` и `Нет` после утверждённого Unicode boundary trim. Case variants, punctuation, synonyms и numeric strings остаются `unsupported`.
+
+Non-string scalars являются `invalid` с `non_string_scalar_value`; array, object и resource являются `invalid` с `non_scalar_value`. Одновременные standalone `Да` и `Нет` дают `review_required` с `mixed_boolean_values`.
+
+Отдельное поле `reason` отсутствует: machine-readable reason передаётся через `warnings` и `ambiguity_reason`. Normalizer не решает `unchanged` против `normalized`; эта source-aware семантика остаётся во внешнем integration layer.
+
+Подробная approved policy, включая Unicode boundary set, result schema и mixed-token semantics, определена в утверждённом spec.
+
+### Последствия
+
+Normalizer implementation теперь может быть отдельным будущим bounded step и обязана точно следовать approved spec. Implementation не может расширять canonical domain. Approved implementation identity не означает, что класс реализован или зарегистрирован.
+
+Machine-readable contract пока намеренно остаётся:
+
+* `normalizer_key = ''`;
+* `normalizer_ready = false`;
+* `read_only_ready = false`;
+* `apply_ready = false`.
+
+Наличие approved policy не означает, что normalizer реализован или зарегистрирован. Contract activation требует отдельного human-approved step после успешной реализации и tests.
+
+### Ограничения
+
+Это решение не разрешает:
+
+* создание или изменение PHP-классов на этом шаге;
+* регистрацию в `NormalizerRegistry`;
+* изменение machine-readable contract;
+* job/config creation;
+* pipeline wiring или execution;
+* catalog normalization или DB access;
+* SQL generation, apply plan, SQL/apply или `--confirm-apply`;
+* изменение product data;
+* production/cache actions или cache rebuild.
+
+Implementation требует отдельного explicit bounded step. SQL/apply остаётся отдельным gate.
