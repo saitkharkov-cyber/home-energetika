@@ -16,6 +16,7 @@ final class NormalizerRegistry
         $registry = new self();
         $registry->register('simple_meters', new SimpleMetersNormalizer());
         $registry->register('voltage', new VoltageNormalizer());
+        $registry->register('boolean_yes_no', new BooleanYesNoNormalizer());
 
         return $registry;
     }
