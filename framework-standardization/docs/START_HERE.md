@@ -21,7 +21,7 @@
 7. Прочитать `docs/DECISIONS.md`.
 8. Прочитать `docs/LEGACY_DECISIONS.md`, если задача связана с legacy-характеристиками.
 9. Прочитать `docs/RUNTIME_CHECKS.md`.
-10. Прочитать только specs, релевантные восстановленному target и необходимые для достоверного выбора одного следующего bounded step.
+10. Прочитать только specs, релевантные либо target, восстановленному из handoff и подтверждённому Git, либо repository-derived candidate при отсутствии handoff, и необходимые для достоверного выбора одного следующего bounded step.
 
 ## 3. Обработка HANDOFF.md
 
@@ -35,6 +35,8 @@
 
 Отсутствие `HANDOFF.md` — нормальное состояние активной сессии; handoff-specific состояние в этом случае не предполагается.
 
+При отсутствии `HANDOFF.md` startup flow продолжается, но session-specific state предыдущей сессии не считается восстановленным. Постоянная документация и Git могут дать только repository-derived context; inferred target нельзя представлять как состояние предыдущей сессии.
+
 ## 4. Отчёт о восстановлении
 
 После успешного завершения startup flow либо сразу после обнаружения blocking inconsistency новый ChatGPT кратко сообщает:
@@ -42,17 +44,18 @@
 * подтверждённые repository identity, project и branch;
 * фактический Git-state;
 * был ли найден и успешно обработан `HANDOFF.md`;
-* восстановленные target, scope, stage, completed и open items — только в той мере, в которой они подтверждены;
+* при наличии `HANDOFF.md` — подтверждённые target, scope, stage, completed и open items как восстановленное состояние предыдущей сессии;
+* при отсутствии `HANDOFF.md` — что session-specific state предыдущей сессии не восстановлен; найденное инженерное направление обозначается как repository-derived context, а предполагаемый target и рекомендуемый следующий bounded step — как repository-derived candidates;
 * действующие gates и safety-ограничения;
 * protected user-owned changes;
-* ровно один рекомендуемый следующий bounded step при успешно восстановленном контексте;
+* ровно один рекомендуемый следующий bounded step после успешно завершённого startup flow;
 * blocking inconsistency и недостающий факт вместо продолжения, если она обнаружена.
 
 После отчёта новый ChatGPT обязан остановиться. До отдельного пользовательского разрешения он не должен удалять `HANDOFF.md`, менять файлы, начинать implementation, обращаться к БД, запускать pipeline, готовить или выполнять SQL, делать commit или push.
 
 ## 5. Переход к активной работе
 
-После успешного восстановления и необходимых lifecycle actions работа продолжается по схеме: пользователь -> ChatGPT -> Codex -> документация.
+После успешного завершения startup flow и необходимых lifecycle actions работа продолжается по схеме: пользователь -> ChatGPT -> Codex -> документация.
 
 ChatGPT выбирает один следующий bounded step и направляет Codex отдельным task-specific prompt. Codex не получает общее поручение восстановить проект по `START_HERE.md`.
 
