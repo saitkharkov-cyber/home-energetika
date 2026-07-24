@@ -13,7 +13,7 @@ import tempfile
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Iterable
 from urllib.parse import urljoin, urlparse
@@ -260,7 +260,7 @@ def normalize_flow(value: str) -> tuple[str, set[str]]:
     if cubic:
         parsed = parse_decimal(cubic.group(1))
         if parsed is not None:
-            return format_decimal(parsed * Decimal(1000) / Decimal(60)), set()
+            return format_decimal((parsed * Decimal(1000) / Decimal(60)).quantize(Decimal("1"), rounding=ROUND_HALF_UP)), set()
     return "", {"unsupported_unit"}
 
 
