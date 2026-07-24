@@ -17,3 +17,5 @@ framework-standardization/var/review-fixtures/*.json
 /framework-standardization/runtime/reports/
 
 _local/
+
+local_proxy.txt
