@@ -21,3 +21,5 @@ _local/
 local_proxy.txt
 
 __pycache__/
+
+vinko_catalog.csv
