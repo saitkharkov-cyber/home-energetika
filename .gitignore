@@ -19,3 +19,5 @@ framework-standardization/var/review-fixtures/*.json
 _local/
 
 local_proxy.txt
+
+__pycache__/
