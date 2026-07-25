@@ -1,0 +1,61 @@
+product_id,product_name,normalized_db_model,source_product_url,source_normalized_model,target_attribute_id,proposed_value,existing_target_value,preview_status,review_note
+3307,SQ 5-70,SQ 5-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_/,SQ 5-70,12,106,,target_missing,"Source URL contains sqe_5_70, but source title and normalized model are SQ 5-70."
+3307,SQ 5-70,SQ 5-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_/,SQ 5-70,13,122,,target_missing,"Source URL contains sqe_5_70, but source title and normalized model are SQ 5-70."
+3307,SQ 5-70,SQ 5-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_/,SQ 5-70,14,2.46,,target_missing,"Source URL contains sqe_5_70, but source title and normalized model are SQ 5-70."
+3307,SQ 5-70,SQ 5-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_/,SQ 5-70,15,220,,target_missing,"Source URL contains sqe_5_70, but source title and normalized model are SQ 5-70."
+3307,SQ 5-70,SQ 5-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_/,SQ 5-70,125,80,,target_missing,"Source URL contains sqe_5_70, but source title and normalized model are SQ 5-70."
+3314,SQ 3-105 с кабелем,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,SQ 3-105,12,145,,target_missing,"One source model SQ 3-105 is used for two DB products: 3314 and 3326."
+3314,SQ 3-105 с кабелем,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,SQ 3-105,13,73,,target_missing,"One source model SQ 3-105 is used for two DB products: 3314 and 3326."
+3314,SQ 3-105 с кабелем,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,SQ 3-105,14,2.46,,target_missing,"One source model SQ 3-105 is used for two DB products: 3314 and 3326."
+3314,SQ 3-105 с кабелем,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,SQ 3-105,15,220,,target_missing,"One source model SQ 3-105 is used for two DB products: 3314 and 3326."
+3314,SQ 3-105 с кабелем,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,SQ 3-105,125,80,,target_missing,"One source model SQ 3-105 is used for two DB products: 3314 and 3326."
+3318,SQ 3-80,SQ 3-80,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_80/,SQ 3-80,12,110,,target_missing,
+3318,SQ 3-80,SQ 3-80,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_80/,SQ 3-80,13,73,,target_missing,
+3318,SQ 3-80,SQ 3-80,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_80/,SQ 3-80,14,2.05,,target_missing,
+3318,SQ 3-80,SQ 3-80,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_80/,SQ 3-80,15,220,,target_missing,
+3318,SQ 3-80,SQ 3-80,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_80/,SQ 3-80,125,80,,target_missing,
+3320,SQ 2-55,SQ 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_55/,SQ 2-55,12,68,,target_missing,
+3320,SQ 2-55,SQ 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_55/,SQ 2-55,13,56,,target_missing,
+3320,SQ 2-55,SQ 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_55/,SQ 2-55,14,1,,target_missing,
+3320,SQ 2-55,SQ 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_55/,SQ 2-55,15,220,,target_missing,
+3320,SQ 2-55,SQ 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_55/,SQ 2-55,125,80,,target_missing,
+3325,SQ 2-70,SQ 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_70/,SQ 2-70,12,89,,target_missing,
+3325,SQ 2-70,SQ 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_70/,SQ 2-70,13,56,,target_missing,
+3325,SQ 2-70,SQ 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_70/,SQ 2-70,14,1.55,,target_missing,
+3325,SQ 2-70,SQ 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_70/,SQ 2-70,15,220,,target_missing,
+3325,SQ 2-70,SQ 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_70/,SQ 2-70,125,80,,target_missing,
+3326,SQ 3-105,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,SQ 3-105,12,145,,target_missing,"One source model SQ 3-105 is used for two DB products: 3314 and 3326."
+3326,SQ 3-105,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,SQ 3-105,13,73,,target_missing,"One source model SQ 3-105 is used for two DB products: 3314 and 3326."
+3326,SQ 3-105,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,SQ 3-105,14,2.46,,target_missing,"One source model SQ 3-105 is used for two DB products: 3314 and 3326."
+3326,SQ 3-105,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,SQ 3-105,15,220,,target_missing,"One source model SQ 3-105 is used for two DB products: 3314 and 3326."
+3326,SQ 3-105,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,SQ 3-105,125,80,,target_missing,"One source model SQ 3-105 is used for two DB products: 3314 and 3326."
+3346,SQE 2-85 комплект,SQE 2-85 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_2_85_komplekt_/,SQE 2-85 комплект,12,109,,target_missing,
+3346,SQE 2-85 комплект,SQE 2-85 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_2_85_komplekt_/,SQE 2-85 комплект,13,50,,target_missing,
+3346,SQE 2-85 комплект,SQE 2-85 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_2_85_komplekt_/,SQE 2-85 комплект,14,1.55,,target_missing,
+3346,SQE 2-85 комплект,SQE 2-85 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_2_85_komplekt_/,SQE 2-85 комплект,15,220,,target_missing,
+3346,SQE 2-85 комплект,SQE 2-85 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_2_85_komplekt_/,SQE 2-85 комплект,125,80,,target_missing,
+3356,SQE 5-70 комплект,SQE 5-70 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_komplekt/,SQE 5-70 комплект,12,106,,target_missing,
+3356,SQE 5-70 комплект,SQE 5-70 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_komplekt/,SQE 5-70 комплект,13,122,,target_missing,
+3356,SQE 5-70 комплект,SQE 5-70 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_komplekt/,SQE 5-70 комплект,14,2.46,,target_missing,
+3356,SQE 5-70 комплект,SQE 5-70 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_komplekt/,SQE 5-70 комплект,15,220,,target_missing,
+3356,SQE 5-70 комплект,SQE 5-70 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_komplekt/,SQE 5-70 комплект,125,80,,target_missing,
+3358,SQE 2-55,SQE 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_55_mse3/,SQE 2-55,12,65,,target_missing,
+3358,SQE 2-55,SQE 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_55_mse3/,SQE 2-55,13,50,,target_missing,
+3358,SQE 2-55,SQE 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_55_mse3/,SQE 2-55,14,1.05,,target_missing,
+3358,SQE 2-55,SQE 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_55_mse3/,SQE 2-55,15,220,,target_missing,
+3358,SQE 2-55,SQE 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_55_mse3/,SQE 2-55,125,80,,target_missing,
+3361,SQE 2-85,SQE 2-85,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_85_mse3/,SQE 2-85,12,109,,target_missing,
+3361,SQE 2-85,SQE 2-85,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_85_mse3/,SQE 2-85,13,50,,target_missing,
+3361,SQE 2-85,SQE 2-85,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_85_mse3/,SQE 2-85,14,1.55,,target_missing,
+3361,SQE 2-85,SQE 2-85,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_85_mse3/,SQE 2-85,15,220,,target_missing,
+3361,SQE 2-85,SQE 2-85,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_85_mse3/,SQE 2-85,125,80,,target_missing,
+3362,SQE 2-70,SQE 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_70/,SQE 2-70,12,89,,target_missing,
+3362,SQE 2-70,SQE 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_70/,SQE 2-70,13,50,,target_missing,
+3362,SQE 2-70,SQE 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_70/,SQE 2-70,14,1.55,,target_missing,
+3362,SQE 2-70,SQE 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_70/,SQE 2-70,15,220,,target_missing,
+3362,SQE 2-70,SQE 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_70/,SQE 2-70,125,80,,target_missing,
+3363,SQE 3-105,SQE 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_3_105_mse3/,SQE 3-105,12,143,,target_missing,
+3363,SQE 3-105,SQE 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_3_105_mse3/,SQE 3-105,13,73,,target_missing,
+3363,SQE 3-105,SQE 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_3_105_mse3/,SQE 3-105,14,2.46,,target_missing,
+3363,SQE 3-105,SQE 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_3_105_mse3/,SQE 3-105,15,220,,target_missing,
+3363,SQE 3-105,SQE 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_3_105_mse3/,SQE 3-105,125,80,,target_missing,

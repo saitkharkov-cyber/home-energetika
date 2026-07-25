@@ -1065,7 +1065,7 @@
 								<h3><span class="title-icon"><img class="title-icon-image" src="/catalog/view/theme/revolution/image/plig-ins.webp" alt="title icon"></span><span class="title-text">Совместимость</span></h3>
 								
 								<div class="form-group">
-									<label class="control-label">Диаметр обсадной трубы</label>
+									<label class="control-label">Внутренний диаметр обсадной трубы</label>
 									<label class="radio-inline">
 										<input type="radio" name="casing_diameter_mode" value="known"<?php if ($input['casing_diameter_mode'] == 'known') { ?> checked="checked"<?php } ?> /> Известен
 									</label>
@@ -1075,7 +1075,7 @@
 								</div>
 								
 								<div class="form-group">
-									<label class="control-label" for="input-casing-diameter">Диаметр, мм</label>
+									<label class="control-label" for="input-casing-diameter">Внутренний диаметр, мм</label>
 									<input type="text" name="casing_diameter_mm" value="<?php echo htmlspecialchars($input['casing_diameter_mm'], ENT_QUOTES, 'UTF-8'); ?>" id="input-casing-diameter" class="form-control pump-selector-number" />
 								</div>
 								
@@ -1093,7 +1093,7 @@
 								</div>
 								<div class="pump-selector-help-box">
 									<strong>Не знаете параметры?</strong>
-									<div>Поможем уточнить диаметр, напряжение и подходящий насос.</div>
+									<div>Поможем уточнить внутренний диаметр обсадной трубы, напряжение и подходящий насос.</div>
 									<a class="pump-selector-help-link" href="index.php?route=information/contact">Получить консультацию</a>
 								</div>
 							</div>
@@ -1379,7 +1379,7 @@
 						<?php if ($result_count != 2) { ?>
 							<div class="pump-selector-consult-box">
 								<h3 class="h3_no_blue">Не уверены в выборе?</h3>
-								<p>Специалист проверит параметры скважины, уровень воды, диаметр обсадной трубы и условия установки перед покупкой.</p>
+								<p>Специалист проверит параметры скважины, уровень воды, внутренний диаметр обсадной трубы и условия установки перед покупкой.</p>
 								<button type="button" class="btn btn-primary">
 									Получить консультацию специалиста
 								</button>
@@ -1429,7 +1429,7 @@
 								</tr>
 								
 								<tr>
-									<td>Диаметр обсадной трубы</td>
+									<td>Внутренний диаметр обсадной трубы</td>
 									<td>
 										<?php echo ($requirements['casing_diameter_mm'] !== null) ? $requirements['casing_diameter_mm'] . ' мм' : 'не указан'; ?>
 									</td>
@@ -1628,7 +1628,7 @@
 						}
 						
 						if (casingDiameterMode === 'known' && !isPositiveNumber(casingDiameter)) {
-							errors.push('Укажите диаметр обсадной трубы или выберите “Не знаю”.');
+							errors.push('Укажите внутренний диаметр обсадной трубы или выберите “Не знаю”.');
 						}
 						
 						if (errors.length > 0) {

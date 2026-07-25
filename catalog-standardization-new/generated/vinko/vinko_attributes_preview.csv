@@ -1,0 +1,391 @@
+﻿product_id,product_name,source_model,target_attribute_id,target_attribute_name,existing_target_value,proposed_value,preview_status,evidence
+7580,Погружной скважинный насос VINKO 3STM1.8/20 ,3STm 1.8/20,12,Максимальный напор (м),,84,insert,model_exact; unique_active_product
+7580,Погружной скважинный насос VINKO 3STM1.8/20 ,3STm 1.8/20,13,Производительность (л/мин),,45,insert,model_exact; unique_active_product
+7580,Погружной скважинный насос VINKO 3STM1.8/20 ,3STm 1.8/20,14,Мощность двигателя (кВт),,0.55,insert,model_exact; unique_active_product
+7580,Погружной скважинный насос VINKO 3STM1.8/20 ,3STm 1.8/20,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+7581,Погружной скважинный насос VINKO 3STM1.8/27 ,3STm 1.8/27,12,Максимальный напор (м),,113,insert,model_exact; unique_active_product
+7581,Погружной скважинный насос VINKO 3STM1.8/27 ,3STm 1.8/27,13,Производительность (л/мин),,45,insert,model_exact; unique_active_product
+7581,Погружной скважинный насос VINKO 3STM1.8/27 ,3STm 1.8/27,14,Мощность двигателя (кВт),,0.75,insert,model_exact; unique_active_product
+7581,Погружной скважинный насос VINKO 3STM1.8/27 ,3STm 1.8/27,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+7582,Погружной скважинный насос VINKO 3STM1.8/37 ,3STm 1.8/37,12,Максимальный напор (м),,154,insert,model_exact; unique_active_product
+7582,Погружной скважинный насос VINKO 3STM1.8/37 ,3STm 1.8/37,13,Производительность (л/мин),,45,insert,model_exact; unique_active_product
+7582,Погружной скважинный насос VINKO 3STM1.8/37 ,3STm 1.8/37,14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+7582,Погружной скважинный насос VINKO 3STM1.8/37 ,3STm 1.8/37,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+7583,Погружной скважинный насос VINKO 3STM1.8/47 ,3STm 1.8/47,12,Максимальный напор (м),,196,insert,model_exact; unique_active_product
+7583,Погружной скважинный насос VINKO 3STM1.8/47 ,3STm 1.8/47,13,Производительность (л/мин),,45,insert,model_exact; unique_active_product
+7583,Погружной скважинный насос VINKO 3STM1.8/47 ,3STm 1.8/47,14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+7583,Погружной скважинный насос VINKO 3STM1.8/47 ,3STm 1.8/47,15,Напряжение (В),,220,insert,model_exact; unique_active_product
+7587,Погружной скважинный насос VINKO 3STM2.5/20 ,3STm 2.5/20,12,Максимальный напор (м),,87,insert,model_exact; unique_active_product
+7587,Погружной скважинный насос VINKO 3STM2.5/20 ,3STm 2.5/20,13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+7587,Погружной скважинный насос VINKO 3STM2.5/20 ,3STm 2.5/20,14,Мощность двигателя (кВт),,0.75,insert,model_exact; unique_active_product
+7587,Погружной скважинный насос VINKO 3STM2.5/20 ,3STm 2.5/20,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+7588,Погружной скважинный насос VINKO 3STM2.5/28,3STm 2.5/28,12,Максимальный напор (м),,122,insert,model_exact; unique_active_product
+7588,Погружной скважинный насос VINKO 3STM2.5/28,3STm 2.5/28,13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+7588,Погружной скважинный насос VINKO 3STM2.5/28,3STm 2.5/28,14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+7588,Погружной скважинный насос VINKO 3STM2.5/28,3STm 2.5/28,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+7589,Погружной скважинный насос VINKO 3STM2.5/36 ,3STm 2.5/36,12,Максимальный напор (м),,156,insert,model_exact; unique_active_product
+7589,Погружной скважинный насос VINKO 3STM2.5/36 ,3STm 2.5/36,13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+7589,Погружной скважинный насос VINKO 3STM2.5/36 ,3STm 2.5/36,14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+7589,Погружной скважинный насос VINKO 3STM2.5/36 ,3STm 2.5/36,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+7594,Погружной скважинный насос VINKO 3STM4/19,3STm 4/19,12,Максимальный напор (м),,65,insert,model_exact; unique_active_product
+7594,Погружной скважинный насос VINKO 3STM4/19,3STm 4/19,13,Производительность (л/мин),,80,insert,model_exact; unique_active_product
+7594,Погружной скважинный насос VINKO 3STM4/19,3STm 4/19,14,Мощность двигателя (кВт),,0.75,insert,model_exact; unique_active_product
+7594,Погружной скважинный насос VINKO 3STM4/19,3STm 4/19,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+7595,Погружной скважинный насос VINKO 3STM4/26,3STm 4/26,12,Максимальный напор (м),,88,insert,model_exact; unique_active_product
+7595,Погружной скважинный насос VINKO 3STM4/26,3STm 4/26,13,Производительность (л/мин),,80,insert,model_exact; unique_active_product
+7595,Погружной скважинный насос VINKO 3STM4/26,3STm 4/26,14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+7595,Погружной скважинный насос VINKO 3STM4/26,3STm 4/26,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+7596,Погружной скважинный насос VINKO 3STM4/35,3STm 4/35,12,Максимальный напор (м),,119,insert,model_exact; unique_active_product
+7596,Погружной скважинный насос VINKO 3STM4/35,3STm 4/35,13,Производительность (л/мин),,80,insert,model_exact; unique_active_product
+7596,Погружной скважинный насос VINKO 3STM4/35,3STm 4/35,14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+7596,Погружной скважинный насос VINKO 3STM4/35,3STm 4/35,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+7601,Погружной скважинный насос VINKO 3STM5/19,3STm 5/19,12,Максимальный напор (м),,68,insert,model_exact; unique_active_product
+7601,Погружной скважинный насос VINKO 3STM5/19,3STm 5/19,13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+7601,Погружной скважинный насос VINKO 3STM5/19,3STm 5/19,14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+7601,Погружной скважинный насос VINKO 3STM5/19,3STm 5/19,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+7602,Погружной скважинный насос VINKO 3STM5/26,3STm 5/26,12,Максимальный напор (м),,94,insert,model_exact; unique_active_product
+7602,Погружной скважинный насос VINKO 3STM5/26,3STm 5/26,13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+7602,Погружной скважинный насос VINKO 3STM5/26,3STm 5/26,14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+7602,Погружной скважинный насос VINKO 3STM5/26,3STm 5/26,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1991,Погружной скважинный насос VINKO 4ST10/10,4ST 10/10 (380в),12,Максимальный напор (м),,56,insert,model_exact; unique_active_product
+1991,Погружной скважинный насос VINKO 4ST10/10,4ST 10/10 (380в),13,Производительность (л/мин),,241,insert,model_exact; unique_active_product
+1991,Погружной скважинный насос VINKO 4ST10/10,4ST 10/10 (380в),14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+1991,Погружной скважинный насос VINKO 4ST10/10,4ST 10/10 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1992,Погружной скважинный насос VINKO 4ST10/14,4ST 10/14 (380в),12,Максимальный напор (м),,78,insert,model_exact; unique_active_product
+1992,Погружной скважинный насос VINKO 4ST10/14,4ST 10/14 (380в),13,Производительность (л/мин),,241,insert,model_exact; unique_active_product
+1992,Погружной скважинный насос VINKO 4ST10/14,4ST 10/14 (380в),14,Мощность двигателя (кВт),,2.2,insert,model_exact; unique_active_product
+1992,Погружной скважинный насос VINKO 4ST10/14,4ST 10/14 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1993,Погружной скважинный насос VINKO 4ST10/18,4ST 10/18 (380в),12,Максимальный напор (м),,100,insert,model_exact; unique_active_product
+1993,Погружной скважинный насос VINKO 4ST10/18,4ST 10/18 (380в),13,Производительность (л/мин),,241,insert,model_exact; unique_active_product
+1993,Погружной скважинный насос VINKO 4ST10/18,4ST 10/18 (380в),14,Мощность двигателя (кВт),,3,insert,model_exact; unique_active_product
+1993,Погружной скважинный насос VINKO 4ST10/18,4ST 10/18 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1994,Погружной скважинный насос VINKO 4ST10/24,4ST 10/24 (380в),12,Максимальный напор (м),,134,insert,model_exact; unique_active_product
+1994,Погружной скважинный насос VINKO 4ST10/24,4ST 10/24 (380в),13,Производительность (л/мин),,241,insert,model_exact; unique_active_product
+1994,Погружной скважинный насос VINKO 4ST10/24,4ST 10/24 (380в),14,Мощность двигателя (кВт),,4,insert,model_exact; unique_active_product
+1994,Погружной скважинный насос VINKO 4ST10/24,4ST 10/24 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1995,Погружной скважинный насос VINKO 4ST10/32,4ST 10/32 (380в),12,Максимальный напор (м),,179,insert,model_exact; unique_active_product
+1995,Погружной скважинный насос VINKO 4ST10/32,4ST 10/32 (380в),13,Производительность (л/мин),,241,insert,model_exact; unique_active_product
+1995,Погружной скважинный насос VINKO 4ST10/32,4ST 10/32 (380в),14,Мощность двигателя (кВт),,5.5,insert,model_exact; unique_active_product
+1995,Погружной скважинный насос VINKO 4ST10/32,4ST 10/32 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1990,Погружной скважинный насос VINKO 4ST10/7,4ST 10/7 (380в),12,Максимальный напор (м),,39,insert,model_exact; unique_active_product
+1990,Погружной скважинный насос VINKO 4ST10/7,4ST 10/7 (380в),13,Производительность (л/мин),,241,insert,model_exact; unique_active_product
+1990,Погружной скважинный насос VINKO 4ST10/7,4ST 10/7 (380в),14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+1990,Погружной скважинный насос VINKO 4ST10/7,4ST 10/7 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+2000,Погружной скважинный насос VINKO 4ST12/10,4ST 12/10 (380в),12,Максимальный напор (м),,61,insert,model_exact; unique_active_product
+2000,Погружной скважинный насос VINKO 4ST12/10,4ST 12/10 (380в),13,Производительность (л/мин),,271,insert,model_exact; unique_active_product
+2000,Погружной скважинный насос VINKO 4ST12/10,4ST 12/10 (380в),14,Мощность двигателя (кВт),,2.2,insert,model_exact; unique_active_product
+2000,Погружной скважинный насос VINKO 4ST12/10,4ST 12/10 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+2001,Погружной скважинный насос VINKO 4ST12/14,4ST 12/14 (380в),12,Максимальный напор (м),,85,insert,model_exact; unique_active_product
+2001,Погружной скважинный насос VINKO 4ST12/14,4ST 12/14 (380в),13,Производительность (л/мин),,271,insert,model_exact; unique_active_product
+2001,Погружной скважинный насос VINKO 4ST12/14,4ST 12/14 (380в),14,Мощность двигателя (кВт),,3,insert,model_exact; unique_active_product
+2001,Погружной скважинный насос VINKO 4ST12/14,4ST 12/14 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+2002,Погружной скважинный насос VINKO 4ST12/19,4ST 12/19 (380в),12,Максимальный напор (м),,115,insert,model_exact; unique_active_product
+2002,Погружной скважинный насос VINKO 4ST12/19,4ST 12/19 (380в),13,Производительность (л/мин),,271,insert,model_exact; unique_active_product
+2002,Погружной скважинный насос VINKO 4ST12/19,4ST 12/19 (380в),14,Мощность двигателя (кВт),,4,insert,model_exact; unique_active_product
+2002,Погружной скважинный насос VINKO 4ST12/19,4ST 12/19 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+2003,Погружной скважинный насос VINKO 4ST12/26,4ST 12/26 (380в),12,Максимальный напор (м),,158,insert,model_exact; unique_active_product
+2003,Погружной скважинный насос VINKO 4ST12/26,4ST 12/26 (380в),13,Производительность (л/мин),,271,insert,model_exact; unique_active_product
+2003,Погружной скважинный насос VINKO 4ST12/26,4ST 12/26 (380в),14,Мощность двигателя (кВт),,5.5,insert,model_exact; unique_active_product
+2003,Погружной скважинный насос VINKO 4ST12/26,4ST 12/26 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1999,Погружной скважинный насос VINKO 4ST12/7 (380V),4ST 12/7 (380в),12,Максимальный напор (м),,42,insert,model_exact; unique_active_product
+1999,Погружной скважинный насос VINKO 4ST12/7 (380V),4ST 12/7 (380в),13,Производительность (л/мин),,271,insert,model_exact; unique_active_product
+1999,Погружной скважинный насос VINKO 4ST12/7 (380V),4ST 12/7 (380в),14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+1999,Погружной скважинный насос VINKO 4ST12/7 (380V),4ST 12/7 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1942,Погружной скважинный насос VINKO 4ST2/10,4ST 2/10 (380в),12,Максимальный напор (м),,65,insert,model_exact; unique_active_product
+1942,Погружной скважинный насос VINKO 4ST2/10,4ST 2/10 (380в),13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+1942,Погружной скважинный насос VINKO 4ST2/10,4ST 2/10 (380в),14,Мощность двигателя (кВт),,0.55,insert,model_exact; unique_active_product
+1942,Погружной скважинный насос VINKO 4ST2/10,4ST 2/10 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1943,Погружной скважинный насос VINKO 4ST2/14,4ST 2/14 (380в),12,Максимальный напор (м),,91,insert,model_exact; unique_active_product
+1943,Погружной скважинный насос VINKO 4ST2/14,4ST 2/14 (380в),13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+1943,Погружной скважинный насос VINKO 4ST2/14,4ST 2/14 (380в),14,Мощность двигателя (кВт),,0.75,insert,model_exact; unique_active_product
+1943,Погружной скважинный насос VINKO 4ST2/14,4ST 2/14 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1944,Погружной скважинный насос  VINKO 4ST2/20,4ST 2/20 (380в),12,Максимальный напор (м),,130,insert,model_exact; unique_active_product
+1944,Погружной скважинный насос  VINKO 4ST2/20,4ST 2/20 (380в),13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+1944,Погружной скважинный насос  VINKO 4ST2/20,4ST 2/20 (380в),14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+1944,Погружной скважинный насос  VINKO 4ST2/20,4ST 2/20 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1945,Погружной скважинный насос VINKO 4ST2/28,4ST 2/28 (380в),12,Максимальный напор (м),,182,insert,model_exact; unique_active_product
+1945,Погружной скважинный насос VINKO 4ST2/28,4ST 2/28 (380в),13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+1945,Погружной скважинный насос VINKO 4ST2/28,4ST 2/28 (380в),14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+1945,Погружной скважинный насос VINKO 4ST2/28,4ST 2/28 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1946,Погружной скважинный насос VINKO 4ST2/40,4ST 2/40 (380в),12,Максимальный напор (м),,260,insert,model_exact; unique_active_product
+1946,Погружной скважинный насос VINKO 4ST2/40,4ST 2/40 (380в),13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+1946,Погружной скважинный насос VINKO 4ST2/40,4ST 2/40 (380в),14,Мощность двигателя (кВт),,2.2,insert,model_exact; unique_active_product
+1946,Погружной скважинный насос VINKO 4ST2/40,4ST 2/40 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1941,Погружной скважинный насос VINKO 4ST2/7,4ST 2/7 (380в),12,Максимальный напор (м),,46,insert,model_exact; unique_active_product
+1941,Погружной скважинный насос VINKO 4ST2/7,4ST 2/7 (380в),13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+1941,Погружной скважинный насос VINKO 4ST2/7,4ST 2/7 (380в),14,Мощность двигателя (кВт),,0.37,insert,model_exact; unique_active_product
+1941,Погружной скважинный насос VINKO 4ST2/7,4ST 2/7 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1958,Погружной скважинный насос  VINKO 4ST4/14,4ST 4/14 (380в),12,Максимальный напор (м),,90,insert,model_exact; unique_active_product
+1958,Погружной скважинный насос  VINKO 4ST4/14,4ST 4/14 (380в),13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1958,Погружной скважинный насос  VINKO 4ST4/14,4ST 4/14 (380в),14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+1958,Погружной скважинный насос  VINKO 4ST4/14,4ST 4/14 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1959,Погружной скважинный насос VINKO 4ST4/18,4ST 4/18 (380в),12,Максимальный напор (м),,115,insert,model_exact; unique_active_product
+1959,Погружной скважинный насос VINKO 4ST4/18,4ST 4/18 (380в),13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1959,Погружной скважинный насос VINKO 4ST4/18,4ST 4/18 (380в),14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+1959,Погружной скважинный насос VINKO 4ST4/18,4ST 4/18 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1960,Погружной скважинный насос VINKO 4ST4/27,4ST 4/27 (380в),12,Максимальный напор (м),,173,insert,model_exact; unique_active_product
+1960,Погружной скважинный насос VINKO 4ST4/27,4ST 4/27 (380в),13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1960,Погружной скважинный насос VINKO 4ST4/27,4ST 4/27 (380в),14,Мощность двигателя (кВт),,2.2,insert,model_exact; unique_active_product
+1960,Погружной скважинный насос VINKO 4ST4/27,4ST 4/27 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1961,Погружной скважинный насос VINKO 4ST4/35,4ST 4/35 (380в),12,Максимальный напор (м),,225,insert,model_exact; unique_active_product
+1961,Погружной скважинный насос VINKO 4ST4/35,4ST 4/35 (380в),13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1961,Погружной скважинный насос VINKO 4ST4/35,4ST 4/35 (380в),14,Мощность двигателя (кВт),,3,insert,model_exact; unique_active_product
+1961,Погружной скважинный насос VINKO 4ST4/35,4ST 4/35 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1962,Погружной скважинный насос VINKO 4 ST  4/48,4ST 4/48 (380в),12,Максимальный напор (м),,308,insert,model_exact; unique_active_product
+1962,Погружной скважинный насос VINKO 4 ST  4/48,4ST 4/48 (380в),13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1962,Погружной скважинный насос VINKO 4 ST  4/48,4ST 4/48 (380в),14,Мощность двигателя (кВт),,4,insert,model_exact; unique_active_product
+1962,Погружной скважинный насос VINKO 4 ST  4/48,4ST 4/48 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1956,Погружной скважинный насос VINKO 4ST4/7,4ST 4/7 (380в),12,Максимальный напор (м),,45,insert,model_exact; unique_active_product
+1956,Погружной скважинный насос VINKO 4ST4/7,4ST 4/7 (380в),13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1956,Погружной скважинный насос VINKO 4ST4/7,4ST 4/7 (380в),14,Мощность двигателя (кВт),,0.55,insert,model_exact; unique_active_product
+1956,Погружной скважинный насос VINKO 4ST4/7,4ST 4/7 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1957,Погружной скважинный насос VINKO 4ST4/9,4ST 4/9 (380в),12,Максимальный напор (м),,57,insert,model_exact; unique_active_product
+1957,Погружной скважинный насос VINKO 4ST4/9,4ST 4/9 (380в),13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1957,Погружной скважинный насос VINKO 4ST4/9,4ST 4/9 (380в),14,Мощность двигателя (кВт),,0.75,insert,model_exact; unique_active_product
+1957,Погружной скважинный насос VINKO 4ST4/9,4ST 4/9 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1970,Погружной скважинный насос VINKO 4ST6/14  (380V),4ST 6/14 (380в),12,Максимальный напор (м),,84,insert,model_exact; unique_active_product
+1970,Погружной скважинный насос VINKO 4ST6/14  (380V),4ST 6/14 (380в),13,Производительность (л/мин),,161,insert,model_exact; unique_active_product
+1970,Погружной скважинный насос VINKO 4ST6/14  (380V),4ST 6/14 (380в),14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+1970,Погружной скважинный насос VINKO 4ST6/14  (380V),4ST 6/14 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1971,Погружной скважинный насос VINKO 4 ST 6/20 (380V),4ST 6/20 (380в),12,Максимальный напор (м),,120,insert,model_exact; unique_active_product
+1971,Погружной скважинный насос VINKO 4 ST 6/20 (380V),4ST 6/20 (380в),13,Производительность (л/мин),,161,insert,model_exact; unique_active_product
+1971,Погружной скважинный насос VINKO 4 ST 6/20 (380V),4ST 6/20 (380в),14,Мощность двигателя (кВт),,2.2,insert,model_exact; unique_active_product
+1971,Погружной скважинный насос VINKO 4 ST 6/20 (380V),4ST 6/20 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1972,Погружной скважинный насос VINKO 4 ST 6/27 (380V),4ST 6/27 (380в),12,Максимальный напор (м),,162,insert,model_exact; unique_active_product
+1972,Погружной скважинный насос VINKO 4 ST 6/27 (380V),4ST 6/27 (380в),13,Производительность (л/мин),,161,insert,model_exact; unique_active_product
+1972,Погружной скважинный насос VINKO 4 ST 6/27 (380V),4ST 6/27 (380в),14,Мощность двигателя (кВт),,3,insert,model_exact; unique_active_product
+1972,Погружной скважинный насос VINKO 4 ST 6/27 (380V),4ST 6/27 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1973,Погружной скважинный насос VINKO 4ST6/36  (380V),4ST 6/36 (380в),12,Максимальный напор (м),,216,insert,model_exact; unique_active_product
+1973,Погружной скважинный насос VINKO 4ST6/36  (380V),4ST 6/36 (380в),13,Производительность (л/мин),,161,insert,model_exact; unique_active_product
+1973,Погружной скважинный насос VINKO 4ST6/36  (380V),4ST 6/36 (380в),14,Мощность двигателя (кВт),,4,insert,model_exact; unique_active_product
+1973,Погружной скважинный насос VINKO 4ST6/36  (380V),4ST 6/36 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1974,Погружной скважинный насос VINKO 4ST6/49  (380V),4ST 6/49 (380в),12,Максимальный напор (м),,294,insert,model_exact; unique_active_product
+1974,Погружной скважинный насос VINKO 4ST6/49  (380V),4ST 6/49 (380в),13,Производительность (л/мин),,161,insert,model_exact; unique_active_product
+1974,Погружной скважинный насос VINKO 4ST6/49  (380V),4ST 6/49 (380в),14,Мощность двигателя (кВт),,5.5,insert,model_exact; unique_active_product
+1974,Погружной скважинный насос VINKO 4ST6/49  (380V),4ST 6/49 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1982,Погружной скважинный насос VINKO 4ST8/13,4ST 8/13 (380в),12,Максимальный напор (м),,81,insert,model_exact; unique_active_product
+1982,Погружной скважинный насос VINKO 4ST8/13,4ST 8/13 (380в),13,Производительность (л/мин),,201,insert,model_exact; unique_active_product
+1982,Погружной скважинный насос VINKO 4ST8/13,4ST 8/13 (380в),14,Мощность двигателя (кВт),,2.2,insert,model_exact; unique_active_product
+1982,Погружной скважинный насос VINKO 4ST8/13,4ST 8/13 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1983,Погружной скважинный насос VINKO 4ST8/17,4ST 8/17 (380в),12,Максимальный напор (м),,106,insert,model_exact; unique_active_product
+1983,Погружной скважинный насос VINKO 4ST8/17,4ST 8/17 (380в),13,Производительность (л/мин),,201,insert,model_exact; unique_active_product
+1983,Погружной скважинный насос VINKO 4ST8/17,4ST 8/17 (380в),14,Мощность двигателя (кВт),,3,insert,model_exact; unique_active_product
+1983,Погружной скважинный насос VINKO 4ST8/17,4ST 8/17 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1984,Погружной скважинный насос VINKO 4ST8/23,4ST 8/23 (380в),12,Максимальный напор (м),,143,insert,model_exact; unique_active_product
+1984,Погружной скважинный насос VINKO 4ST8/23,4ST 8/23 (380в),13,Производительность (л/мин),,201,insert,model_exact; unique_active_product
+1984,Погружной скважинный насос VINKO 4ST8/23,4ST 8/23 (380в),14,Мощность двигателя (кВт),,4,insert,model_exact; unique_active_product
+1984,Погружной скважинный насос VINKO 4ST8/23,4ST 8/23 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1985,Погружной скважинный насос VINKO 4ST8/32,4ST 8/32 (380в),12,Максимальный напор (м),,200,insert,model_exact; unique_active_product
+1985,Погружной скважинный насос VINKO 4ST8/32,4ST 8/32 (380в),13,Производительность (л/мин),,201,insert,model_exact; unique_active_product
+1985,Погружной скважинный насос VINKO 4ST8/32,4ST 8/32 (380в),14,Мощность двигателя (кВт),,5.5,insert,model_exact; unique_active_product
+1985,Погружной скважинный насос VINKO 4ST8/32,4ST 8/32 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1979,Погружной скважинный насос VINKO 4ST8/4,4ST 8/4 (380в),12,Максимальный напор (м),,25,insert,model_exact; unique_active_product
+1979,Погружной скважинный насос VINKO 4ST8/4,4ST 8/4 (380в),13,Производительность (л/мин),,201,insert,model_exact; unique_active_product
+1979,Погружной скважинный насос VINKO 4ST8/4,4ST 8/4 (380в),14,Мощность двигателя (кВт),,0.75,insert,model_exact; unique_active_product
+1979,Погружной скважинный насос VINKO 4ST8/4,4ST 8/4 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1980,Погружной скважинный насос VINKO 4ST8/6,4ST 8/6 (380в),12,Максимальный напор (м),,37,insert,model_exact; unique_active_product
+1980,Погружной скважинный насос VINKO 4ST8/6,4ST 8/6 (380в),13,Производительность (л/мин),,201,insert,model_exact; unique_active_product
+1980,Погружной скважинный насос VINKO 4ST8/6,4ST 8/6 (380в),14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+1980,Погружной скважинный насос VINKO 4ST8/6,4ST 8/6 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1981,Погружной скважинный насос VINKO 4ST8/8,4ST 8/8 (380в),12,Максимальный напор (м),,50,insert,model_exact; unique_active_product
+1981,Погружной скважинный насос VINKO 4ST8/8,4ST 8/8 (380в),13,Производительность (л/мин),,201,insert,model_exact; unique_active_product
+1981,Погружной скважинный насос VINKO 4ST8/8,4ST 8/8 (380в),14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+1981,Погружной скважинный насос VINKO 4ST8/8,4ST 8/8 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+1988,Погружной скважинный насос VINKO 4STM10/10,4STm 10/10,12,Максимальный напор (м),,56,insert,model_exact; unique_active_product
+1988,Погружной скважинный насос VINKO 4STM10/10,4STm 10/10,13,Производительность (л/мин),,241,insert,model_exact; unique_active_product
+1988,Погружной скважинный насос VINKO 4STM10/10,4STm 10/10,14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+1988,Погружной скважинный насос VINKO 4STM10/10,4STm 10/10,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1989,Погружной скважинный насос VINKO 4STM10/14,4STm 10/14,12,Максимальный напор (м),,78,insert,model_exact; unique_active_product
+1989,Погружной скважинный насос VINKO 4STM10/14,4STm 10/14,13,Производительность (л/мин),,241,insert,model_exact; unique_active_product
+1989,Погружной скважинный насос VINKO 4STM10/14,4STm 10/14,14,Мощность двигателя (кВт),,2.2,insert,model_exact; unique_active_product
+1989,Погружной скважинный насос VINKO 4STM10/14,4STm 10/14,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1987,Погружной скважинный насос VINKO 4STM10/7,4STm 10/7,12,Максимальный напор (м),,39,insert,model_exact; unique_active_product
+1987,Погружной скважинный насос VINKO 4STM10/7,4STm 10/7,13,Производительность (л/мин),,241,insert,model_exact; unique_active_product
+1987,Погружной скважинный насос VINKO 4STM10/7,4STm 10/7,14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+1987,Погружной скважинный насос VINKO 4STM10/7,4STm 10/7,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1997,Погружной скважинный насос VINKO 4STM 12/7,4STm 12/7,12,Максимальный напор (м),,42,insert,model_exact; unique_active_product
+1997,Погружной скважинный насос VINKO 4STM 12/7,4STm 12/7,13,Производительность (л/мин),,271,insert,model_exact; unique_active_product
+1997,Погружной скважинный насос VINKO 4STM 12/7,4STm 12/7,14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+1997,Погружной скважинный насос VINKO 4STM 12/7,4STm 12/7,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1936,Погружной скважинный насос VINKO 4STM2/10,4STm 2/10,12,Максимальный напор (м),,65,insert,model_exact; unique_active_product
+1936,Погружной скважинный насос VINKO 4STM2/10,4STm 2/10,13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+1936,Погружной скважинный насос VINKO 4STM2/10,4STm 2/10,14,Мощность двигателя (кВт),,0.55,insert,model_exact; unique_active_product
+1936,Погружной скважинный насос VINKO 4STM2/10,4STm 2/10,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1937,Погружной скважинный насос VINKO 4STM2/14,4STm 2/14,12,Максимальный напор (м),,91,insert,model_exact; unique_active_product
+1937,Погружной скважинный насос VINKO 4STM2/14,4STm 2/14,13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+1937,Погружной скважинный насос VINKO 4STM2/14,4STm 2/14,14,Мощность двигателя (кВт),,0.75,insert,model_exact; unique_active_product
+1937,Погружной скважинный насос VINKO 4STM2/14,4STm 2/14,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1938,Погружной скважинный насос VINKO 4STM2/20,4STm 2/20,12,Максимальный напор (м),,130,insert,model_exact; unique_active_product
+1938,Погружной скважинный насос VINKO 4STM2/20,4STm 2/20,13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+1938,Погружной скважинный насос VINKO 4STM2/20,4STm 2/20,14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+1938,Погружной скважинный насос VINKO 4STM2/20,4STm 2/20,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1939,Погружной скважинный насос VINKO 4STM2/28,4STm 2/28,12,Максимальный напор (м),,182,insert,model_exact; unique_active_product
+1939,Погружной скважинный насос VINKO 4STM2/28,4STm 2/28,13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+1939,Погружной скважинный насос VINKO 4STM2/28,4STm 2/28,14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+1939,Погружной скважинный насос VINKO 4STM2/28,4STm 2/28,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1940,Погружной скважинный насос VINKO 4STM2/40,4STm 2/40,12,Максимальный напор (м),,260,insert,model_exact; unique_active_product
+1940,Погружной скважинный насос VINKO 4STM2/40,4STm 2/40,13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+1940,Погружной скважинный насос VINKO 4STM2/40,4STm 2/40,14,Мощность двигателя (кВт),,2.2,insert,model_exact; unique_active_product
+1940,Погружной скважинный насос VINKO 4STM2/40,4STm 2/40,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1935,Погружной скважинный насос VINKO 4STM2/7,4STm 2/7,12,Максимальный напор (м),,46,insert,model_exact; unique_active_product
+1935,Погружной скважинный насос VINKO 4STM2/7,4STm 2/7,13,Производительность (л/мин),,60,insert,model_exact; unique_active_product
+1935,Погружной скважинный насос VINKO 4STM2/7,4STm 2/7,14,Мощность двигателя (кВт),,0.37,insert,model_exact; unique_active_product
+1935,Погружной скважинный насос VINKO 4STM2/7,4STm 2/7,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1950,Погружной скважинный насос VINKO 4STM4/14,4STm 4/14,12,Максимальный напор (м),,90,insert,model_exact; unique_active_product
+1950,Погружной скважинный насос VINKO 4STM4/14,4STm 4/14,13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1950,Погружной скважинный насос VINKO 4STM4/14,4STm 4/14,14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+1950,Погружной скважинный насос VINKO 4STM4/14,4STm 4/14,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1951,Погружной скважинный насос VINKO 4STM4/18,4STm 4/18,12,Максимальный напор (м),,115,insert,model_exact; unique_active_product
+1951,Погружной скважинный насос VINKO 4STM4/18,4STm 4/18,13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1951,Погружной скважинный насос VINKO 4STM4/18,4STm 4/18,14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+1951,Погружной скважинный насос VINKO 4STM4/18,4STm 4/18,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1952,Погружной скважинный насос VINKO 4STM4/27,4STm 4/27,12,Максимальный напор (м),,173,insert,model_exact; unique_active_product
+1952,Погружной скважинный насос VINKO 4STM4/27,4STm 4/27,13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1952,Погружной скважинный насос VINKO 4STM4/27,4STm 4/27,14,Мощность двигателя (кВт),,2.2,insert,model_exact; unique_active_product
+1952,Погружной скважинный насос VINKO 4STM4/27,4STm 4/27,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1953,Погружной скважинный насос VINKO 4STM4/35,4STm 4/35,12,Максимальный напор (м),,225,insert,model_exact; unique_active_product
+1953,Погружной скважинный насос VINKO 4STM4/35,4STm 4/35,13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1953,Погружной скважинный насос VINKO 4STM4/35,4STm 4/35,14,Мощность двигателя (кВт),,3,insert,model_exact; unique_active_product
+1953,Погружной скважинный насос VINKO 4STM4/35,4STm 4/35,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1954,Погружной скважинный насос VINKO 4 STM 4/48,4STm 4/48,12,Максимальный напор (м),,308,insert,model_exact; unique_active_product
+1954,Погружной скважинный насос VINKO 4 STM 4/48,4STm 4/48,13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1954,Погружной скважинный насос VINKO 4 STM 4/48,4STm 4/48,14,Мощность двигателя (кВт),,4,insert,model_exact; unique_active_product
+1954,Погружной скважинный насос VINKO 4 STM 4/48,4STm 4/48,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1948,Погружной скважинный насос  VINKO 4STM4/7,4STm 4/7,12,Максимальный напор (м),,45,insert,model_exact; unique_active_product
+1948,Погружной скважинный насос  VINKO 4STM4/7,4STm 4/7,13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1948,Погружной скважинный насос  VINKO 4STM4/7,4STm 4/7,14,Мощность двигателя (кВт),,0.55,insert,model_exact; unique_active_product
+1948,Погружной скважинный насос  VINKO 4STM4/7,4STm 4/7,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1949,Погружной скважинный насос VINKO 4STM4/9,4STm 4/9,12,Максимальный напор (м),,57,insert,model_exact; unique_active_product
+1949,Погружной скважинный насос VINKO 4STM4/9,4STm 4/9,13,Производительность (л/мин),,100,insert,model_exact; unique_active_product
+1949,Погружной скважинный насос VINKO 4STM4/9,4STm 4/9,14,Мощность двигателя (кВт),,0.75,insert,model_exact; unique_active_product
+1949,Погружной скважинный насос VINKO 4STM4/9,4STm 4/9,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1965,Погружной скважинный насос VINKO 4STM6/10,4STm 6/10,12,Максимальный напор (м),,60,insert,model_exact; unique_active_product
+1965,Погружной скважинный насос VINKO 4STM6/10,4STm 6/10,13,Производительность (л/мин),,161,insert,model_exact; unique_active_product
+1965,Погружной скважинный насос VINKO 4STM6/10,4STm 6/10,14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+1965,Погружной скважинный насос VINKO 4STM6/10,4STm 6/10,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1966,Погружной скважинный насос VINKO 4STM6/14,4STm 6/14,12,Максимальный напор (м),,84,insert,model_exact; unique_active_product
+1966,Погружной скважинный насос VINKO 4STM6/14,4STm 6/14,13,Производительность (л/мин),,161,insert,model_exact; unique_active_product
+1966,Погружной скважинный насос VINKO 4STM6/14,4STm 6/14,14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+1966,Погружной скважинный насос VINKO 4STM6/14,4STm 6/14,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1967,Погружной скважинный насос VINKO 4STM6/20,4STm 6/20,12,Максимальный напор (м),,120,insert,model_exact; unique_active_product
+1967,Погружной скважинный насос VINKO 4STM6/20,4STm 6/20,13,Производительность (л/мин),,161,insert,model_exact; unique_active_product
+1967,Погружной скважинный насос VINKO 4STM6/20,4STm 6/20,14,Мощность двигателя (кВт),,2.2,insert,model_exact; unique_active_product
+1967,Погружной скважинный насос VINKO 4STM6/20,4STm 6/20,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1964,Погружной скважинный насос VINKO 4STM6/7,4STm 6/7,12,Максимальный напор (м),,42,insert,model_exact; unique_active_product
+1964,Погружной скважинный насос VINKO 4STM6/7,4STm 6/7,13,Производительность (л/мин),,161,insert,model_exact; unique_active_product
+1964,Погружной скважинный насос VINKO 4STM6/7,4STm 6/7,14,Мощность двигателя (кВт),,0.75,insert,model_exact; unique_active_product
+1964,Погружной скважинный насос VINKO 4STM6/7,4STm 6/7,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1978,Погружной скважинный насос VINKO 4STM8/13,4STm 8/13,12,Максимальный напор (м),,81,insert,model_exact; unique_active_product
+1978,Погружной скважинный насос VINKO 4STM8/13,4STm 8/13,13,Производительность (л/мин),,201,insert,model_exact; unique_active_product
+1978,Погружной скважинный насос VINKO 4STM8/13,4STm 8/13,14,Мощность двигателя (кВт),,2.2,insert,model_exact; unique_active_product
+1978,Погружной скважинный насос VINKO 4STM8/13,4STm 8/13,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1975,Погружной скважинный насос VINKO 4STM8/4,4STm 8/4,12,Максимальный напор (м),,25,insert,model_exact; unique_active_product
+1975,Погружной скважинный насос VINKO 4STM8/4,4STm 8/4,13,Производительность (л/мин),,201,insert,model_exact; unique_active_product
+1975,Погружной скважинный насос VINKO 4STM8/4,4STm 8/4,14,Мощность двигателя (кВт),,0.75,insert,model_exact; unique_active_product
+1975,Погружной скважинный насос VINKO 4STM8/4,4STm 8/4,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1976,Погружной скважинный насос VINKO 4STM8/6,4STm 8/6,12,Максимальный напор (м),,37,insert,model_exact; unique_active_product
+1976,Погружной скважинный насос VINKO 4STM8/6,4STm 8/6,13,Производительность (л/мин),,201,insert,model_exact; unique_active_product
+1976,Погружной скважинный насос VINKO 4STM8/6,4STm 8/6,14,Мощность двигателя (кВт),,1.1,insert,model_exact; unique_active_product
+1976,Погружной скважинный насос VINKO 4STM8/6,4STm 8/6,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+1977,Погружной скважинный насос VINKO 4STM8/8,4STm 8/8,12,Максимальный напор (м),,50,insert,model_exact; unique_active_product
+1977,Погружной скважинный насос VINKO 4STM8/8,4STm 8/8,13,Производительность (л/мин),,201,insert,model_exact; unique_active_product
+1977,Погружной скважинный насос VINKO 4STM8/8,4STm 8/8,14,Мощность двигателя (кВт),,1.5,insert,model_exact; unique_active_product
+1977,Погружной скважинный насос VINKO 4STM8/8,4STm 8/8,15,Напряжение (В),220,220,skip,model_exact; unique_active_product
+7604,Погружной скважинный насос VINKO 6ST18/13 ,6ST 18/13 (380в),12,Максимальный напор (м),,191,insert,model_exact; unique_active_product
+7604,Погружной скважинный насос VINKO 6ST18/13 ,6ST 18/13 (380в),13,Производительность (л/мин),,452,insert,model_exact; unique_active_product
+7604,Погружной скважинный насос VINKO 6ST18/13 ,6ST 18/13 (380в),14,Мощность двигателя (кВт),,11,insert,model_exact; unique_active_product
+7604,Погружной скважинный насос VINKO 6ST18/13 ,6ST 18/13 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+7605,Погружной скважинный насос VINKO 6ST18/15 ,6ST 18/15 (380в),12,Максимальный напор (м),,220,insert,model_exact; unique_active_product
+7605,Погружной скважинный насос VINKO 6ST18/15 ,6ST 18/15 (380в),13,Производительность (л/мин),,452,insert,model_exact; unique_active_product
+7605,Погружной скважинный насос VINKO 6ST18/15 ,6ST 18/15 (380в),14,Мощность двигателя (кВт),,13,insert,model_exact; unique_active_product
+7605,Погружной скважинный насос VINKO 6ST18/15 ,6ST 18/15 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+7606,Погружной скважинный насос VINKO 6ST18/18 ,6ST 18/18 (380в),12,Максимальный напор (м),,264,insert,model_exact; unique_active_product
+7606,Погружной скважинный насос VINKO 6ST18/18 ,6ST 18/18 (380в),13,Производительность (л/мин),,452,insert,model_exact; unique_active_product
+7606,Погружной скважинный насос VINKO 6ST18/18 ,6ST 18/18 (380в),14,Мощность двигателя (кВт),,15,insert,model_exact; unique_active_product
+7606,Погружной скважинный насос VINKO 6ST18/18 ,6ST 18/18 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+7613,Погружной скважинный насос VINKO 6ST30/15,6ST 30/15 (380в),12,Максимальный напор (м),,213,insert,model_exact; unique_active_product
+7613,Погружной скважинный насос VINKO 6ST30/15,6ST 30/15 (380в),13,Производительность (л/мин),,670,insert,model_exact; unique_active_product
+7613,Погружной скважинный насос VINKO 6ST30/15,6ST 30/15 (380в),14,Мощность двигателя (кВт),,15,insert,model_exact; unique_active_product
+7613,Погружной скважинный насос VINKO 6ST30/15,6ST 30/15 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+7614,Погружной скважинный насос VINKO 6ST30/18 ,6ST 30/18 (380в),12,Максимальный напор (м),,255,insert,model_exact; unique_active_product
+7614,Погружной скважинный насос VINKO 6ST30/18 ,6ST 30/18 (380в),13,Производительность (л/мин),,670,insert,model_exact; unique_active_product
+7614,Погружной скважинный насос VINKO 6ST30/18 ,6ST 30/18 (380в),14,Мощность двигателя (кВт),,18.5,insert,model_exact; unique_active_product
+7614,Погружной скважинный насос VINKO 6ST30/18 ,6ST 30/18 (380в),15,Напряжение (В),380,380,skip,model_exact; unique_active_product
+7580,Погружной скважинный насос VINKO 3STM1.8/20 ,3STm 1.8/20,125,Минимальный внутренний диаметр обсадной трубы (мм),,90,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7581,Погружной скважинный насос VINKO 3STM1.8/27 ,3STm 1.8/27,125,Минимальный внутренний диаметр обсадной трубы (мм),,90,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7582,Погружной скважинный насос VINKO 3STM1.8/37 ,3STm 1.8/37,125,Минимальный внутренний диаметр обсадной трубы (мм),,90,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7583,Погружной скважинный насос VINKO 3STM1.8/47 ,3STm 1.8/47,125,Минимальный внутренний диаметр обсадной трубы (мм),,90,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7587,Погружной скважинный насос VINKO 3STM2.5/20 ,3STm 2.5/20,125,Минимальный внутренний диаметр обсадной трубы (мм),,90,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7588,Погружной скважинный насос VINKO 3STM2.5/28,3STm 2.5/28,125,Минимальный внутренний диаметр обсадной трубы (мм),,90,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7589,Погружной скважинный насос VINKO 3STM2.5/36 ,3STm 2.5/36,125,Минимальный внутренний диаметр обсадной трубы (мм),,90,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7594,Погружной скважинный насос VINKO 3STM4/19,3STm 4/19,125,Минимальный внутренний диаметр обсадной трубы (мм),,90,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7595,Погружной скважинный насос VINKO 3STM4/26,3STm 4/26,125,Минимальный внутренний диаметр обсадной трубы (мм),,90,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7596,Погружной скважинный насос VINKO 3STM4/35,3STm 4/35,125,Минимальный внутренний диаметр обсадной трубы (мм),,90,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7601,Погружной скважинный насос VINKO 3STM5/19,3STm 5/19,125,Минимальный внутренний диаметр обсадной трубы (мм),,90,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7602,Погружной скважинный насос VINKO 3STM5/26,3STm 5/26,125,Минимальный внутренний диаметр обсадной трубы (мм),,90,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1991,Погружной скважинный насос VINKO 4ST10/10,4ST 10/10 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1992,Погружной скважинный насос VINKO 4ST10/14,4ST 10/14 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1993,Погружной скважинный насос VINKO 4ST10/18,4ST 10/18 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1994,Погружной скважинный насос VINKO 4ST10/24,4ST 10/24 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1995,Погружной скважинный насос VINKO 4ST10/32,4ST 10/32 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1990,Погружной скважинный насос VINKO 4ST10/7,4ST 10/7 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+2000,Погружной скважинный насос VINKO 4ST12/10,4ST 12/10 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+2001,Погружной скважинный насос VINKO 4ST12/14,4ST 12/14 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+2002,Погружной скважинный насос VINKO 4ST12/19,4ST 12/19 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+2003,Погружной скважинный насос VINKO 4ST12/26,4ST 12/26 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1999,Погружной скважинный насос VINKO 4ST12/7 (380V),4ST 12/7 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1942,Погружной скважинный насос VINKO 4ST2/10,4ST 2/10 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1943,Погружной скважинный насос VINKO 4ST2/14,4ST 2/14 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1944,Погружной скважинный насос  VINKO 4ST2/20,4ST 2/20 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1945,Погружной скважинный насос VINKO 4ST2/28,4ST 2/28 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1946,Погружной скважинный насос VINKO 4ST2/40,4ST 2/40 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1941,Погружной скважинный насос VINKO 4ST2/7,4ST 2/7 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1958,Погружной скважинный насос  VINKO 4ST4/14,4ST 4/14 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1959,Погружной скважинный насос VINKO 4ST4/18,4ST 4/18 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1960,Погружной скважинный насос VINKO 4ST4/27,4ST 4/27 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1961,Погружной скважинный насос VINKO 4ST4/35,4ST 4/35 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1962,Погружной скважинный насос VINKO 4 ST  4/48,4ST 4/48 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1956,Погружной скважинный насос VINKO 4ST4/7,4ST 4/7 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1957,Погружной скважинный насос VINKO 4ST4/9,4ST 4/9 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1970,Погружной скважинный насос VINKO 4ST6/14  (380V),4ST 6/14 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1971,Погружной скважинный насос VINKO 4 ST 6/20 (380V),4ST 6/20 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1972,Погружной скважинный насос VINKO 4 ST 6/27 (380V),4ST 6/27 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1973,Погружной скважинный насос VINKO 4ST6/36  (380V),4ST 6/36 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1974,Погружной скважинный насос VINKO 4ST6/49  (380V),4ST 6/49 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1982,Погружной скважинный насос VINKO 4ST8/13,4ST 8/13 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1983,Погружной скважинный насос VINKO 4ST8/17,4ST 8/17 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1984,Погружной скважинный насос VINKO 4ST8/23,4ST 8/23 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1985,Погружной скважинный насос VINKO 4ST8/32,4ST 8/32 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1979,Погружной скважинный насос VINKO 4ST8/4,4ST 8/4 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1980,Погружной скважинный насос VINKO 4ST8/6,4ST 8/6 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1981,Погружной скважинный насос VINKO 4ST8/8,4ST 8/8 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1988,Погружной скважинный насос VINKO 4STM10/10,4STm 10/10,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1989,Погружной скважинный насос VINKO 4STM10/14,4STm 10/14,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1987,Погружной скважинный насос VINKO 4STM10/7,4STm 10/7,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1997,Погружной скважинный насос VINKO 4STM 12/7,4STm 12/7,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1936,Погружной скважинный насос VINKO 4STM2/10,4STm 2/10,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1937,Погружной скважинный насос VINKO 4STM2/14,4STm 2/14,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1938,Погружной скважинный насос VINKO 4STM2/20,4STm 2/20,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1939,Погружной скважинный насос VINKO 4STM2/28,4STm 2/28,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1940,Погружной скважинный насос VINKO 4STM2/40,4STm 2/40,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1935,Погружной скважинный насос VINKO 4STM2/7,4STm 2/7,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1950,Погружной скважинный насос VINKO 4STM4/14,4STm 4/14,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1951,Погружной скважинный насос VINKO 4STM4/18,4STm 4/18,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1952,Погружной скважинный насос VINKO 4STM4/27,4STm 4/27,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1953,Погружной скважинный насос VINKO 4STM4/35,4STm 4/35,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1954,Погружной скважинный насос VINKO 4 STM 4/48,4STm 4/48,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1948,Погружной скважинный насос  VINKO 4STM4/7,4STm 4/7,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1949,Погружной скважинный насос VINKO 4STM4/9,4STm 4/9,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1965,Погружной скважинный насос VINKO 4STM6/10,4STm 6/10,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1966,Погружной скважинный насос VINKO 4STM6/14,4STm 6/14,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1967,Погружной скважинный насос VINKO 4STM6/20,4STm 6/20,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1964,Погружной скважинный насос VINKO 4STM6/7,4STm 6/7,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1978,Погружной скважинный насос VINKO 4STM8/13,4STm 8/13,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1975,Погружной скважинный насос VINKO 4STM8/4,4STm 8/4,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1976,Погружной скважинный насос VINKO 4STM8/6,4STm 8/6,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+1977,Погружной скважинный насос VINKO 4STM8/8,4STm 8/8,125,Минимальный внутренний диаметр обсадной трубы (мм),,110,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7604,Погружной скважинный насос VINKO 6ST18/13 ,6ST 18/13 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,160,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7605,Погружной скважинный насос VINKO 6ST18/15 ,6ST 18/15 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,160,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7606,Погружной скважинный насос VINKO 6ST18/18 ,6ST 18/18 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,160,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7613,Погружной скважинный насос VINKO 6ST30/15,6ST 30/15 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,160,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map
+7614,Погружной скважинный насос VINKO 6ST30/18 ,6ST 30/18 (380в),125,Минимальный внутренний диаметр обсадной трубы (мм),,160,insert,model_exact; unique_active_product; series_min_casing_inner_diameter_map

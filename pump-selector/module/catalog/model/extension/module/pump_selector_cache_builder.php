@@ -42,11 +42,12 @@ class ModelExtensionModulePumpSelectorCacheBuilder extends Model
 		$sql .= " MAX(CASE WHEN pa.attribute_id = 12 THEN pa.text END) AS attribute_12,";
 		$sql .= " MAX(CASE WHEN pa.attribute_id = 13 THEN pa.text END) AS attribute_13,";
 		$sql .= " MAX(CASE WHEN pa.attribute_id = 15 THEN pa.text END) AS attribute_15,";
-		$sql .= " MAX(CASE WHEN pa.attribute_id = 44 THEN pa.text END) AS attribute_44";
+		$sql .= " MAX(CASE WHEN pa.attribute_id = 44 THEN pa.text END) AS attribute_44,";
+		$sql .= " MAX(CASE WHEN pa.attribute_id = 125 THEN pa.text END) AS attribute_125";
 		$sql .= " FROM " . DB_PREFIX . "product p";
 		$sql .= " INNER JOIN " . DB_PREFIX . "product_to_category p2c ON (p2c.product_id = p.product_id AND p2c.category_id IN (" . implode(',', array_map('intval', $category_ids)) . "))";
 		$sql .= " LEFT JOIN " . DB_PREFIX . "manufacturer m ON (m.manufacturer_id = p.manufacturer_id)";
-		$sql .= " LEFT JOIN " . DB_PREFIX . "product_attribute pa ON (pa.product_id = p.product_id AND pa.language_id = " . $language_id . " AND pa.attribute_id IN (12, 13, 15, 44))";
+		$sql .= " LEFT JOIN " . DB_PREFIX . "product_attribute pa ON (pa.product_id = p.product_id AND pa.language_id = " . $language_id . " AND pa.attribute_id IN (12, 13, 15, 44, 125))";
 		$sql .= " GROUP BY p.product_id, p.price, p.quantity, p.status, m.name";
 		$sql .= " ORDER BY p.product_id ASC";
 
@@ -61,11 +62,11 @@ class ModelExtensionModulePumpSelectorCacheBuilder extends Model
 
 	private function isEligibleForCache(array $row)
 	{
-		if (!isset($row['attribute_12']) || !isset($row['attribute_13']) || !isset($row['attribute_44'])) {
+		if (!isset($row['attribute_12']) || !isset($row['attribute_13']) || !isset($row['attribute_125'])) {
 			return false;
 		}
 
-		if ($row['attribute_12'] === '' || $row['attribute_13'] === '' || $row['attribute_44'] === '') {
+		if ($row['attribute_12'] === '' || $row['attribute_13'] === '' || trim((string)$row['attribute_125']) === '' || !is_numeric($row['attribute_125'])) {
 			return false;
 		}
 
@@ -90,7 +91,8 @@ class ModelExtensionModulePumpSelectorCacheBuilder extends Model
 		$max_head_m = (float)$row['attribute_12'];
 		$max_flow_l_min = (int)$row['attribute_13'];
 		$voltage = isset($row['attribute_15']) && $row['attribute_15'] !== '' ? (string)(int)$row['attribute_15'] : '';
-		$pump_diameter_mm = (float)$row['attribute_44'];
+		$pump_diameter_mm = isset($row['attribute_44']) && trim((string)$row['attribute_44']) !== '' ? (float)$row['attribute_44'] : null;
+		$min_casing_inner_diameter_mm = (float)$row['attribute_125'];
 		$brand_priority = $this->getBrandPriority(isset($row['manufacturer']) ? (string)$row['manufacturer'] : '');
 		$product_price = (float)$row['product_price'];
 		$quantity = (int)$row['quantity'];
@@ -100,7 +102,8 @@ class ModelExtensionModulePumpSelectorCacheBuilder extends Model
 		$sql .= " product_id = " . $product_id . ",";
 		$sql .= " max_head_m = " . $this->formatDecimal($max_head_m) . ",";
 		$sql .= " max_flow_l_min = " . $max_flow_l_min . ",";
-		$sql .= " pump_diameter_mm = " . $this->formatDecimal($pump_diameter_mm) . ",";
+		$sql .= " pump_diameter_mm = " . ($pump_diameter_mm === null ? "NULL" : $this->formatDecimal($pump_diameter_mm)) . ",";
+		$sql .= " min_casing_inner_diameter_mm = " . $this->formatDecimal($min_casing_inner_diameter_mm) . ",";
 		$sql .= " voltage = '" . $this->db->escape($voltage) . "',";
 		$sql .= " brand_priority = " . (int)$brand_priority . ",";
 		$sql .= " is_eligible = 1,";

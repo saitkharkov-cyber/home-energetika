@@ -43,14 +43,14 @@ class ModelExtensionModulePumpSelector extends Model {
 
 		$casing_diameter_mode = $this->getValue($input, 'casing_diameter_mode', '');
 		if ($casing_diameter_mode != 'known' && $casing_diameter_mode != 'unknown') {
-			$errors['casing_diameter_mode'] = 'Укажите режим диаметра обсадной трубы: known или unknown.';
+			$errors['casing_diameter_mode'] = 'Укажите режим внутреннего диаметра обсадной трубы: known или unknown.';
 		}
 
 		if ($casing_diameter_mode == 'known') {
 			$casing_diameter_mm = $this->toFloat($this->getValue($input, 'casing_diameter_mm', 0));
 
 			if ($casing_diameter_mm <= 0) {
-				$errors['casing_diameter_mm'] = 'Диаметр обсадной трубы должен быть больше 0.';
+				$errors['casing_diameter_mm'] = 'Внутренний диаметр обсадной трубы должен быть больше 0.';
 			}
 		}
 
@@ -122,7 +122,7 @@ class ModelExtensionModulePumpSelector extends Model {
 			$casing_diameter_mm = $this->toFloat($this->getValue($input, 'casing_diameter_mm', 0));
 		} else {
 			$casing_diameter_mm = null;
-			$warnings[] = 'Диаметр обсадной трубы неизвестен, поэтому фильтр по диаметру насоса не применен. Совместимость по диаметру нужно подтвердить перед покупкой.';
+			$warnings[] = 'Внутренний диаметр обсадной трубы неизвестен, поэтому фильтр по минимально требуемому внутреннему диаметру не применен. Совместимость по диаметру нужно подтвердить перед покупкой.';
 		}
 
 		return array(
@@ -388,7 +388,7 @@ class ModelExtensionModulePumpSelector extends Model {
 		$where[] = "psp.status = 1";
 
 		if (isset($requirements['casing_diameter_mm']) && $requirements['casing_diameter_mm'] !== null && $requirements['casing_diameter_mm'] !== '') {
-			$where[] = "psp.pump_diameter_mm <= " . $this->toFloat($requirements['casing_diameter_mm']);
+			$where[] = "psp.min_casing_inner_diameter_mm <= " . $this->toFloat($requirements['casing_diameter_mm']);
 		}
 
 		if ($premium_only) {

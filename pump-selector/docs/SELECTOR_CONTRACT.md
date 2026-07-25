@@ -57,7 +57,7 @@ Builder использует `attribute_id` как источник истины
 |      12      | Максимальный напор (м)                  | `max_head_m`       | Decimal | м                  | ✅           |
 |      13      | Максимальная производительность (л/мин) | `max_flow_l_min`   | Integer | л/мин              | ✅           |
 |      15      | Напряжение питания (В)                  | `voltage`          | Integer | 220 / 380          | ✅           |
-|      44      | Диаметр насоса (мм)                     | `pump_diameter_mm` | Decimal | мм                 | ✅           |
+|     125      | Минимальный внутренний диаметр обсадной трубы (мм) | `min_casing_inner_diameter_mm` | Decimal | мм | ✅ |
 
 ### Примечания
 
@@ -66,11 +66,22 @@ Builder использует `attribute_id` как источник истины
 - Поиск по названиям атрибутов запрещён.
 - Переименование атрибутов OpenCart не должно влиять на работу подборщика.
 
+### Переходный контракт внутреннего диаметра обсадной трубы
+
+- `min_casing_inner_diameter_mm` — минимальный внутренний диаметр обсадной трубы, требуемый для установки насоса.
+- Значение учитывает не только корпус насоса, но также кабель, защитную планку и монтажный запас.
+- Пользователь вводит внутренний диаметр обсадной трубы в `casing_diameter_mm`.
+- `min_casing_inner_diameter_mm` является единственным полем диаметральной совместимости Selector.
+- `pump_diameter_mm` временно сохраняется только как историческое поле.
+- Товар с незаполненным `min_casing_inner_diameter_mm` не проходит диаметральный фильтр при известном внутреннем диаметре обсадной трубы.
+
 ---
 
 ## 5. Необязательные атрибуты
 
-Раздел будет расширяться по мере развития подборщика.
+- `attribute_id = 44` — Диаметр насоса (мм).
+- Поле cache: `pump_diameter_mm`.
+- Историческое необязательное поле; не участвует в диаметральной совместимости Selector.
 
 ---
 
@@ -83,7 +94,7 @@ Builder использует `attribute_id` как источник истины
 ```text
 max_head_m = 90
 max_flow_l_min = 30
-pump_diameter_mm = 76.2
+min_casing_inner_diameter_mm = 90
 voltage = 220
 ```
 
@@ -210,3 +221,64 @@ Builder не исправляет данные каталога.
 - товар исключается из cache;
 - Selector не пытается исправить данные;
 - отсутствие товара считается корректным поведением системы.
+
+
+## Запуск пересборки cache
+
+1. Реальный frontend route:
+
+https://<production-domain>/index.php?route=extension/module/pump_selector/rebuildCache&token=<current_rebuild_token>
+
+2. Токен берётся из production-реализации getRebuildToken().
+Само значение токена в документации не сохранять.
+
+3. Это catalog/frontend route:
+- admin-авторизация не требуется;
+- user_token не используется;
+- операция запускается GET-запросом;
+- при неверном token возвращается HTTP 403 и {"error":"forbidden"}.
+
+4. Успешный ответ:
+HTTP 200 и JSON вида:
+
+{
+  "total_scanned": 186,
+  "eligible_inserted": 186
+}
+
+Числа необходимо проверять по текущему scope.
+
+5. Важно:
+- rebuild выполняет TRUNCATE TABLE, затем INSERT;
+- транзакции и rollback нет;
+- при ошибке cache может остаться пустым или частично заполненным;
+- URL с token нельзя публиковать;
+- endpoint при exception может раскрыть stack trace.
+
+6. Перед запуском проверить:
+- загружен актуальный pump_selector_cache_builder.php;
+- attribute_id = 125 заполнен у всего scope;
+- столбец min_casing_inner_diameter_mm существует;
+- есть резервная копия таблицы или возможность быстрого восстановления.
+
+7. После запуска выполнить SQL-проверки:
+
+SELECT
+    COUNT(*) AS rows_total,
+    SUM(min_casing_inner_diameter_mm IS NULL) AS min_casing_nulls
+FROM oc_pump_selector_product;
+
+SELECT
+    min_casing_inner_diameter_mm,
+    COUNT(*) AS product_count
+FROM oc_pump_selector_product
+GROUP BY min_casing_inner_diameter_mm
+ORDER BY min_casing_inner_diameter_mm;
+
+Текущее ожидаемое распределение:
+- 90 мм — 63 товара
+- 110 мм — 114 товаров
+- 160 мм — 9 товаров
+- NULL — 0
+
+8. Не использовать rebuildSelectorProducts(), так как это не рабочий rebuild endpoint.
