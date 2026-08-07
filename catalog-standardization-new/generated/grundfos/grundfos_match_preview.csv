@@ -1,29 +1,28 @@
 product_id,product_name,product_status,normalized_db_model,source_product_url,source_raw_product_name,source_normalized_model,match_status,match_reason,review_note
-3272,SP 14-8,1,SP 14-8,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3273,SP 14-23,1,SP 14-23,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3274,SP 11-33,1,SP 11-33,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3277,SP 125-3,1,SP 125-3,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3278,SP 95-5,1,SP 95-5,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3284,SP 3A-29,1,SP 3A-29,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3286,SP 5A-17,1,SP 5A-17,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3288,SP 3A-25,1,SP 3A-25,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3307,SQ 5-70,1,SQ 5-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_/,"Скважинный насос Grundfos SQ 5-70",SQ 5-70,matched,exact_normalized_model,"Source URL contains sqe_5_70 while source title and normalized model are SQ 5-70; review before any downstream use."
-3313,SQ 1-50,1,SQ 1-50,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3314,SQ 3-105 с кабелем,1,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,"Скважинный насос Grundfos SQ 3-105",SQ 3-105,matched,exact_normalized_model;duplicate_db_match,"Same source model also matches active product_id 3326 after removing the service phrase с кабелем."
-3316,SQ 5-50,1,SQ 5-50,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3318,SQ 3-80,1,SQ 3-80,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_80/,"Скважинный насос Grundfos SQ 3-80",SQ 3-80,matched,exact_normalized_model,
-3320,SQ 2-55,1,SQ 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_55/,"Скважинный насос Grundfos SQ 2-55",SQ 2-55,matched,exact_normalized_model,
-3325,SQ 2-70,1,SQ 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_70/,"Скважинный насос Grundfos SQ 2-70",SQ 2-70,matched,exact_normalized_model,
-3326,SQ 3-105,1,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,"Скважинный насос Grundfos SQ 3-105",SQ 3-105,matched,exact_normalized_model;duplicate_db_match,"Same source model also matches active product_id 3314 after removing the service phrase с кабелем."
-3345,SQE 1-95,1,SQE 1-95,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3346,SQE 2-85 комплект,1,SQE 2-85 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_2_85_komplekt_/,"Скважинный насос Grundfos SQE 2-85 комплект",SQE 2-85 комплект,matched,exact_normalized_model,
-3349,SQE 1-35,1,SQE 1-35,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3352,SQE 3-55,1,SQE 3-55,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3354,SQE 1-50,1,SQE 1-50,,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3356,SQE 5-70 комплект,1,SQE 5-70 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_komplekt/,"Скважинный насос Grundfos SQE 5-70 комплект",SQE 5-70 комплект,matched,exact_normalized_model,
-3358,SQE 2-55,1,SQE 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_55_mse3/,"Скважинный насос Grundfos SQE 2-55",SQE 2-55,matched,exact_normalized_model,
-3361,SQE 2-85,1,SQE 2-85,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_85_mse3/,"Скважинный насос Grundfos SQE 2-85",SQE 2-85,matched,exact_normalized_model,
-3362,SQE 2-70,1,SQE 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_70/,"Скважинный насос Grundfos SQE 2-70",SQE 2-70,matched,exact_normalized_model,
-3363,SQE 3-105,1,SQE 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_3_105_mse3/,"Скважинный насос Grundfos SQE 3-105",SQE 3-105,matched,exact_normalized_model,
-7997,"SP17-18 6"" 3X380...",1,"SP 17-18 6"" 3x380...",,,,unmatched,exact_normalized_model_not_found,"No exact source model in grundfos_catalog.csv; no fuzzy matching used."
-3285,SP 5A-21,0,SP 5A-21,,,,unmatched,exact_normalized_model_not_found,"Inactive product; no exact source model in grundfos_catalog.csv; no fuzzy matching used."
+3272,SP 14-8,1,SP 14-8,tmp/grundfos_sp_characteristics_verified.csv,SP 14-8,SP 14-8,matched,exact_sku_confirmed,Exact SKU 98699355; direct Hmax/Qmax/voltage/attr125 evidence.
+3273,SP 14-23,1,SP 14-23,tmp/grundfos_sp_characteristics_verified.csv,SP 14-23,SP 14-23,matched,exact_sku_confirmed,Exact SKU 98699361; direct Hmax/Qmax/voltage/attr125 evidence.
+3274,SP 11-33,1,SP 11-33,tmp/grundfos_sp_characteristics_verified.csv,SP 11-33,SP 11-33,matched,exact_sku_confirmed,Exact SKU 98699320; direct Hmax/Qmax/voltage/attr125 evidence.
+3277,SP 125-3,1,SP 125-3,tmp/grundfos_sp_3277_hydraulics_verified.csv,SP 125-3,SP 125-3,matched,exact_sku_confirmed,Manual visual review approved: Hmax/Qmax CURVE_APPROXIMATE; exact SKU 17A01903; direct voltage/attr125.
+3278,SP 95-5,1,SP 95-5,tmp/grundfos_sp_characteristics_verified.csv,SP 95-5,SP 95-5,matched,exact_sku_confirmed,Exact SKU 19001905; direct Hmax/Qmax/voltage/attr125 evidence.
+3284,SP 3A-29,1,SP 3A-29,tmp/grundfos_sp_characteristics_verified.csv,SP 3A-29,SP 3A-29,matched,exact_sku_confirmed,Exact SKU 10001K29; direct Hmax/Qmax/voltage/attr125 evidence.
+3286,SP 5A-17,1,SP 5A-17,tmp/grundfos_sp_characteristics_verified.csv,SP 5A-17,SP 5A-17,matched,exact_sku_confirmed,Exact SKU 05001K17; direct Hmax/Qmax/voltage/attr125 evidence.
+3288,SP 3A-25,1,SP 3A-25,tmp/grundfos_sp_characteristics_verified.csv,SP 3A-25,SP 3A-25,matched,exact_sku_confirmed,Exact SKU 10001K25; direct Hmax/Qmax/voltage/attr125 evidence.
+3307,SQ 5-70,1,SQ 5-70,tmp/grundfos_final_manual_selector_decisions.csv,SQ 5-70,SQ 5-70,matched,exact_sku_confirmed,Manual review approved: exact SKU 96510217; Hmax/Qmax CURVE_APPROXIMATE; direct voltage/attr125.
+3313,SQ 1-50,1,SQ 1-50,tmp/grundfos_sq_sqe_final_verified.csv,SQ 1-50,SQ 1-50,matched,exact_sku_confirmed,Exact SKU 96160404; Hmax DIRECT_FIELD; Qmax CURVE_APPROXIMATE; direct voltage/attr125.
+3314,SQ 3-105 с кабелем,1,SQ 3-105,tmp/grundfos_final_manual_selector_decisions.csv,SQ 3-105 с кабелем,SQ 3-105,matched,exact_sku_confirmed,"Manual review approved: exact SKU 96524448, cable 80 m; Hmax/Qmax CURVE_APPROXIMATE; 96510210 rejected."
+3316,SQ 5-50,1,SQ 5-50,tmp/grundfos_sq_sqe_final_verified.csv,SQ 5-50,SQ 5-50,matched,exact_sku_confirmed,Exact SKU 96510214; Hmax DIRECT_FIELD; Qmax CURVE_APPROXIMATE; direct voltage/attr125.
+3318,SQ 3-80,1,SQ 3-80,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_80/,SQ 3-80,SQ 3-80,matched,exact_normalized_model,Exact normalized model from current Grundfos source; direct source values.
+3320,SQ 2-55,1,SQ 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_55/,SQ 2-55,SQ 2-55,matched,exact_normalized_model,Exact normalized model from current Grundfos source; direct source values.
+3325,SQ 2-70,1,SQ 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_2_70/,SQ 2-70,SQ 2-70,matched,exact_normalized_model,Exact normalized model from current Grundfos source; direct source values.
+3326,SQ 3-105,1,SQ 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sq_3_105_ms3/,SQ 3-105,SQ 3-105,matched,exact_normalized_model,Exact normalized model from current Grundfos source; direct source values.
+3345,SQE 1-95,1,SQE 1-95,tmp/grundfos_sq_sqe_final_verified.csv,SQE 1-95,SQE 1-95,matched,exact_sku_confirmed,Exact SKU 96160440; Hmax DIRECT_FIELD; Qmax CURVE_APPROXIMATE; direct voltage/attr125.
+3346,SQE 2-85 комплект,1,SQE 2-85 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_2_85_komplekt_/,SQE 2-85 комплект,SQE 2-85 комплект,matched,exact_normalized_model,Exact normalized model from current Grundfos source; direct source values.
+3349,SQE 1-35,1,SQE 1-35,tmp/grundfos_sq_sqe_final_verified.csv,SQE 1-35,SQE 1-35,matched,exact_sku_confirmed,Exact SKU 96160436; Hmax DIRECT_FIELD; Qmax CURVE_APPROXIMATE; direct voltage/attr125.
+3352,SQE 3-55,1,SQE 3-55,tmp/grundfos_sq_sqe_final_verified.csv,SQE 3-55,SQE 3-55,matched,exact_sku_confirmed,Exact SKU 96160454; Hmax DIRECT_FIELD; Qmax CURVE_APPROXIMATE; direct voltage/attr125.
+3354,SQE 1-50,1,SQE 1-50,tmp/grundfos_sq_sqe_final_verified.csv,SQE 1-50,SQE 1-50,matched,exact_sku_confirmed,Exact SKU 96510141; Hmax DIRECT_FIELD; Qmax CURVE_APPROXIMATE; direct voltage/attr125.
+3356,SQE 5-70 комплект,1,SQE 5-70 комплект,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_5_70_komplekt/,SQE 5-70 комплект,SQE 5-70 комплект,matched,exact_normalized_model,Exact normalized model from current Grundfos source; direct source values.
+3358,SQE 2-55,1,SQE 2-55,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_55_mse3/,SQE 2-55,SQE 2-55,matched,exact_normalized_model,Exact normalized model from current Grundfos source; direct source values.
+3361,SQE 2-85,1,SQE 2-85,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_85_mse3/,SQE 2-85,SQE 2-85,matched,exact_normalized_model,Exact normalized model from current Grundfos source; direct source values.
+3362,SQE 2-70,1,SQE 2-70,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyi_nasos_grundfos_sqe_2_70/,SQE 2-70,SQE 2-70,matched,exact_normalized_model,Exact normalized model from current Grundfos source; direct source values.
+3363,SQE 3-105,1,SQE 3-105,https://nasosymarket.ru/catalog/vodyanye_nasosy/skvazhinnyy_nasos_grundfos_sqe_3_105_mse3/,SQE 3-105,SQE 3-105,matched,exact_normalized_model,Exact normalized model from current Grundfos source; direct source values.
+7997,"SP17-18 6"" 3X380...",1,SP 17-18,tmp/grundfos_sp_7997_selector_verified.csv,"SP17-18 6"" 3X380...",SP 17-18,matched,strong_config_match,Manual visual review approved: candidate 12A01918; Hmax/Qmax CURVE_APPROXIMATE; direct voltage/attr125.

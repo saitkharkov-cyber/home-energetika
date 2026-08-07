@@ -109,6 +109,9 @@ class VinkoRecord:
     source_power_label: str
     source_power: str
     normalized_power_kw: str
+    source_min_casing_inner_diameter_label: str
+    source_min_casing_inner_diameter: str
+    normalized_min_casing_inner_diameter_mm: str
     source_diameter_evidence: str
     normalized_diameter_mm: str
     diameter_evidence_type: str
@@ -316,6 +319,26 @@ def normalize_physical_diameter(value: str) -> tuple[str, set[str]]:
     return "", {"unsupported_unit"}
 
 
+def normalize_min_casing_inner_diameter(value: str) -> tuple[str, set[str]]:
+    """Normalize one explicit minimum inner casing diameter in millimeters."""
+    text = clean_text(value)
+    if not text:
+        return "", set()
+    if contains_range_or_upper_bound(text) or re.search(
+        r"\d+(?:[.,]\d+)?\s*(?:/|;|\b(?:и|или)\b)\s*\d",
+        text,
+        re.IGNORECASE,
+    ):
+        return "", {"ambiguous_min_casing_inner_diameter"}
+    match = re.fullmatch(r"(\d+(?:[.,]\d+)?)\s*(?:мм)?", text, re.IGNORECASE)
+    if not match:
+        return "", {"unsupported_min_casing_inner_diameter"}
+    parsed = parse_decimal(match.group(1))
+    if parsed is None or parsed <= 0:
+        return "", {"unsupported_min_casing_inner_diameter"}
+    return format_decimal(parsed), set()
+
+
 def extract_model(title: str) -> str:
     model = clean_text(title)
     prefixes = (
@@ -421,6 +444,58 @@ def extract_diameter(card: Tag, model: str) -> tuple[str, str, str, set[str]]:
     return "", "", "unknown", reasons
 
 
+def normalize_detail_label(value: str) -> str:
+    """Make exact detail-property labels resilient to formatting noise."""
+    return clean_text(re.sub(r"[^0-9a-zа-яё]+", " ", clean_text(value).lower()))
+
+
+def extract_detail_property(
+    detail_html: str, expected_label: str
+) -> tuple[str, str, set[str]]:
+    """Read one label/value pair only from the primary detail-properties block."""
+    soup = BeautifulSoup(detail_html, "html.parser")
+    roots = soup.find_all(
+        "div", id=lambda value: isinstance(value, str) and value.endswith("_main_properties")
+    )
+    containers: list[Tag] = []
+    for root in roots:
+        container = root.find(
+            "div", class_="catalog-detail-properties", recursive=False
+        )
+        if container is not None:
+            containers.append(container)
+    if not containers:
+        return "", "", {"missing_detail_properties_root"}
+
+    normalized_expected_label = normalize_detail_label(expected_label)
+    matches: list[LabelValue] = []
+    for container in containers:
+        for row in container.find_all(
+            "div", class_="catalog-detail-property", recursive=False
+        ):
+            label_node = row.find("div", class_="name", recursive=False)
+            if label_node is None:
+                continue
+            label = clean_text(label_node.get_text(" ", strip=True))
+            if normalize_detail_label(label) != normalized_expected_label:
+                continue
+            value_node = row.find("div", class_="val", recursive=False)
+            value = (
+                clean_text(value_node.get_text(" ", strip=True))
+                if value_node is not None
+                else ""
+            )
+            matches.append(LabelValue(label, value))
+
+    if not matches:
+        return "", "", {"missing_min_casing_inner_diameter"}
+    if len(matches) > 1:
+        return "", "", {"ambiguous_min_casing_inner_diameter"}
+    if not matches[0].value:
+        return matches[0].label, "", {"missing_min_casing_inner_diameter"}
+    return matches[0].label, matches[0].value, set()
+
+
 def blank_record(base_url: str, page_url: str) -> VinkoRecord:
     return VinkoRecord(
         source_name=SOURCE_NAME,
@@ -442,6 +517,9 @@ def blank_record(base_url: str, page_url: str) -> VinkoRecord:
         source_power_label="",
         source_power="",
         normalized_power_kw="",
+        source_min_casing_inner_diameter_label="",
+        source_min_casing_inner_diameter="",
+        normalized_min_casing_inner_diameter_mm="",
         source_diameter_evidence="",
         normalized_diameter_mm="",
         diameter_evidence_type="unknown",
@@ -556,6 +634,38 @@ def parse_card(card: Tag, base_url: str, page_url: str) -> VinkoRecord:
         return finalize_status(record, reasons)
     except Exception:
         return record
+
+
+def enrich_min_casing_inner_diameter(
+    record: VinkoRecord,
+    session: requests.Session,
+    config: RunConfig,
+    proxies: dict[str, str] | None,
+) -> VinkoRecord:
+    """Enrich a listing record with direct evidence from its product detail page."""
+    reasons = set(filter(None, record.review_reason.split(";")))
+    if not record.source_product_url:
+        return record
+    try:
+        detail_html = fetch_page(session, record.source_product_url, config, proxies)
+    except SourceFailure:
+        reasons.add("detail_page_failure")
+        return finalize_status(record, reasons)
+
+    label, value, detail_reasons = extract_detail_property(
+        detail_html, "Мин. внутренний диаметр обсадной трубы, мм"
+    )
+    record.source_min_casing_inner_diameter_label = label
+    record.source_min_casing_inner_diameter = value
+    if detail_reasons:
+        reasons.update(detail_reasons)
+    else:
+        normalized, normalization_reasons = normalize_min_casing_inner_diameter(value)
+        record.normalized_min_casing_inner_diameter_mm = normalized
+        reasons.update(normalization_reasons)
+        if normalized:
+            reasons.discard("series_diameter_only")
+    return finalize_status(record, reasons)
 
 
 def extract_cards(listing_html: str) -> list[Tag]:
@@ -768,7 +878,12 @@ def run(config: RunConfig, proxies: dict[str, str] | None) -> tuple[
                 if key in seen_records:
                     continue
                 seen_records.add(key)
+                record = enrich_min_casing_inner_diameter(
+                    record, session, config, proxies
+                )
                 records.append(record)
+                if record.source_product_url and config.delay:
+                    time.sleep(config.delay)
 
             next_url = find_next_page_url(html, current_url, page_number)
             if not next_url:
