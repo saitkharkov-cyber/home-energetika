@@ -31,7 +31,7 @@ class ModelExtensionModulePumpSelectorCacheBuilder extends Model
 	private function loadProducts()
 	{
 		$language_id = (int)$this->config->get('config_language_id');
-		$category_ids = array(11900308, 11900309, 11900321);
+		$category_ids = array(11900213);
 
 		$sql = "SELECT";
 		$sql .= " p.product_id,";
