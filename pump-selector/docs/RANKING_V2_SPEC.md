@@ -6,21 +6,21 @@
 
 Статус: **working specification v1**.
 
-Документ является нормативной основой для последующего проектирования DTO, интерфейсов, unit-тестов и реализации ranking v2.
+Документ является нормативной основой для реализации ranking v2, unit-тестов и regression-проверок.
 
-На этом этапе документ **не изменяет** production-код, cache Builder или текущую выдачу подборщика.
+На этом этапе документ сам по себе **не изменяет** production-выдачу, cache Builder или текущий selector pipeline.
 
 ---
 
 ## 2. Цель
 
-Новая модель должна сохранять три независимых бизнес-роли:
+Новая модель сохраняет три независимых бизнес-роли:
 
 - **Best Price** — самый дешёвый уверенно допустимый вариант;
 - **Optimal** — лучший инженерно-экономический баланс;
 - **Premium** — оправданный качественный upgrade относительно Optimal.
 
-Модель должна масштабироваться на многобрендовый каталог без жёсткой лестницы `brand_priority`, при которой бренд автоматически побеждает технически более рациональный вариант.
+Модель должна масштабироваться на многобрендовый каталог без жёсткой линейной лестницы `brand_priority`, при которой бренд автоматически побеждает технически более рациональный вариант.
 
 ---
 
@@ -45,6 +45,12 @@ GATES
    │        PREMIUM ε-PARETO
    │             ↓
    │        compare vs Optimal
+   │             ↓
+   │        upgrade strength
+   │             ↓
+   │        price delta gate
+   │             ↓
+   │          PREMIUM
    │
    ├── BORDERLINE
    │       ↓
@@ -56,18 +62,19 @@ GATES
         excluded
 ```
 
-Ключевое разделение ответственности:
+Разделение ответственности:
 
-- **Gates** отвечают за физическую допустимость;
-- **ε-Pareto** очищает физику и экономику от доминируемых вариантов;
-- **Role Ranking** назначает бизнес-роли;
-- **Brand tier** участвует в бизнес-логике Premium, но не загрязняет общий физико-экономический Pareto-front.
+- **Gates** — физическая допустимость;
+- **ε-Pareto** — устранение физико-экономически доминируемых вариантов;
+- **Role Ranking** — назначение бизнес-роли;
+- **Brand tier** — допуск в Premium Pool и low-order business factor;
+- бренд не входит в общий физико-экономический Pareto-вектор.
 
 ---
 
 ## 4. Доступные данные и уровень достоверности
 
-На текущем этапе для каждого насоса доступны только предельные характеристики:
+Для текущего каталога доступны только предельные характеристики:
 
 - `H_max` — максимальный напор;
 - `Q_max` — максимальная производительность.
@@ -81,33 +88,24 @@ hydraulic_model = endpoint_parabolic_estimate
 confidence = approximate
 ```
 
-Архитектура должна позволять в будущем заменить этот провайдер на реальные заводские кривые без изменения слоёв `Gates → Pareto → Roles`.
+В будущем hydraulic provider может быть заменён на реальные заводские кривые без изменения слоёв `Gates → Pareto → Roles`.
 
 ---
 
 ## 5. Аппроксимация Q-H характеристики
 
-Используется параболическая оценка:
-
 ```text
 q_rel = Q_req / Q_max
+h_rel = H_req / H_max
 
 H_est(Q_req) = H_max * (1 - q_rel^2)
 ```
 
-Где:
-
-- `Q_req` — требуемый расход;
-- `H_req` — требуемый напор;
-- `H_est` — оценочный напор насоса при требуемом расходе.
-
-Эта формула используется как ранжирующая аппроксимация, а не как лабораторно точная характеристика конкретной модели.
+Формула используется как ранжирующая аппроксимация, а не как лабораторно точная характеристика конкретной модели.
 
 ---
 
 ## 6. Hydraulic Gate
-
-Вычисляется относительный гидравлический запас:
 
 ```text
 reserve_rel = (H_est - H_req) / H_req
@@ -121,39 +119,29 @@ reserve_rel < -0.10       → FAIL
 reserve_rel >= 0          → PASS
 ```
 
-Смысл:
+### 6.1. Использование BORDERLINE
 
-- **FAIL** — модель показывает явную неспособность выполнить задачу;
-- **BORDERLINE** — расчётный дефицит находится в пределах допуска на неточность приближённой Q-H модели;
-- **PASS** — расчётная точка не имеет дефицита напора.
-
-### 6.1. Правила использования BORDERLINE
-
-- **Best Price:** сначала выбирается только среди PASS. BORDERLINE используется только как fallback, если PASS-кандидатов нет.
-- **Optimal:** сначала выбирается только среди PASS. BORDERLINE используется только как отдельный fallback, если PASS-кандидатов нет.
+- **Best Price:** сначала PASS; BORDERLINE только fallback при полном отсутствии PASS.
+- **Optimal:** сначала PASS; BORDERLINE только отдельный fallback при полном отсутствии PASS.
 - **Premium:** BORDERLINE запрещён.
 - **FAIL:** не участвует ни в одной роли.
 
-Порог `10%` является default v1 и подлежит regression-проверке на полном candidate pool.
+Порог `-10%` остаётся default v1 и подлежит regression-проверке на полном candidate pool.
 
 ---
 
 ## 7. Target Box и technical_fit
 
-Для приближённой модели задаётся конфигурируемая целевая рабочая область:
+Default target box:
 
 ```text
-q_rel = Q_req / Q_max
-h_rel = H_req / H_max
-
-default target box:
 q_rel ∈ [0.35, 0.65]
 h_rel ∈ [0.45, 0.75]
 ```
 
-Это **условная целевая рабочая область для approximate-модели**, а не заявленная заводом POR/BEP конкретного насоса.
+Это условная целевая рабочая область approximate-модели, а не заявленная производителем POR/BEP.
 
-### 7.1. Расстояние до целевой зоны
+Расстояние до зоны:
 
 ```text
 Δq =
@@ -175,15 +163,13 @@ technical_fit = d_zone = sqrt(Δq^2 + Δh^2)
 technical_fit → MIN
 ```
 
-Если расчётная точка находится внутри Target Box, `technical_fit = 0`.
+Если точка находится внутри Target Box, `technical_fit = 0`.
 
 ---
 
-## 8. Целевой гидравлический запас и reserve_penalty
+## 8. Reserve Penalty
 
-Сырой `reserve_rel` нельзя минимизировать к нулю: слишком малый положительный запас также нежелателен.
-
-Для Pareto используется непрерывная штрафная функция с комфортным плато:
+Сырой `reserve_rel` не минимизируется к нулю. Для Pareto используется непрерывная функция:
 
 ```text
 reserve_penalty(R) =
@@ -192,20 +178,12 @@ reserve_penalty(R) =
     R - 0.25,         если R > 0.25
 ```
 
-Где `R = reserve_rel`.
-
 Default v1:
 
 ```text
 comfort reserve = +10% ... +25%
-low-reserve multiplier = 2.0
+low_reserve_multiplier = 2.0
 ```
-
-Смысл:
-
-- запас ниже +10% штрафуется быстрее;
-- +10...+25% — нулевой штраф;
-- выше +25% — мягко растущий штраф переподбора.
 
 Направление оптимизации:
 
@@ -217,7 +195,7 @@ reserve_penalty → MIN
 
 ## 9. General ε-Pareto
 
-Общий Pareto-вектор строится только по физике и экономике:
+Общий Pareto-вектор:
 
 ```text
 technical_fit     → MIN
@@ -225,17 +203,17 @@ reserve_penalty   → MIN
 price             → MIN
 ```
 
-**Brand / brand tier в общий Pareto-вектор не входит.**
+Brand / brand tier в общий Pareto-вектор не входит.
 
 ### 9.1. ε-доминирование по цене
 
 Default v1:
 
 ```text
-ε_price = 0.02   // 2%
+ε_price = 0.02
 ```
 
-Кандидат `A` ε-доминирует `B`, если:
+`A` ε-доминирует `B`, если:
 
 ```text
 A.technical_fit <= B.technical_fit
@@ -251,7 +229,7 @@ AND
 )
 ```
 
-Дополнительное правило для полностью одинаковой инженерии:
+Для полностью одинаковой инженерии:
 
 ```text
 IF
@@ -264,28 +242,22 @@ THEN
 A dominates B
 ```
 
-Таким образом, допуск +2% по цене разрешён только ради объективного инженерного улучшения.
-
 Инженерные epsilon в v1 не вводятся.
-
-`ε_price = 2%` является default v1 и подлежит regression-проверке на полном candidate pool.
 
 ---
 
 ## 10. Непрерывные метрики и дискретные grades
 
-Принципиальное разделение:
-
 - `technical_fit`, `reserve_penalty`, `price` — непрерывные величины для Pareto;
 - `reserve_grade`, `fit_grade` — дискретные ранги для Role Ranking.
 
-Pareto и Role Ranking не обязаны использовать одинаковые границы.
+Pareto и Role Ranking сознательно используют разные представления одной и той же инженерной картины.
 
 ---
 
 ## 11. Reserve Grade
 
-Grade применяется только к **PASS-кандидатам**.
+Применяется только к PASS-кандидатам.
 
 | Grade | Rank | reserve_rel |
 |---|---:|---|
@@ -294,25 +266,27 @@ Grade применяется только к **PASS-кандидатам**.
 | ACCEPTABLE | 1 | `0 <= R < 0.05` или `0.35 < R <= 0.50` |
 | POOR | 0 | `R > 0.50` |
 
-Для BORDERLINE `reserve_grade` не присваивается (`N/A`).
+Для BORDERLINE `reserve_grade = N/A`.
 
-Важно: в Pareto диапазон `+10...+25%` имеет `reserve_penalty = 0`, тогда как Role Ranking сознательно различает:
+В Pareto диапазон `+10...+25%` имеет `reserve_penalty = 0`, но Role Ranking сознательно различает:
 
-- `+10...+20%` → IDEAL;
-- `+20...+25%` → GOOD.
+```text
++10...+20% → IDEAL
+>20...+25% → GOOD
+```
 
 ---
 
 ## 12. Technical Fit Grade
 
-| Grade | Rank | technical_fit / d_zone |
+| Grade | Rank | technical_fit |
 |---|---:|---|
 | IDEAL | 3 | `d_zone = 0` |
 | GOOD | 2 | `0 < d_zone <= 0.10` |
 | ACCEPTABLE | 1 | `0.10 < d_zone <= 0.22` |
 | POOR | 0 | `d_zone > 0.22` |
 
-`IDEAL` означает только, что расчётная точка находится внутри условной Target Box approximate-модели.
+`IDEAL` означает попадание в условную Target Box approximate-модели.
 
 ---
 
@@ -320,28 +294,20 @@ Grade применяется только к **PASS-кандидатам**.
 
 Best Price независим от Optimal и Premium.
 
-Правило v1:
-
 ```text
 1. взять PASS-кандидатов;
 2. выбрать min(price);
-3. если PASS нет — отдельный fallback среди BORDERLINE по min(price);
-4. FAIL никогда не участвует.
+3. если PASS нет — min(price) среди BORDERLINE;
+4. FAIL не участвует.
 ```
 
-Бренд, Pareto-front и Premium-tier не участвуют в выборе Best Price.
-
-Бизнес-смысл:
-
-> минимальная стоимость среди уверенно допустимых решений; BORDERLINE — только аварийный fallback из-за приближённости гидравлической модели.
+Brand, Pareto-front и Premium-tier не влияют на выбор Best Price.
 
 ---
 
 ## 14. Optimal
 
-Основной Optimal выбирается только среди PASS-кандидатов.
-
-Последовательность:
+Основной Optimal выбирается только среди PASS-кандидатов:
 
 ```text
 PASS
@@ -356,42 +322,75 @@ GENERAL ε-PARETO
   ↓
 brand factor только как low-order tie-break
   ↓
-product_id как стабильный последний tie-break
+product_id ASC
 ```
 
-Общий weighted score не используется.
+Weighted score и сумма `Rank_R + Rank_F` не используются.
 
-Сумма `Rank_R + Rank_F` также не используется, чтобы не допускать скрытой компенсации между разными видами инженерной деградации.
-
-Если PASS-кандидатов нет, допускается отдельный BORDERLINE fallback для Optimal. Он должен быть явно диагностируемым и не смешиваться с обычным PASS-ranking.
+При отсутствии PASS допускается отдельный BORDERLINE fallback, диагностически отделённый от нормального выбора.
 
 ---
 
-## 15. Premium Pool
+## 15. Brand Tier v1
 
-Premium не строится из общего Pareto-front, иначе дешёвый standard-бренд может уничтожить качественный premium-кандидат только ценой ещё до Role Ranking.
+`brand_tier` — это коммерческая классификация **в рамках данного подборщика**, а не заявление об абсолютном мировом качестве брендов.
 
-Premium имеет отдельный candidate pool:
+| Tier | Код | Бренды v1 | Premium Pool |
+|---:|---|---|---|
+| 3 | PREMIUM | Grundfos, Pedrollo | yes |
+| 2 | UPPER | Sumoto / Summoto | yes |
+| 1 | STANDARD | VINKO, Belamos, DYU | no |
+| 0 | UNKNOWN | любой ещё не классифицированный бренд | no |
+
+Правило допуска:
+
+```text
+in_premium_pool = (brand_tier >= 2)
+```
+
+### 15.1. Проверка Sumoto в production DB
+
+Перед фиксацией `Sumoto = UPPER` проведена read-only проверка production-каталога:
+
+- `manufacturer_id = 58` соответствует `Sumoto`;
+- всего товаров с `manufacturer_id = 58`: `153`;
+- `141` содержат `SUMOTO` в названии;
+- из оставшихся `12`: `11` — отдельные погружные электродвигатели `SUMMOTO`, `1` — насос `3OPC4/19` без бренда в названии;
+- отдельные электродвигатели Sumoto/Summoto в `oc_pump_selector_product` отсутствуют: `0` строк.
+
+Следовательно, для selector candidate pool безопасно использовать:
+
+```text
+manufacturer_id = 58
+→ brand_tier = UPPER
+→ in_premium_pool = true
+```
+
+При этом сам Candidate Provider обязан работать только с квалифицированным selector-pool, а не со всеми товарами производителя из общего каталога.
+
+---
+
+## 16. Premium Pool
+
+Premium строится отдельно от общего Pareto-front:
 
 ```text
 PASS
   ↓
-разрешённые brand tiers
+brand_tier >= 2
   ↓
 PREMIUM ε-PARETO
   ↓
-сравнение с выбранным Optimal
+compare vs Optimal
 ```
 
-Конкретное распределение брендов по `brand_tier` фиксируется отдельно и не является частью данной математической спецификации.
+Это предотвращает ситуацию, когда дешёвый standard-бренд уничтожает качественный premium-кандидат только ценой ещё до Role Ranking.
 
 Premium не обязан иметь большие абсолютные `H_max` или `Q_max`, чем Optimal.
 
-Premium должен быть качественным и экономически оправданным upgrade, а не «самым мощным» или «самым дорогим» насосом.
-
 ---
 
-## 16. Допустимая инженерная деградация Premium относительно Optimal
+## 17. Инженерная деградация Premium относительно Optimal
 
 Пусть:
 
@@ -400,14 +399,21 @@ O = Optimal
 P = Premium candidate
 ```
 
-Определяем только ухудшение, не штрафуя Premium за улучшение:
+Определяем только ухудшение:
 
 ```text
 D_R = max(0, Rank_R(O) - Rank_R(P))
 D_F = max(0, Rank_F(O) - Rank_F(P))
 ```
 
-Premium инженерно допустим относительно Optimal, если одновременно:
+И улучшение:
+
+```text
+I_R = max(0, Rank_R(P) - Rank_R(O))
+I_F = max(0, Rank_F(P) - Rank_F(O))
+```
+
+Engineering Gate Premium:
 
 ```text
 D_R <= 1
@@ -417,81 +423,140 @@ AND
 D_R + D_F <= 1
 ```
 
-Смысл:
-
-> Premium может уступить Optimal максимум по одному инженерному измерению и максимум на одну ступень.
-
-Примеры:
-
-| Optimal Reserve/Fit | Premium Reserve/Fit | D_R | D_F | Result |
-|---|---|---:|---:|---|
-| IDEAL / IDEAL | GOOD / IDEAL | 1 | 0 | PASS |
-| IDEAL / IDEAL | IDEAL / GOOD | 0 | 1 | PASS |
-| IDEAL / IDEAL | GOOD / GOOD | 1 | 1 | FAIL |
-| GOOD / GOOD | IDEAL / IDEAL | 0 | 0 | PASS |
-| GOOD / IDEAL | IDEAL / GOOD | 0 | 1 | PASS |
+Смысл: Premium может уступить Optimal максимум по одному инженерному измерению и максимум на одну ступень.
 
 BORDERLINE-кандидаты в Premium запрещены.
 
 ---
 
-## 17. Premium Price / Upgrade Strength
+## 18. Premium Upgrade Strength v1
 
-Переплата относительно Optimal определяется как:
-
-```text
-price_delta = (Price_premium - Price_optimal) / Price_optimal
-```
-
-Архитектурно Premium должен проверяться на разумность переплаты относительно силы upgrade.
-
-Рабочие defaults, обсуждавшиеся при проектировании:
+### 18.1. STRONG
 
 ```text
-WEAK upgrade   → ориентир до +15%
-MEDIUM upgrade → ориентир до +35%
-STRONG upgrade → ориентир до +60%
+(I_R + I_F) >= 1
+AND
+(D_R + D_F) = 0
 ```
 
-**Эти границы пока не считаются окончательно откалиброванными нормативными порогами.**
+Premium улучшает хотя бы одну инженерную зону и ничего не ухудшает.
 
-До implementation freeze требуется отдельная проверка на полном многобрендовом candidate pool.
+Максимальная переплата v1:
+
+```text
+price_delta <= 0.60
+```
+
+### 18.2. MEDIUM
+
+Вариант A — инженерный trade-off:
+
+```text
+(I_R + I_F) >= 1
+AND
+(D_R + D_F) = 1
+```
+
+Вариант B — инженерия та же, но brand tier выше:
+
+```text
+I_R + I_F = 0
+AND
+D_R + D_F = 0
+AND
+brand_tier(P) > brand_tier(O)
+```
+
+Максимальная переплата v1:
+
+```text
+price_delta <= 0.35
+```
+
+### 18.3. WEAK
+
+```text
+I_R + I_F = 0
+AND
+D_R + D_F = 1
+AND
+brand_tier(P) > brand_tier(O)
+```
+
+Максимальная переплата v1:
+
+```text
+price_delta <= 0.15
+```
+
+### 18.4. NONE / REJECT
+
+Кандидат не является оправданным Premium upgrade, если:
+
+```text
+нет инженерного улучшения
+AND
+brand_tier(P) <= brand_tier(O)
+```
+
+или если превышен допустимый price threshold для вычисленного `upgrade_strength`.
 
 ---
 
-## 18. Brand logic
-
-Старая линейная модель вида:
+## 19. Premium Price Delta
 
 ```text
-Pedrollo = 10
-Sumoto = 8
-Belamos = 5
-...
+price_delta = (Price_Premium - Price_Optimal) / Price_Optimal
 ```
 
-не должна использоваться как главный сортировщик Premium.
-
-Новая архитектура предполагает разделение как минимум на:
+Defaults v1:
 
 ```text
-brand_tier
-brand_factor / brand_score (только low-order tie-break при необходимости)
+STRONG  → max +60%
+MEDIUM  → max +35%
+WEAK    → max +15%
+NONE    → REJECT
 ```
 
-`brand_tier` отвечает за допустимость участия в Premium Pool.
+Если Premium дешевле Optimal, `price_delta < 0`, и ценовой Gate естественно проходит.
 
-Brand factor не должен автоматически вытеснять существенно лучший инженерный вариант.
-
-Конкретная классификация Pedrollo / Sumoto / Belamos / VINKO / Grundfos / DYU фиксируется отдельным бизнес-решением после regression-тестов.
+Пороги `60/35/15` являются **defaults v1** и подлежат калибровке на полном многобрендовом candidate pool. Их изменение не должно требовать изменения архитектуры.
 
 ---
 
-## 19. Диагностируемость
+## 20. Финальный выбор Premium
 
-Ranking v2 должен позволять объяснить результат для любого товара и сценария.
+После Premium ε-Pareto, Engineering Gate и Price Gate кандидаты сортируются так:
 
-Минимально полезная диагностическая запись:
+```text
+1. upgrade_strength
+      STRONG > MEDIUM > WEAK
+
+2. improvement_total = I_R + I_F
+      MAX
+
+3. degradation_total = D_R + D_F
+      MIN
+
+4. price_delta
+      MIN
+
+5. brand_tier
+      MAX
+
+6. product_id
+      ASC
+```
+
+`brand_tier DESC` не ставится первым, чтобы не восстановить скрыто старую модель `brand_priority`.
+
+Например, tier 3 не имеет автоматического преимущества над tier 2, если tier 2 даёт более сильный и более рациональный upgrade.
+
+---
+
+## 21. Диагностируемость
+
+Минимальная диагностическая запись ranking v2:
 
 ```text
 product_id
@@ -506,30 +571,26 @@ technical_fit
 reserve_penalty
 reserve_grade
 fit_grade
+brand_tier
+in_premium_pool
 pareto_status
-pareto_dominator_product_id (если есть)
+pareto_dominator_product_id
+D_R
+D_F
+I_R
+I_F
+upgrade_strength
+price_delta
 role_candidate_status
 role_rejection_reason
 final_role
-```
-
-Пример логической цепочки:
-
-```text
-Gate: PASS
-→ Hydraulic model: endpoint_parabolic_estimate / approximate
-→ ε-Pareto: RETAINED
-→ Reserve grade: IDEAL
-→ Fit grade: GOOD
-→ Optimal ranking: candidate
-→ Final: lost by price to product X
 ```
 
 Диагностика является частью архитектуры, а не временным debug-механизмом.
 
 ---
 
-## 20. Зафиксированные defaults v1
+## 22. Зафиксированные defaults v1
 
 ```text
 hydraulic_model          = endpoint_parabolic_estimate
@@ -547,6 +608,11 @@ reserve_penalty ideal    = [0.10, 0.25]
 low_reserve_multiplier   = 2.0
 
 ε_price                  = 0.02
+
+premium_pool_min_tier    = 2
+premium_strong_max_delta = 0.60
+premium_medium_max_delta = 0.35
+premium_weak_max_delta   = 0.15
 ```
 
 Grades:
@@ -565,52 +631,66 @@ ACCEPTABLE  >0.10..0.22
 POOR        >0.22
 ```
 
----
+Brand tiers v1:
 
-## 21. Что ещё не зафиксировано окончательно
-
-До implementation freeze остаются отдельные решения:
-
-1. точная классификация брендов по `brand_tier`;
-2. точный low-order brand tie-break для Optimal, если он вообще понадобится;
-3. окончательная калибровка Premium price thresholds / upgrade strength;
-4. regression-проверка `ε_price = 2%` на полном candidate pool;
-5. regression-проверка hydraulic `FAIL/BORDERLINE` порога `-10%` на полном candidate pool;
-6. стратегия перехода от approximate Q-H к manufacturer curves в будущем.
-
-Эти открытые параметры не меняют архитектуру математического ядра.
+```text
+3 PREMIUM  → Grundfos, Pedrollo
+2 UPPER    → Sumoto / Summoto
+1 STANDARD → VINKO, Belamos, DYU
+0 UNKNOWN  → any unclassified brand
+```
 
 ---
 
-## 22. Инварианты Ranking v2
+## 23. Параметры, требующие regression-калибровки
 
-Независимо от конкретной реализации должны сохраняться следующие правила:
+Архитектурно зафиксированы, но требуют проверки на полном candidate pool:
+
+1. `ε_price = 2%`;
+2. hydraulic `FAIL/BORDERLINE` threshold `-10%`;
+3. Premium price thresholds `60/35/15`;
+4. распределение Premium по реальным пользовательским сценариям;
+5. необходимость отдельного low-order `brand_factor` для Optimal;
+6. будущая стратегия перехода на manufacturer Q-H curves.
+
+---
+
+## 24. Инварианты Ranking v2
 
 - Best Price, Optimal и Premium имеют разные бизнес-смыслы;
 - Best Price не зависит от Optimal;
 - общий Pareto не содержит brand как координату;
-- Premium имеет отдельный premium candidate pool;
+- Premium имеет отдельный candidate pool;
+- Premium Pool допускает только PASS и `brand_tier >= 2`;
 - Premium не обязан быть мощнее Optimal по `H_max/Q_max`;
 - Premium не может оправдывать двойную инженерную деградацию ради бренда;
 - BORDERLINE не смешивается с PASS в обычном ranking;
 - weighted scoring не является основой выбора Optimal;
+- brand tier не является главным сортировщиком Premium;
 - approximate hydraulic model всегда явно маркируется как approximate;
-- переход на реальные Q-H кривые не должен требовать смены архитектуры `Gates → Pareto → Roles`;
-- каждый финальный выбор должен быть диагностируемым и объяснимым.
+- каждый финальный выбор должен быть диагностируемым;
+- переход на реальные Q-H кривые не должен требовать смены архитектуры `Gates → Pareto → Roles`.
 
 ---
 
-## 23. Следующий этап
+## 25. Состояние реализации
 
-После фиксации этого документа следующий этап — **не изменение production**, а проектирование реализации ranking v2:
+К моменту этой редакции отдельно реализованы и протестированы под PHP 5.6:
 
-- DTO / структуры расчётных данных;
-- функции hydraulic model;
-- Gates;
-- ε-Pareto;
-- grade calculators;
-- role selectors;
-- diagnostic trace;
-- unit-тесты и regression-сценарии.
+```text
+Hydraulic layer
+Pareto layer
+Ranking layer: Best Price / Optimal / Premium engineering eligibility
+```
 
-Только после прохождения тестов на полном многобрендовом candidate pool допускается замена текущего production ranking.
+Фактический локальный regression status перед этой редакцией:
+
+```text
+Hydraulic: 10 tests / 55 assertions — PASS
+Pareto:    14 tests / 24 assertions — PASS
+Ranking:   19 tests / 20 assertions — PASS
+
+Total:     43 tests / 99 assertions — PASS
+```
+
+Финальный `selectPremium()` должен реализовываться только по правилам разделов 15–20 настоящей спецификации и затем получать отдельный unit/regression slice перед интеграцией в production selector pipeline.
