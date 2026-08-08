@@ -10,15 +10,6 @@ class PumpSelectorRanking {
     const BRAND_TIER_UPPER = 2;
     const BRAND_TIER_PREMIUM = 3;
 
-    const UPGRADE_NONE = 'NONE';
-    const UPGRADE_WEAK = 'WEAK';
-    const UPGRADE_MEDIUM = 'MEDIUM';
-    const UPGRADE_STRONG = 'STRONG';
-
-    const PREMIUM_MAX_PRICE_DELTA_WEAK = 0.15;
-    const PREMIUM_MAX_PRICE_DELTA_MEDIUM = 0.35;
-    const PREMIUM_MAX_PRICE_DELTA_STRONG = 0.60;
-
     /**
      * Select the cheapest physically admissible candidate.
      * PASS candidates always take precedence over BORDERLINE candidates.
@@ -57,7 +48,7 @@ class PumpSelectorRanking {
      * This method intentionally handles PASS candidates only.
      * BORDERLINE fallback ranking is a separate policy and is not frozen yet.
      *
-     * Ordering from RANKING_V2_SPEC:
+     * Ordering:
      * reserve_grade DESC -> fit_grade DESC -> price ASC ->
      * brand_factor DESC (optional low-order tie-break) -> product_id ASC.
      *
@@ -113,8 +104,7 @@ class PumpSelectorRanking {
     }
 
     /**
-     * Filter an already-built Premium epsilon-Pareto front by the frozen
-     * engineering degradation rule relative to Optimal.
+     * Filter Premium candidates by the engineering degradation rule.
      *
      * @param array $premiumParetoCandidates
      * @param array $optimal
@@ -133,15 +123,20 @@ class PumpSelectorRanking {
     }
 
     /**
-     * Select Premium from an already-built Premium epsilon-Pareto front.
-     * Candidates must belong to UPPER/PREMIUM brand tiers, pass the engineering
-     * degradation rule relative to Optimal, have a justified upgrade strength,
-     * and fit the frozen v1 price-delta gate for that strength.
+     * Select Premium from the union of tier-scoped Premium epsilon-Pareto fronts.
+     *
+     * Admission rules:
+     * - PASS only;
+     * - brand_tier >= UPPER;
+     * - engineering degradation vs Optimal is at most one grade on one axis;
+     * - candidate has a Premium reason: higher brand tier than Optimal OR at
+     *   least one engineering-grade improvement.
+     *
+     * Price is not an admission gate. It is only a low-order tie-break.
      *
      * Final order:
-     * upgrade strength DESC -> engineering improvement DESC ->
-     * engineering degradation ASC -> price_delta ASC -> brand_tier DESC ->
-     * product_id ASC.
+     * brand_tier DESC -> improvement_total DESC -> degradation_total ASC ->
+     * reserve_grade DESC -> fit_grade DESC -> price ASC -> product_id ASC.
      *
      * @param array $premiumParetoCandidates
      * @param array $optimal
@@ -172,26 +167,19 @@ class PumpSelectorRanking {
             }
 
             $metrics = $this->getPremiumComparisonMetrics($optimal, $candidate);
-            $upgradeStrength = $this->getUpgradeStrength($optimal, $candidate, $metrics);
+            $hasBrandUpgrade = (int)$candidate['brand_tier'] > (int)$optimal['brand_tier'];
+            $hasEngineeringImprovement = (int)$metrics['improvement_total'] > 0;
 
-            if ($upgradeStrength === self::UPGRADE_NONE) {
+            if (!$hasBrandUpgrade && !$hasEngineeringImprovement) {
                 continue;
             }
 
-            $priceDelta = $this->getPriceDelta($optimal, $candidate);
-
-            if (!$this->isPremiumPriceEligible($upgradeStrength, $priceDelta)) {
-                continue;
-            }
-
-            $candidate['upgrade_strength'] = $upgradeStrength;
             $candidate['improvement_total'] = $metrics['improvement_total'];
             $candidate['degradation_total'] = $metrics['degradation_total'];
             $candidate['reserve_improvement'] = $metrics['reserve_improvement'];
             $candidate['fit_improvement'] = $metrics['fit_improvement'];
             $candidate['reserve_degradation'] = $metrics['reserve_degradation'];
             $candidate['fit_degradation'] = $metrics['fit_degradation'];
-            $candidate['price_delta'] = $priceDelta;
 
             $eligible[] = $candidate;
         }
@@ -203,86 +191,6 @@ class PumpSelectorRanking {
         usort($eligible, array($this, 'comparePremiumCandidates'));
 
         return $eligible[0];
-    }
-
-    /**
-     * Return STRONG / MEDIUM / WEAK / NONE for a Premium candidate relative
-     * to Optimal according to RANKING_V2_SPEC v1.
-     *
-     * @param array $optimal
-     * @param array $premiumCandidate
-     * @param array|null $metrics
-     * @return string
-     */
-    public function getUpgradeStrength(array $optimal, array $premiumCandidate, $metrics = null) {
-        $this->assertPremiumReferenceCandidate($optimal);
-        $this->assertPremiumCandidate($premiumCandidate);
-
-        if ($metrics === null) {
-            $metrics = $this->getPremiumComparisonMetrics($optimal, $premiumCandidate);
-        }
-
-        $improvementTotal = (int)$metrics['improvement_total'];
-        $degradationTotal = (int)$metrics['degradation_total'];
-        $brandUpgrade = (int)$premiumCandidate['brand_tier'] > (int)$optimal['brand_tier'];
-
-        if ($improvementTotal >= 1 && $degradationTotal === 0) {
-            return self::UPGRADE_STRONG;
-        }
-
-        if ($improvementTotal >= 1 && $degradationTotal === 1) {
-            return self::UPGRADE_MEDIUM;
-        }
-
-        if ($improvementTotal === 0 && $degradationTotal === 0 && $brandUpgrade) {
-            return self::UPGRADE_MEDIUM;
-        }
-
-        if ($improvementTotal === 0 && $degradationTotal === 1 && $brandUpgrade) {
-            return self::UPGRADE_WEAK;
-        }
-
-        return self::UPGRADE_NONE;
-    }
-
-    /**
-     * Return relative Premium price difference vs Optimal.
-     * Negative values mean Premium is cheaper than Optimal.
-     *
-     * @param array $optimal
-     * @param array $premiumCandidate
-     * @return float
-     */
-    public function getPriceDelta(array $optimal, array $premiumCandidate) {
-        $this->assertBaseCandidate($optimal);
-        $this->assertBaseCandidate($premiumCandidate);
-
-        return ((float)$premiumCandidate['price'] - (float)$optimal['price']) / (float)$optimal['price'];
-    }
-
-    /**
-     * Check frozen v1 Premium price gates.
-     *
-     * @param string $upgradeStrength
-     * @param float $priceDelta
-     * @return bool
-     */
-    public function isPremiumPriceEligible($upgradeStrength, $priceDelta) {
-        $priceDelta = (float)$priceDelta;
-
-        if ($upgradeStrength === self::UPGRADE_STRONG) {
-            return $priceDelta <= self::PREMIUM_MAX_PRICE_DELTA_STRONG;
-        }
-
-        if ($upgradeStrength === self::UPGRADE_MEDIUM) {
-            return $priceDelta <= self::PREMIUM_MAX_PRICE_DELTA_MEDIUM;
-        }
-
-        if ($upgradeStrength === self::UPGRADE_WEAK) {
-            return $priceDelta <= self::PREMIUM_MAX_PRICE_DELTA_WEAK;
-        }
-
-        return false;
     }
 
     public function compareOptimalCandidates($a, $b) {
@@ -313,11 +221,8 @@ class PumpSelectorRanking {
     }
 
     public function comparePremiumCandidates($a, $b) {
-        $aStrength = $this->getUpgradeStrengthRank($a['upgrade_strength']);
-        $bStrength = $this->getUpgradeStrengthRank($b['upgrade_strength']);
-
-        if ($aStrength !== $bStrength) {
-            return ($aStrength > $bStrength) ? -1 : 1;
+        if ((int)$a['brand_tier'] !== (int)$b['brand_tier']) {
+            return ((int)$a['brand_tier'] > (int)$b['brand_tier']) ? -1 : 1;
         }
 
         if ((int)$a['improvement_total'] !== (int)$b['improvement_total']) {
@@ -328,12 +233,16 @@ class PumpSelectorRanking {
             return ((int)$a['degradation_total'] < (int)$b['degradation_total']) ? -1 : 1;
         }
 
-        if ((float)$a['price_delta'] !== (float)$b['price_delta']) {
-            return ((float)$a['price_delta'] < (float)$b['price_delta']) ? -1 : 1;
+        if ((int)$a['reserve_grade'] !== (int)$b['reserve_grade']) {
+            return ((int)$a['reserve_grade'] > (int)$b['reserve_grade']) ? -1 : 1;
         }
 
-        if ((int)$a['brand_tier'] !== (int)$b['brand_tier']) {
-            return ((int)$a['brand_tier'] > (int)$b['brand_tier']) ? -1 : 1;
+        if ((int)$a['fit_grade'] !== (int)$b['fit_grade']) {
+            return ((int)$a['fit_grade'] > (int)$b['fit_grade']) ? -1 : 1;
+        }
+
+        if ((float)$a['price'] !== (float)$b['price']) {
+            return ((float)$a['price'] < (float)$b['price']) ? -1 : 1;
         }
 
         if ((int)$a['product_id'] === (int)$b['product_id']) {
@@ -357,22 +266,6 @@ class PumpSelectorRanking {
             'fit_degradation' => $fitDegradation,
             'degradation_total' => $reserveDegradation + $fitDegradation,
         );
-    }
-
-    private function getUpgradeStrengthRank($upgradeStrength) {
-        if ($upgradeStrength === self::UPGRADE_STRONG) {
-            return 3;
-        }
-
-        if ($upgradeStrength === self::UPGRADE_MEDIUM) {
-            return 2;
-        }
-
-        if ($upgradeStrength === self::UPGRADE_WEAK) {
-            return 1;
-        }
-
-        return 0;
     }
 
     private function selectCheapest(array $candidates) {
