@@ -36,7 +36,12 @@ GATES
    │     │
    │     ├── BEST PRICE → min(price)
    │     │
-   │     ├── GENERAL ε-PARETO
+   │     ├── OPTIMAL PRICE GATE
+   │     │       ↓
+   │     │   exclude Best Price
+   │     │   if another valid PASS candidate remains
+   │     │       ↓
+   │     │   GENERAL grade-aware ε-PARETO
    │     │       ↓
    │     │     OPTIMAL
    │     │
@@ -377,6 +382,12 @@ PASS
   ↓
 ценовой gate относительно Best Price
   ↓
+если после gate существует хотя бы один кандидат
+с product_id != BestPrice.product_id:
+    исключить Best Price из Optimal candidate pool
+иначе:
+    оставить Best Price как единственного допустимого кандидата
+  ↓
 GENERAL grade-aware ε-PARETO
   ↓
 лучшая reserve_grade
@@ -396,7 +407,47 @@ product_id ASC
 Optimal.price <= BestPrice.price * 1.80
 ```
 
-Таким образом, роль Optimal остаётся инженерно-экономическим балансом и не может превратиться в технически идеальный вариант с неограниченной переплатой относительно Best Price.
+### 14.1. Разделение Best Price и Optimal при наличии альтернативы
+
+Best Price и Optimal имеют разные бизнес-смыслы. Поэтому Best Price не должен повторно занимать роль Optimal, если после применения Optimal price gate существует хотя бы один другой допустимый PASS-кандидат.
+
+Нормальное правило:
+
+```text
+IF exists candidate C where
+    C is PASS
+    AND C passed Optimal price gate
+    AND C.product_id != BestPrice.product_id
+THEN
+    remove BestPrice.product_id from Optimal candidate pool
+ELSE
+    keep BestPrice in Optimal candidate pool
+```
+
+Это не является абсолютным запретом совпадения ролей. Если Best Price — единственный допустимый кандидат после gate, он может одновременно быть Optimal.
+
+Исключение Best Price выполняется **до General grade-aware ε-Pareto**, чтобы Pareto и Role Ranking работали уже по альтернативам для роли Optimal.
+
+Контрольный сценарий:
+
+```text
+H_req = 78 м
+Q_req = 65 л/мин
+voltage = 220 В
+casing = 125 мм
+
+Best Price:
+SUMOTO OPC 4SRM4/26
+product_id = 1856
+price = 87900
+
+после исключения Best Price ожидаемый Optimal:
+SUMOTO 4SRM6/20
+product_id = 1869
+price = 95500
+```
+
+Таким образом, роль Optimal остаётся инженерно-экономическим балансом и не может превратиться в технически идеальный вариант с неограниченной переплатой относительно Best Price, а при наличии реальной альтернативы не дублирует роль минимальной цены.
 
 Weighted score и сумма `Rank_R + Rank_F` не используются.
 
@@ -698,6 +749,7 @@ general_pareto_price_eps  = grade-aware
 same_grades_price_epsilon = disabled
 
 optimal_max_price_factor  = 1.80
+optimal_exclude_best_price_if_alternative = true
 premium_pool_min_tier     = 2
 premium_price_hard_gate   = none
 premium_cross_tier_pareto = disabled
@@ -737,10 +789,11 @@ Brand tiers v1:
 1. `ε_price = 2%` при grade-aware General Pareto;
 2. hydraulic `FAIL/BORDERLINE` threshold `-10%`;
 3. `Optimal <= Best Price * 1.80` на полном наборе сценариев;
-4. распределение Premium по реальным пользовательским сценариям после удаления price hard gate;
-5. порядок `brand_tier → improvement → degradation → grades → price` для Premium;
-6. необходимость отдельного low-order `brand_factor` для Optimal;
-7. будущая стратегия перехода на manufacturer Q-H curves.
+4. исключение Best Price из Optimal при наличии допустимой альтернативы;
+5. распределение Premium по реальным пользовательским сценариям после удаления price hard gate;
+6. порядок `brand_tier → improvement → degradation → grades → price` для Premium;
+7. необходимость отдельного low-order `brand_factor` для Optimal;
+8. будущая стратегия перехода на manufacturer Q-H curves.
 
 ---
 
@@ -749,6 +802,8 @@ Brand tiers v1:
 - Best Price, Optimal и Premium имеют разные бизнес-смыслы;
 - Best Price не зависит от Optimal;
 - Optimal ограничен ценовым коридором относительно Best Price;
+- если после Optimal price gate существует другой допустимый PASS-кандидат, Best Price исключается из Optimal candidate pool до General Pareto;
+- если другой допустимой альтернативы нет, Best Price может одновременно быть Optimal;
 - общий Pareto для Optimal не содержит brand как координату;
 - ценовая ε-поблажка в General Pareto применяется только при улучшении хотя бы одного discrete engineering grade;
 - при одинаковых `reserve_grade/fit_grade` более дорогой кандидат не может доминировать более дешёвый только за счёт лучшего `technical_fit` или `reserve_penalty`;
@@ -778,6 +833,9 @@ Pareto layer
 Ranking layer
 Optimal price gate (Best Price * 1.80)
 Premium v2 policy without price hard gate
+Grade-aware General Pareto
 ```
 
-Grade-aware General Pareto, зафиксированный разделом 9 настоящей редакции, **ещё не реализован** в коде. Его реализация должна быть отдельным ограниченным изменением с unit/regression-тестами перед продолжением scenario regression.
+Grade-aware General Pareto подтверждён unit-тестами и integration pipeline test.
+
+Правило исключения Best Price из Optimal при наличии допустимой альтернативы, зафиксированное разделом 14.1, **ещё не реализовано** в runtime-коде. Его реализация должна быть отдельным ограниченным изменением с unit/regression-тестами перед продолжением scenario regression.
