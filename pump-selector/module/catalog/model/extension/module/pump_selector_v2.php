@@ -3,6 +3,7 @@
 require_once(DIR_SYSTEM . 'library/pump_selector_hydraulic.php');
 require_once(DIR_SYSTEM . 'library/pump_selector_pareto.php');
 require_once(DIR_SYSTEM . 'library/pump_selector_ranking.php');
+require_once(DIR_SYSTEM . 'library/pump_selector_optimal_price_gate.php');
 
 class ModelExtensionModulePumpSelectorV2 extends Model {
     public function getRecommendedProducts($requirements) {
@@ -15,6 +16,7 @@ class ModelExtensionModulePumpSelectorV2 extends Model {
         $hydraulic = new PumpSelectorHydraulic();
         $pareto = new PumpSelectorPareto(0.02);
         $ranking = new PumpSelectorRanking();
+        $optimal_price_gate = new PumpSelectorOptimalPriceGate();
 
         $decorated = array();
         $pass_candidates = array();
@@ -37,9 +39,13 @@ class ModelExtensionModulePumpSelectorV2 extends Model {
         $optimal = null;
         $premium = null;
 
-        if ($pass_candidates) {
-            $general_front = $pareto->buildFront($pass_candidates);
-            $optimal = $ranking->selectOptimalFromPassPareto($general_front);
+        if ($pass_candidates && $best_price) {
+            $optimal_candidates = $optimal_price_gate->filter($pass_candidates, $best_price);
+
+            if ($optimal_candidates) {
+                $general_front = $pareto->buildFront($optimal_candidates);
+                $optimal = $ranking->selectOptimalFromPassPareto($general_front);
+            }
         }
 
         if ($optimal && $premium_candidates) {
