@@ -14,7 +14,6 @@ class PumpSelectorRankingTest extends PHPUnit_Framework_TestCase {
             $this->candidate(1, 100.0, 'PASS', 2, 2),
             $this->candidate(2, 50.0, 'BORDERLINE', null, null),
         ));
-
         $this->assertSame(1, $result['product_id']);
     }
 
@@ -24,7 +23,6 @@ class PumpSelectorRankingTest extends PHPUnit_Framework_TestCase {
             $this->candidate(2, 80.0, 'BORDERLINE', null, null),
             $this->candidate(3, 70.0, 'BORDERLINE', null, null),
         ));
-
         $this->assertSame(3, $result['product_id']);
     }
 
@@ -33,7 +31,6 @@ class PumpSelectorRankingTest extends PHPUnit_Framework_TestCase {
             $this->candidate(1, 90.0, 'FAIL', null, null),
             $this->candidate(2, 80.0, 'FAIL', null, null),
         ));
-
         $this->assertNull($result);
     }
 
@@ -42,7 +39,6 @@ class PumpSelectorRankingTest extends PHPUnit_Framework_TestCase {
             $this->candidate(20, 100.0, 'PASS', 2, 2),
             $this->candidate(10, 100.0, 'PASS', 2, 2),
         ));
-
         $this->assertSame(10, $result['product_id']);
     }
 
@@ -51,7 +47,6 @@ class PumpSelectorRankingTest extends PHPUnit_Framework_TestCase {
             $this->candidate(1, 50.0, 'PASS', 2, 3),
             $this->candidate(2, 100.0, 'PASS', 3, 1),
         ));
-
         $this->assertSame(2, $result['product_id']);
     }
 
@@ -60,7 +55,6 @@ class PumpSelectorRankingTest extends PHPUnit_Framework_TestCase {
             $this->candidate(1, 50.0, 'PASS', 3, 2),
             $this->candidate(2, 100.0, 'PASS', 3, 3),
         ));
-
         $this->assertSame(2, $result['product_id']);
     }
 
@@ -69,7 +63,6 @@ class PumpSelectorRankingTest extends PHPUnit_Framework_TestCase {
             $this->candidate(1, 100.0, 'PASS', 3, 3),
             $this->candidate(2, 90.0, 'PASS', 3, 3),
         ));
-
         $this->assertSame(2, $result['product_id']);
     }
 
@@ -78,9 +71,7 @@ class PumpSelectorRankingTest extends PHPUnit_Framework_TestCase {
         $a['brand_factor'] = 5;
         $b = $this->candidate(2, 100.0, 'PASS', 3, 3);
         $b['brand_factor'] = 8;
-
         $result = $this->ranking->selectOptimalFromPassPareto(array($a, $b));
-
         $this->assertSame(2, $result['product_id']);
     }
 
@@ -89,7 +80,6 @@ class PumpSelectorRankingTest extends PHPUnit_Framework_TestCase {
             $this->candidate(20, 100.0, 'PASS', 3, 3),
             $this->candidate(10, 100.0, 'PASS', 3, 3),
         ));
-
         $this->assertSame(10, $result['product_id']);
     }
 
@@ -98,7 +88,6 @@ class PumpSelectorRankingTest extends PHPUnit_Framework_TestCase {
             $this->candidate(1, 50.0, 'BORDERLINE', null, null),
             $this->candidate(2, 100.0, 'PASS', 2, 2),
         ));
-
         $this->assertSame(2, $result['product_id']);
     }
 
@@ -107,199 +96,131 @@ class PumpSelectorRankingTest extends PHPUnit_Framework_TestCase {
             $this->candidate(1, 50.0, 'BORDERLINE', null, null),
             $this->candidate(2, 40.0, 'FAIL', null, null),
         ));
-
         $this->assertNull($result);
     }
 
     public function testPremiumAllowsOneStepReserveDegradation() {
         $optimal = $this->candidate(1, 100.0, 'PASS', 3, 3);
         $premium = $this->candidate(2, 120.0, 'PASS', 2, 3);
-
         $this->assertTrue($this->ranking->isPremiumEngineeringEligible($optimal, $premium));
     }
 
     public function testPremiumAllowsOneStepFitDegradation() {
         $optimal = $this->candidate(1, 100.0, 'PASS', 3, 3);
         $premium = $this->candidate(2, 120.0, 'PASS', 3, 2);
-
         $this->assertTrue($this->ranking->isPremiumEngineeringEligible($optimal, $premium));
     }
 
     public function testPremiumRejectsDoubleOneStepDegradation() {
         $optimal = $this->candidate(1, 100.0, 'PASS', 3, 3);
         $premium = $this->candidate(2, 120.0, 'PASS', 2, 2);
-
         $this->assertFalse($this->ranking->isPremiumEngineeringEligible($optimal, $premium));
-    }
-
-    public function testPremiumDoesNotPenalizeEngineeringImprovement() {
-        $optimal = $this->candidate(1, 100.0, 'PASS', 2, 2);
-        $premium = $this->candidate(2, 120.0, 'PASS', 3, 3);
-
-        $this->assertTrue($this->ranking->isPremiumEngineeringEligible($optimal, $premium));
-    }
-
-    public function testPremiumAllowsTradeoffWhenImprovementOffsetsOnlyByRuleDefinition() {
-        $optimal = $this->candidate(1, 100.0, 'PASS', 2, 3);
-        $premium = $this->candidate(2, 120.0, 'PASS', 3, 2);
-
-        $this->assertTrue($this->ranking->isPremiumEngineeringEligible($optimal, $premium));
     }
 
     public function testPremiumRejectsBorderlineCandidate() {
         $optimal = $this->candidate(1, 100.0, 'PASS', 3, 3);
         $premium = $this->candidate(2, 120.0, 'BORDERLINE', null, null);
-
         $this->assertFalse($this->ranking->isPremiumEngineeringEligible($optimal, $premium));
     }
 
-    public function testPremiumFilterKeepsOnlyEngineeringEligibleCandidates() {
-        $optimal = $this->candidate(1, 100.0, 'PASS', 3, 3);
-        $eligible = $this->candidate(2, 120.0, 'PASS', 2, 3);
-        $doubleDrop = $this->candidate(3, 130.0, 'PASS', 2, 2);
-        $borderline = $this->candidate(4, 110.0, 'BORDERLINE', null, null);
-
-        $result = $this->ranking->filterPremiumEngineeringEligible(
-            array($eligible, $doubleDrop, $borderline),
-            $optimal
-        );
-
-        $this->assertCount(1, $result);
-        $this->assertSame(2, $result[0]['product_id']);
-    }
-
-    public function testPremiumStrongUpgradeAllowsExactlySixtyPercentPriceDelta() {
-        $optimal = $this->candidate(1, 100.0, 'PASS', 2, 2, 1);
-        $premium = $this->candidate(2, 160.0, 'PASS', 3, 2, 2);
-
+    public function testPremiumHasNoPriceHardGate() {
+        $optimal = $this->candidate(1, 100.0, 'PASS', 2, 3, 1);
+        $premium = $this->candidate(2, 1000.0, 'PASS', 2, 3, 3);
         $result = $this->ranking->selectPremium(array($premium), $optimal);
-
         $this->assertSame(2, $result['product_id']);
-        $this->assertSame('STRONG', $result['upgrade_strength']);
-    }
-
-    public function testPremiumStrongUpgradeRejectsPriceAboveSixtyPercent() {
-        $optimal = $this->candidate(1, 100.0, 'PASS', 2, 2, 1);
-        $premium = $this->candidate(2, 160.01, 'PASS', 3, 2, 2);
-
-        $this->assertNull($this->ranking->selectPremium(array($premium), $optimal));
-    }
-
-    public function testPremiumMediumBrandUpgradeAllowsExactlyThirtyFivePercent() {
-        $optimal = $this->candidate(1, 100.0, 'PASS', 3, 3, 1);
-        $premium = $this->candidate(2, 135.0, 'PASS', 3, 3, 2);
-
-        $result = $this->ranking->selectPremium(array($premium), $optimal);
-
-        $this->assertSame(2, $result['product_id']);
-        $this->assertSame('MEDIUM', $result['upgrade_strength']);
-    }
-
-    public function testPremiumWeakBrandUpgradeAllowsExactlyFifteenPercent() {
-        $optimal = $this->candidate(1, 100.0, 'PASS', 3, 3, 1);
-        $premium = $this->candidate(2, 115.0, 'PASS', 2, 3, 2);
-
-        $result = $this->ranking->selectPremium(array($premium), $optimal);
-
-        $this->assertSame(2, $result['product_id']);
-        $this->assertSame('WEAK', $result['upgrade_strength']);
-    }
-
-    public function testPremiumRejectsNoUpgradeAtSameBrandTier() {
-        $optimal = $this->candidate(1, 100.0, 'PASS', 3, 3, 2);
-        $premium = $this->candidate(2, 100.0, 'PASS', 3, 3, 2);
-
-        $this->assertNull($this->ranking->selectPremium(array($premium), $optimal));
     }
 
     public function testPremiumRejectsStandardTierEvenWithEngineeringImprovement() {
         $optimal = $this->candidate(1, 100.0, 'PASS', 2, 2, 1);
         $standard = $this->candidate(2, 90.0, 'PASS', 3, 3, 1);
-
         $this->assertNull($this->ranking->selectPremium(array($standard), $optimal));
     }
 
-    public function testPremiumRejectsDoubleEngineeringDegradationBeforePriceCheck() {
+    public function testPremiumRejectsDoubleEngineeringDegradation() {
         $optimal = $this->candidate(1, 100.0, 'PASS', 3, 3, 1);
-        $premium = $this->candidate(2, 90.0, 'PASS', 2, 2, 3);
-
+        $premium = $this->candidate(2, 1000.0, 'PASS', 2, 2, 3);
         $this->assertNull($this->ranking->selectPremium(array($premium), $optimal));
     }
 
-    public function testPremiumRankingPrefersStrongerUpgradeBeforeLowerPrice() {
-        $optimal = $this->candidate(1, 100.0, 'PASS', 2, 2, 1);
-        $medium = $this->candidate(2, 105.0, 'PASS', 3, 1, 3);
-        $strong = $this->candidate(3, 150.0, 'PASS', 3, 2, 2);
-
-        $result = $this->ranking->selectPremium(array($medium, $strong), $optimal);
-
-        $this->assertSame(3, $result['product_id']);
-        $this->assertSame('STRONG', $result['upgrade_strength']);
+    public function testPremiumRequiresBrandUpgradeOrEngineeringImprovement() {
+        $optimal = $this->candidate(1, 100.0, 'PASS', 3, 3, 2);
+        $same = $this->candidate(2, 90.0, 'PASS', 3, 3, 2);
+        $this->assertNull($this->ranking->selectPremium(array($same), $optimal));
     }
 
-    public function testPremiumRankingUsesImprovementBeforePriceWithinSameStrength() {
+    public function testPremiumAllowsEngineeringImprovementAtSameTier() {
+        $optimal = $this->candidate(1, 100.0, 'PASS', 2, 2, 2);
+        $better = $this->candidate(2, 200.0, 'PASS', 3, 2, 2);
+        $result = $this->ranking->selectPremium(array($better), $optimal);
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testPremiumRankingPrefersHigherBrandTierBeforePrice() {
+        $optimal = $this->candidate(1, 100.0, 'PASS', 2, 3, 1);
+        $upper = $this->candidate(2, 120.0, 'PASS', 3, 2, 2);
+        $premium = $this->candidate(3, 1000.0, 'PASS', 2, 3, 3);
+        $result = $this->ranking->selectPremium(array($upper, $premium), $optimal);
+        $this->assertSame(3, $result['product_id']);
+    }
+
+    public function testPremiumRankingUsesImprovementWithinSameTier() {
         $optimal = $this->candidate(1, 100.0, 'PASS', 1, 1, 1);
-        $oneStep = $this->candidate(2, 105.0, 'PASS', 2, 1, 2);
-        $twoSteps = $this->candidate(3, 140.0, 'PASS', 2, 2, 2);
-
+        $oneStep = $this->candidate(2, 100.0, 'PASS', 2, 1, 3);
+        $twoSteps = $this->candidate(3, 200.0, 'PASS', 2, 2, 3);
         $result = $this->ranking->selectPremium(array($oneStep, $twoSteps), $optimal);
-
         $this->assertSame(3, $result['product_id']);
         $this->assertSame(2, $result['improvement_total']);
     }
 
-    public function testPremiumRankingUsesPriceBeforeBrandTier() {
+    public function testPremiumRankingUsesLowerDegradationWithinSameTierAndImprovement() {
         $optimal = $this->candidate(1, 100.0, 'PASS', 2, 2, 1);
-        $upper = $this->candidate(2, 120.0, 'PASS', 3, 2, 2);
-        $premium = $this->candidate(3, 130.0, 'PASS', 3, 2, 3);
-
-        $result = $this->ranking->selectPremium(array($premium, $upper), $optimal);
-
+        $noDrop = $this->candidate(2, 200.0, 'PASS', 3, 2, 3);
+        $tradeoff = $this->candidate(3, 100.0, 'PASS', 3, 1, 3);
+        $result = $this->ranking->selectPremium(array($tradeoff, $noDrop), $optimal);
         $this->assertSame(2, $result['product_id']);
     }
 
-    public function testPremiumRankingUsesBrandTierAfterPriceTie() {
+    public function testPremiumRankingUsesReserveThenFitThenPrice() {
+        $optimal = $this->candidate(1, 100.0, 'PASS', 1, 1, 1);
+        $a = $this->candidate(2, 300.0, 'PASS', 3, 1, 3);
+        $b = $this->candidate(3, 100.0, 'PASS', 2, 2, 3);
+        $result = $this->ranking->selectPremium(array($b, $a), $optimal);
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testPremiumRankingUsesPriceAfterAllHigherOrderFactorsTie() {
         $optimal = $this->candidate(1, 100.0, 'PASS', 2, 2, 1);
-        $upper = $this->candidate(2, 120.0, 'PASS', 3, 2, 2);
-        $premium = $this->candidate(3, 120.0, 'PASS', 3, 2, 3);
-
-        $result = $this->ranking->selectPremium(array($upper, $premium), $optimal);
-
+        $expensive = $this->candidate(2, 300.0, 'PASS', 2, 2, 3);
+        $cheap = $this->candidate(3, 200.0, 'PASS', 2, 2, 3);
+        $result = $this->ranking->selectPremium(array($expensive, $cheap), $optimal);
         $this->assertSame(3, $result['product_id']);
     }
 
     public function testPremiumRankingUsesProductIdAsFinalTieBreak() {
         $optimal = $this->candidate(1, 100.0, 'PASS', 2, 2, 1);
-        $higherId = $this->candidate(20, 120.0, 'PASS', 3, 2, 2);
-        $lowerId = $this->candidate(10, 120.0, 'PASS', 3, 2, 2);
-
+        $higherId = $this->candidate(20, 120.0, 'PASS', 2, 2, 3);
+        $lowerId = $this->candidate(10, 120.0, 'PASS', 2, 2, 3);
         $result = $this->ranking->selectPremium(array($higherId, $lowerId), $optimal);
-
         $this->assertSame(10, $result['product_id']);
     }
 
-    public function testPremiumCheaperCandidatePassesPriceGate() {
-        $optimal = $this->candidate(1, 100.0, 'PASS', 3, 3, 1);
-        $premium = $this->candidate(2, 90.0, 'PASS', 3, 3, 2);
-
-        $result = $this->ranking->selectPremium(array($premium), $optimal);
-
-        $this->assertSame(2, $result['product_id']);
-        $this->assertLessThan(0, $result['price_delta']);
+    public function testPremiumScenarioTwoChoosesGrundfosTierThree() {
+        $optimal = $this->candidate(1600, 22370.0, 'PASS', 2, 3, 1);
+        $sumoto = $this->candidate(1825, 76900.0, 'PASS', 3, 2, 2);
+        $grundfos = $this->candidate(3318, 103000.0, 'PASS', 2, 3, 3);
+        $result = $this->ranking->selectPremium(array($sumoto, $grundfos), $optimal);
+        $this->assertSame(3318, $result['product_id']);
     }
 
     public function testPremiumRequiresBrandTierForFinalSelection() {
         $this->setExpectedException('InvalidArgumentException');
-
         $optimal = $this->candidate(1, 100.0, 'PASS', 3, 3, 1);
         $premium = $this->candidate(2, 110.0, 'PASS', 3, 3);
-
         $this->ranking->selectPremium(array($premium), $optimal);
     }
 
     public function testInvalidPassGradeIsRejected() {
         $this->setExpectedException('InvalidArgumentException');
-
         $this->ranking->selectOptimalFromPassPareto(array(
             $this->candidate(1, 100.0, 'PASS', 4, 3),
         ));
