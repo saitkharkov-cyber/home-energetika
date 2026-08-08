@@ -80,11 +80,8 @@ class ModelExtensionModulePumpSelectorV2 extends Model {
         $sql .= " psp.min_casing_inner_diameter_mm,";
         $sql .= " psp.voltage,";
         $sql .= " psp.brand_priority,";
-        $sql .= " psp.product_price AS price,";
-        $sql .= " m.name AS manufacturer";
+        $sql .= " psp.product_price AS price";
         $sql .= " FROM " . DB_PREFIX . "pump_selector_product psp";
-        $sql .= " LEFT JOIN " . DB_PREFIX . "product p ON (p.product_id = psp.product_id)";
-        $sql .= " LEFT JOIN " . DB_PREFIX . "manufacturer m ON (m.manufacturer_id = p.manufacturer_id)";
         $sql .= " WHERE " . implode(" AND ", $where);
         $sql .= " ORDER BY psp.product_id ASC";
 
@@ -97,7 +94,7 @@ class ModelExtensionModulePumpSelectorV2 extends Model {
         $candidates = array();
 
         foreach ($query->rows as $row) {
-            $manufacturer = isset($row['manufacturer']) ? (string)$row['manufacturer'] : '';
+            $brand_tier = $this->getBrandTierFromPriority((int)$row['brand_priority']);
 
             $candidates[] = array(
                 'product_id' => (int)$row['product_id'],
@@ -107,9 +104,8 @@ class ModelExtensionModulePumpSelectorV2 extends Model {
                 'min_casing_inner_diameter_mm' => (float)$row['min_casing_inner_diameter_mm'],
                 'voltage' => (string)$row['voltage'],
                 'brand_priority' => (int)$row['brand_priority'],
-                'brand_tier' => $this->getBrandTier($manufacturer),
-                'brand_factor' => (float)$this->getBrandTier($manufacturer),
-                'manufacturer' => $manufacturer,
+                'brand_tier' => $brand_tier,
+                'brand_factor' => (float)$brand_tier,
                 'price' => (float)$row['price']
             );
         }
@@ -117,22 +113,18 @@ class ModelExtensionModulePumpSelectorV2 extends Model {
         return $candidates;
     }
 
-    private function getBrandTier($manufacturer) {
-        $manufacturer = trim((string)$manufacturer);
+    private function getBrandTierFromPriority($brand_priority) {
+        $brand_priority = (int)$brand_priority;
 
-        if ($manufacturer === '') {
-            return PumpSelectorRanking::BRAND_TIER_UNKNOWN;
-        }
-
-        if (stripos($manufacturer, 'Pedrollo') === 0 || stripos($manufacturer, 'Grundfos') === 0) {
+        if ($brand_priority >= 10) {
             return PumpSelectorRanking::BRAND_TIER_PREMIUM;
         }
 
-        if (stripos($manufacturer, 'Sumoto') === 0 || stripos($manufacturer, 'Summoto') === 0) {
+        if ($brand_priority >= 8) {
             return PumpSelectorRanking::BRAND_TIER_UPPER;
         }
 
-        if (stripos($manufacturer, 'VINKO') === 0 || stripos($manufacturer, 'Belamos') === 0 || stripos($manufacturer, 'DYU') === 0) {
+        if ($brand_priority >= 5) {
             return PumpSelectorRanking::BRAND_TIER_STANDARD;
         }
 
