@@ -43,7 +43,7 @@ class ModelExtensionModulePumpSelectorV2 extends Model {
             $optimal_candidates = $optimal_price_gate->filter($pass_candidates, $best_price);
 
             if ($optimal_candidates) {
-                $general_front = $pareto->buildFront($optimal_candidates);
+                $general_front = $pareto->buildGradeAwareFront($optimal_candidates);
                 $optimal = $ranking->selectOptimalFromPassPareto($general_front);
             }
         }
