@@ -118,6 +118,64 @@ class PumpSelectorParetoTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(1, $front[0]['product_id']);
     }
 
+    public function testGradeAwareMoreExpensiveSameGradesCannotDominateOnContinuousMetricsOnly() {
+        $pareto = new PumpSelectorPareto();
+
+        $dyu = $this->gradeCandidate(7316, 0.0000, 0.0000, 97000, 2, 3);
+        $sumoto = $this->gradeCandidate(1869, 0.0000, 0.0346, 95500, 2, 3);
+
+        $this->assertFalse($pareto->gradeAwareEpsilonDominates($dyu, $sumoto));
+    }
+
+    public function testGradeAwareMoreExpensiveCandidateMayDominateWhenGradeImprovesWithinEpsilon() {
+        $pareto = new PumpSelectorPareto();
+
+        $better_grade = $this->gradeCandidate(1, 0.0000, 0.0000, 102.00, 3, 3);
+        $cheaper = $this->gradeCandidate(2, 0.0200, 0.0500, 100.00, 2, 3);
+
+        $this->assertTrue($pareto->gradeAwareEpsilonDominates($better_grade, $cheaper));
+    }
+
+    public function testGradeAwareMoreExpensiveCandidateCannotDominateWhenOneGradeIsWorse() {
+        $pareto = new PumpSelectorPareto();
+
+        $tradeoff = $this->gradeCandidate(1, 0.0000, 0.0000, 101.00, 3, 2);
+        $cheaper = $this->gradeCandidate(2, 0.0200, 0.0500, 100.00, 2, 3);
+
+        $this->assertFalse($pareto->gradeAwareEpsilonDominates($tradeoff, $cheaper));
+    }
+
+    public function testGradeAwareCheaperCandidateStillDominatesWhenContinuousEngineeringIsBetter() {
+        $pareto = new PumpSelectorPareto();
+
+        $cheap_better = $this->gradeCandidate(1, 0.0000, 0.0000, 99.00, 2, 3);
+        $expensive_worse = $this->gradeCandidate(2, 0.0200, 0.0500, 100.00, 2, 3);
+
+        $this->assertTrue($pareto->gradeAwareEpsilonDominates($cheap_better, $expensive_worse));
+    }
+
+    public function testGradeAwareScenario3KeepsSumotoAndDyuOnGeneralFront() {
+        $pareto = new PumpSelectorPareto();
+
+        $sumoto = $this->gradeCandidate(1869, 0.0000, 0.0346, 95500, 2, 3);
+        $dyu = $this->gradeCandidate(7316, 0.0000, 0.0000, 97000, 2, 3);
+
+        $front = $pareto->buildGradeAwareFront(array($sumoto, $dyu));
+
+        $this->assertCount(2, $front);
+        $this->assertSame(1869, $front[0]['product_id']);
+        $this->assertSame(7316, $front[1]['product_id']);
+    }
+
+    public function testGradeAwareFrontRequiresGrades() {
+        $pareto = new PumpSelectorPareto();
+
+        $this->setExpectedException('InvalidArgumentException');
+        $pareto->buildGradeAwareFront(array(
+            $this->candidate(1, 0.0, 0.0, 100.0)
+        ));
+    }
+
     public function testMissingMetricThrowsInvalidArgumentException() {
         $pareto = new PumpSelectorPareto();
 
@@ -151,5 +209,12 @@ class PumpSelectorParetoTest extends PHPUnit_Framework_TestCase {
             'reserve_penalty' => (float)$reserve_penalty,
             'price' => (float)$price
         );
+    }
+
+    private function gradeCandidate($product_id, $technical_fit, $reserve_penalty, $price, $reserve_grade, $fit_grade) {
+        $candidate = $this->candidate($product_id, $technical_fit, $reserve_penalty, $price);
+        $candidate['reserve_grade'] = (int)$reserve_grade;
+        $candidate['fit_grade'] = (int)$fit_grade;
+        return $candidate;
     }
 }
