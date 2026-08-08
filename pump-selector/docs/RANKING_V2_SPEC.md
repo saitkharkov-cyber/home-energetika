@@ -207,15 +207,35 @@ price             → MIN
 
 Brand / brand tier в общий Pareto-вектор не входит.
 
-### 9.1. ε-доминирование по цене
+### 9.1. Grade-aware ε-доминирование по цене
 
-Default v1:
+Default v2:
 
 ```text
 ε_price = 0.02
 ```
 
-`A` ε-доминирует `B`, если:
+Непрерывные метрики сохраняются в Pareto-векторе, но ценовая ε-поблажка для более дорогого кандидата разрешается только при реальном улучшении хотя бы одного дискретного инженерного grade.
+
+Сначала требуется отсутствие ухудшения по grades:
+
+```text
+A.reserve_grade >= B.reserve_grade
+AND
+A.fit_grade >= B.fit_grade
+```
+
+#### Режим A — есть улучшение инженерного класса
+
+Если хотя бы один grade строго лучше:
+
+```text
+A.reserve_grade > B.reserve_grade
+OR
+A.fit_grade > B.fit_grade
+```
+
+то `A` может ε-доминировать `B`, если одновременно:
 
 ```text
 A.technical_fit <= B.technical_fit
@@ -231,29 +251,70 @@ AND
 )
 ```
 
-Для полностью одинаковой инженерии:
+То есть переплата до 2% допускается только за переход в лучший дискретный инженерный класс.
+
+#### Режим B — grades одинаковые
+
+Если:
 
 ```text
-IF
-A.technical_fit = B.technical_fit
+A.reserve_grade = B.reserve_grade
 AND
-A.reserve_penalty = B.reserve_penalty
-AND
-A.price < B.price
-THEN
-A dominates B
+A.fit_grade = B.fit_grade
 ```
 
-Инженерные epsilon в v1 не вводятся.
+то более дорогой `A` **не может** доминировать `B` только за счёт лучшего `technical_fit` или `reserve_penalty`.
+
+Для доминирования внутри одинаковой пары grades требуется:
+
+```text
+A.price <= B.price
+```
+
+и при этом непрерывная инженерия должна быть не хуже:
+
+```text
+A.technical_fit <= B.technical_fit
+AND
+A.reserve_penalty <= B.reserve_penalty
+```
+
+с хотя бы одним строгим улучшением по непрерывной инженерии или цене.
+
+Для полностью одинаковой инженерии более дешёвый кандидат доминирует более дорогой.
+
+### 9.2. Контрольный смысл правила
+
+Для кандидатов с одинаковыми `reserve_grade / fit_grade` небольшое улучшение continuous metric не должно уничтожать более дешёвый вариант до Role Ranking.
+
+Контрольный сценарий `H_req=78`, `Q_req=65`, `220 В`, `125 мм`:
+
+```text
+SUMOTO 4SRM6/20:
+reserve_grade = 2
+fit_grade = 3
+price = 95500
+reserve_penalty ≈ 0.0346
+
+DYU DWH3-125:
+reserve_grade = 2
+fit_grade = 3
+price = 97000
+reserve_penalty = 0
+```
+
+При одинаковых grades DYU дороже, поэтому он не может удалить SUMOTO только из-за меньшего `reserve_penalty`. Оба должны дожить до Role Ranking, где цена выбирается раньше low-order brand factor.
+
+Инженерные epsilon в v2 не вводятся.
 
 ---
 
 ## 10. Непрерывные метрики и дискретные grades
 
 - `technical_fit`, `reserve_penalty`, `price` — непрерывные величины для Pareto;
-- `reserve_grade`, `fit_grade` — дискретные ранги для Role Ranking.
+- `reserve_grade`, `fit_grade` — дискретные ранги для Role Ranking и для ограничения применения ценового ε-доминирования.
 
-Pareto и Role Ranking сознательно используют разные представления одной и той же инженерной картины.
+Pareto и Role Ranking сознательно используют разные представления одной и той же инженерной картины, но General Pareto не должен удалять кандидата из-за малой continuous-разницы внутри одинакового инженерного grade-класса, если доминирующий кандидат дороже.
 
 ---
 
@@ -316,7 +377,7 @@ PASS
   ↓
 ценовой gate относительно Best Price
   ↓
-GENERAL ε-PARETO
+GENERAL grade-aware ε-PARETO
   ↓
 лучшая reserve_grade
   ↓
@@ -618,25 +679,27 @@ final_role
 ## 22. Зафиксированные defaults v2
 
 ```text
-hydraulic_model          = endpoint_parabolic_estimate
-confidence               = approximate
+hydraulic_model           = endpoint_parabolic_estimate
+confidence                = approximate
 
-q_target_min             = 0.35
-q_target_max             = 0.65
-h_target_min             = 0.45
-h_target_max             = 0.75
+q_target_min              = 0.35
+q_target_max              = 0.65
+h_target_min              = 0.45
+h_target_max              = 0.75
 
-hydraulic_fail_threshold = -0.10
-borderline range         = [-0.10, 0)
+hydraulic_fail_threshold  = -0.10
+borderline range          = [-0.10, 0)
 
-reserve_penalty ideal    = [0.10, 0.25]
-low_reserve_multiplier   = 2.0
+reserve_penalty ideal     = [0.10, 0.25]
+low_reserve_multiplier    = 2.0
 
-ε_price                  = 0.02
+ε_price                   = 0.02
+general_pareto_price_eps  = grade-aware
+same_grades_price_epsilon = disabled
 
-optimal_max_price_factor = 1.80
-premium_pool_min_tier    = 2
-premium_price_hard_gate  = none
+optimal_max_price_factor  = 1.80
+premium_pool_min_tier     = 2
+premium_price_hard_gate   = none
 premium_cross_tier_pareto = disabled
 ```
 
@@ -671,7 +734,7 @@ Brand tiers v1:
 
 Архитектурно зафиксированы, но требуют проверки на полном candidate pool:
 
-1. `ε_price = 2%`;
+1. `ε_price = 2%` при grade-aware General Pareto;
 2. hydraulic `FAIL/BORDERLINE` threshold `-10%`;
 3. `Optimal <= Best Price * 1.80` на полном наборе сценариев;
 4. распределение Premium по реальным пользовательским сценариям после удаления price hard gate;
@@ -687,6 +750,8 @@ Brand tiers v1:
 - Best Price не зависит от Optimal;
 - Optimal ограничен ценовым коридором относительно Best Price;
 - общий Pareto для Optimal не содержит brand как координату;
+- ценовая ε-поблажка в General Pareto применяется только при улучшении хотя бы одного discrete engineering grade;
+- при одинаковых `reserve_grade/fit_grade` более дорогой кандидат не может доминировать более дешёвый только за счёт лучшего `technical_fit` или `reserve_penalty`;
 - Premium имеет отдельный candidate pool;
 - Premium Pool допускает только PASS и `brand_tier >= 2`;
 - Premium не обязан быть мощнее Optimal по `H_max/Q_max`;
@@ -712,8 +777,7 @@ Hydraulic layer
 Pareto layer
 Ranking layer
 Optimal price gate (Best Price * 1.80)
+Premium v2 policy without price hard gate
 ```
 
-Premium v2, зафиксированный разделами 16–20, **ещё не реализован** в коде на момент этой редакции.
-
-Текущий код всё ещё содержит прежнюю Premium price-delta policy `60/35/15`; она считается superseded настоящей спецификацией и должна быть заменена отдельным ограниченным изменением с unit/regression-тестами до дальнейшего scenario regression.
+Grade-aware General Pareto, зафиксированный разделом 9 настоящей редакции, **ещё не реализован** в коде. Его реализация должна быть отдельным ограниченным изменением с unit/regression-тестами перед продолжением scenario regression.
