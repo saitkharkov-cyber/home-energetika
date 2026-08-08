@@ -123,15 +123,15 @@ class ModelExtensionModulePumpSelectorCacheBuilder extends Model
 			return 0;
 		}
 
-		if (stripos($manufacturer, 'Pedrollo') === 0) {
+		if (stripos($manufacturer, 'Pedrollo') === 0 || stripos($manufacturer, 'Grundfos') === 0) {
 			return 10;
 		}
 
-		if (stripos($manufacturer, 'Sumoto') === 0) {
+		if (stripos($manufacturer, 'Sumoto') === 0 || stripos($manufacturer, 'Summoto') === 0) {
 			return 8;
 		}
 
-		if (stripos($manufacturer, 'Belamos') === 0) {
+		if (stripos($manufacturer, 'VINKO') === 0 || stripos($manufacturer, 'Belamos') === 0 || stripos($manufacturer, 'DYU') === 0) {
 			return 5;
 		}
 
