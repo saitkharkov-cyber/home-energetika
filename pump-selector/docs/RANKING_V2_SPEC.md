@@ -4,7 +4,7 @@
 
 Документ фиксирует утверждённое математическое ядро новой логики ранжирования подборщика насосов.
 
-Статус: **working specification v1**.
+Статус: **working specification v2**.
 
 Документ является нормативной основой для реализации ranking v2, unit-тестов и regression-проверок.
 
@@ -18,9 +18,9 @@
 
 - **Best Price** — самый дешёвый уверенно допустимый вариант;
 - **Optimal** — лучший инженерно-экономический баланс;
-- **Premium** — оправданный качественный upgrade относительно Optimal.
+- **Premium** — лучший допустимый вариант более высокого продуктового/брендового класса либо инженерно улучшенный вариант из Premium Pool; цена для Premium не является hard gate.
 
-Модель должна масштабироваться на многобрендовый каталог без жёсткой линейной лестницы `brand_priority`, при которой бренд автоматически побеждает технически более рациональный вариант.
+Модель должна масштабироваться на многобрендовый каталог без жёсткой линейной лестницы `brand_priority` в Best Price/Optimal, но роль Premium сознательно использует `brand_tier` как главный business factor после инженерного допуска.
 
 ---
 
@@ -42,13 +42,15 @@ GATES
    │     │
    │     └── PREMIUM POOL
    │             ↓
-   │        PREMIUM ε-PARETO
+   │      tier-scoped ε-PARETO
    │             ↓
    │        compare vs Optimal
    │             ↓
-   │        upgrade strength
+   │        Engineering Gate
    │             ↓
-   │        price delta gate
+   │       Premium justification
+   │             ↓
+   │      brand-first role ranking
    │             ↓
    │          PREMIUM
    │
@@ -67,8 +69,8 @@ GATES
 - **Gates** — физическая допустимость;
 - **ε-Pareto** — устранение физико-экономически доминируемых вариантов;
 - **Role Ranking** — назначение бизнес-роли;
-- **Brand tier** — допуск в Premium Pool и low-order business factor;
-- бренд не входит в общий физико-экономический Pareto-вектор.
+- **Brand tier** — допуск в Premium Pool и главный business factor финального Premium ranking;
+- бренд не входит в общий физико-экономический Pareto-вектор для Optimal.
 
 ---
 
@@ -312,6 +314,8 @@ Brand, Pareto-front и Premium-tier не влияют на выбор Best Price
 ```text
 PASS
   ↓
+ценовой gate относительно Best Price
+  ↓
 GENERAL ε-PARETO
   ↓
 лучшая reserve_grade
@@ -324,6 +328,14 @@ brand factor только как low-order tie-break
   ↓
 product_id ASC
 ```
+
+Для нормального PASS-сценария применяется:
+
+```text
+Optimal.price <= BestPrice.price * 1.80
+```
+
+Таким образом, роль Optimal остаётся инженерно-экономическим балансом и не может превратиться в технически идеальный вариант с неограниченной переплатой относительно Best Price.
 
 Weighted score и сумма `Rank_R + Rank_F` не используются.
 
@@ -379,12 +391,28 @@ PASS
   ↓
 brand_tier >= 2
   ↓
-PREMIUM ε-PARETO
+разделение по brand_tier
+  ↓
+tier-scoped PREMIUM ε-PARETO
   ↓
 compare vs Optimal
 ```
 
-Это предотвращает ситуацию, когда дешёвый standard-бренд уничтожает качественный premium-кандидат только ценой ещё до Role Ranking.
+### 16.1. Tier-scoped Premium ε-Pareto
+
+Для Premium кандидаты разных `brand_tier` **не доминируют друг друга**.
+
+Pareto строится отдельно внутри каждого tier по тому же непрерывному вектору:
+
+```text
+technical_fit   → MIN
+reserve_penalty → MIN
+price           → MIN
+```
+
+Это сохраняет защиту от явно доминируемых вариантов внутри одного класса, но не позволяет более дешёвому tier 2 удалить tier 3 до бизнес-ранжирования.
+
+Цена остаётся полезной экономической координатой внутри одного tier, но не является межtierовым hard gate.
 
 Premium не обязан иметь большие абсолютные `H_max` или `Q_max`, чем Optimal.
 
@@ -399,7 +427,7 @@ O = Optimal
 P = Premium candidate
 ```
 
-Определяем только ухудшение:
+Определяем ухудшение:
 
 ```text
 D_R = max(0, Rank_R(O) - Rank_R(P))
@@ -429,108 +457,60 @@ BORDERLINE-кандидаты в Premium запрещены.
 
 ---
 
-## 18. Premium Upgrade Strength v1
+## 18. Premium Justification v2
 
-### 18.1. STRONG
+После Engineering Gate кандидат должен иметь хотя бы одно явное основание для роли Premium.
 
-```text
-(I_R + I_F) >= 1
-AND
-(D_R + D_F) = 0
-```
-
-Premium улучшает хотя бы одну инженерную зону и ничего не ухудшает.
-
-Максимальная переплата v1:
+Кандидат допускается, если выполняется хотя бы одно условие:
 
 ```text
-price_delta <= 0.60
-```
-
-### 18.2. MEDIUM
-
-Вариант A — инженерный trade-off:
-
-```text
-(I_R + I_F) >= 1
-AND
-(D_R + D_F) = 1
-```
-
-Вариант B — инженерия та же, но brand tier выше:
-
-```text
-I_R + I_F = 0
-AND
-D_R + D_F = 0
-AND
 brand_tier(P) > brand_tier(O)
+OR
+I_R >= 1
+OR
+I_F >= 1
 ```
 
-Максимальная переплата v1:
+Таким образом:
 
-```text
-price_delta <= 0.35
-```
+- более высокий брендовый класс сам по себе является допустимым основанием, если инженерный Gate пройден;
+- кандидат того же брендового tier должен давать инженерное улучшение хотя бы по одной grade;
+- более низкий tier не может стать Premium только за счёт цены.
 
-### 18.3. WEAK
-
-```text
-I_R + I_F = 0
-AND
-D_R + D_F = 1
-AND
-brand_tier(P) > brand_tier(O)
-```
-
-Максимальная переплата v1:
-
-```text
-price_delta <= 0.15
-```
-
-### 18.4. NONE / REJECT
-
-Кандидат не является оправданным Premium upgrade, если:
-
-```text
-нет инженерного улучшения
-AND
-brand_tier(P) <= brand_tier(O)
-```
-
-или если превышен допустимый price threshold для вычисленного `upgrade_strength`.
+Старые категории `STRONG / MEDIUM / WEAK` больше не являются gate-механизмом Premium.
 
 ---
 
-## 19. Premium Price Delta
+## 19. Premium Price Policy v2
+
+Для Premium **нет hard price gate относительно Optimal**.
+
+Не применяются ограничения вида:
 
 ```text
-price_delta = (Price_Premium - Price_Optimal) / Price_Optimal
+Premium <= Optimal * 1.15
+Premium <= Optimal * 1.35
+Premium <= Optimal * 1.60
 ```
 
-Defaults v1:
+Высокая цена сама по себе не является причиной отклонить технически допустимый Premium-кандидат.
 
-```text
-STRONG  → max +60%
-MEDIUM  → max +35%
-WEAK    → max +15%
-NONE    → REJECT
-```
+Цена используется только:
 
-Если Premium дешевле Optimal, `price_delta < 0`, и ценовой Gate естественно проходит.
+1. как координата Pareto внутри одного `brand_tier`;
+2. как low-order tie-break при финальном сравнении кандидатов, которые уже прошли Premium Engineering Gate и Premium Justification.
 
-Пороги `60/35/15` являются **defaults v1** и подлежат калибровке на полном многобрендовом candidate pool. Их изменение не должно требовать изменения архитектуры.
+Если Premium стоит в несколько раз дороже Optimal, это допустимо: роли имеют разные бизнес-смыслы.
 
 ---
 
-## 20. Финальный выбор Premium
+## 20. Финальный выбор Premium v2
 
-После Premium ε-Pareto, Engineering Gate и Price Gate кандидаты сортируются так:
+После tier-scoped Premium ε-Pareto, Engineering Gate и Premium Justification кандидаты сортируются так:
 
 ```text
-1. upgrade_strength
-      STRONG > MEDIUM > WEAK
+1. brand_tier
+      MAX
 
 2. improvement_total = I_R + I_F
       MAX
@@ -538,19 +518,61 @@ NONE    → REJECT
 3. degradation_total = D_R + D_F
       MIN
 
-4. price_delta
-      MIN
-
-5. brand_tier
+4. reserve_grade
       MAX
 
-6. product_id
+5. fit_grade
+      MAX
+
+6. price
+      MIN
+
+7. product_id
       ASC
 ```
 
-`brand_tier DESC` не ставится первым, чтобы не восстановить скрыто старую модель `brand_priority`.
+Для Premium `brand_tier DESC` сознательно является первым business factor.
 
-Например, tier 3 не имеет автоматического преимущества над tier 2, если tier 2 даёт более сильный и более рациональный upgrade.
+Это не распространяется на Best Price или Optimal и поэтому не возвращает старую глобальную модель `brand_priority`.
+
+Следствие:
+
+- tier 3 имеет приоритет над tier 2, если оба кандидата прошли Engineering Gate и Premium Justification;
+- tier 2 остаётся допустимым Premium, когда подходящего tier 3 нет;
+- цена не может автоматически вытеснить качественный tier 3 кандидатом tier 2.
+
+### 20.1. Контрольный реальный сценарий
+
+Для локального сценария:
+
+```text
+H_req = 73 м
+Q_req = 40 л/мин
+voltage = 220 В
+casing = 125 мм
+```
+
+Optimal:
+
+```text
+Belamos TF-100/5
+brand_tier = 1
+reserve_grade = 2
+fit_grade = 3
+price = 22370
+```
+
+По Premium v2 ожидаемый кандидат:
+
+```text
+Grundfos SQ 3-80
+brand_tier = 3
+reserve_grade = 2
+fit_grade = 3
+price = 103000
+```
+
+Он не хуже Optimal по дискретным инженерным grades, относится к более высокому tier и не должен отбрасываться из-за разницы в цене.
 
 ---
 
@@ -579,18 +601,21 @@ D_R
 D_F
 I_R
 I_F
-upgrade_strength
-price_delta
+improvement_total
+degradation_total
+premium_justification
 role_candidate_status
 role_rejection_reason
 final_role
 ```
 
+`price_delta` может сохраняться как диагностическая метрика, но больше не участвует в Premium admission gate.
+
 Диагностика является частью архитектуры, а не временным debug-механизмом.
 
 ---
 
-## 22. Зафиксированные defaults v1
+## 22. Зафиксированные defaults v2
 
 ```text
 hydraulic_model          = endpoint_parabolic_estimate
@@ -609,10 +634,10 @@ low_reserve_multiplier   = 2.0
 
 ε_price                  = 0.02
 
+optimal_max_price_factor = 1.80
 premium_pool_min_tier    = 2
-premium_strong_max_delta = 0.60
-premium_medium_max_delta = 0.35
-premium_weak_max_delta   = 0.15
+premium_price_hard_gate  = none
+premium_cross_tier_pareto = disabled
 ```
 
 Grades:
@@ -648,10 +673,11 @@ Brand tiers v1:
 
 1. `ε_price = 2%`;
 2. hydraulic `FAIL/BORDERLINE` threshold `-10%`;
-3. Premium price thresholds `60/35/15`;
-4. распределение Premium по реальным пользовательским сценариям;
-5. необходимость отдельного low-order `brand_factor` для Optimal;
-6. будущая стратегия перехода на manufacturer Q-H curves.
+3. `Optimal <= Best Price * 1.80` на полном наборе сценариев;
+4. распределение Premium по реальным пользовательским сценариям после удаления price hard gate;
+5. порядок `brand_tier → improvement → degradation → grades → price` для Premium;
+6. необходимость отдельного low-order `brand_factor` для Optimal;
+7. будущая стратегия перехода на manufacturer Q-H curves.
 
 ---
 
@@ -659,14 +685,18 @@ Brand tiers v1:
 
 - Best Price, Optimal и Premium имеют разные бизнес-смыслы;
 - Best Price не зависит от Optimal;
-- общий Pareto не содержит brand как координату;
+- Optimal ограничен ценовым коридором относительно Best Price;
+- общий Pareto для Optimal не содержит brand как координату;
 - Premium имеет отдельный candidate pool;
 - Premium Pool допускает только PASS и `brand_tier >= 2`;
 - Premium не обязан быть мощнее Optimal по `H_max/Q_max`;
 - Premium не может оправдывать двойную инженерную деградацию ради бренда;
+- Premium не имеет hard price gate относительно Optimal;
+- кандидаты разных Premium brand tier не Pareto-доминируют друг друга;
+- после инженерного допуска `brand_tier` является первым business factor финального Premium ranking;
+- цена в Premium является low-order factor, а не admission gate;
 - BORDERLINE не смешивается с PASS в обычном ranking;
 - weighted scoring не является основой выбора Optimal;
-- brand tier не является главным сортировщиком Premium;
 - approximate hydraulic model всегда явно маркируется как approximate;
 - каждый финальный выбор должен быть диагностируемым;
 - переход на реальные Q-H кривые не должен требовать смены архитектуры `Gates → Pareto → Roles`.
@@ -675,22 +705,15 @@ Brand tiers v1:
 
 ## 25. Состояние реализации
 
-К моменту этой редакции отдельно реализованы и протестированы под PHP 5.6:
+К моменту этой редакции под PHP 5.6 отдельно реализованы и протестированы:
 
 ```text
 Hydraulic layer
 Pareto layer
-Ranking layer: Best Price / Optimal / Premium engineering eligibility
+Ranking layer
+Optimal price gate (Best Price * 1.80)
 ```
 
-Фактический локальный regression status перед этой редакцией:
+Premium v2, зафиксированный разделами 16–20, **ещё не реализован** в коде на момент этой редакции.
 
-```text
-Hydraulic: 10 tests / 55 assertions — PASS
-Pareto:    14 tests / 24 assertions — PASS
-Ranking:   19 tests / 20 assertions — PASS
-
-Total:     43 tests / 99 assertions — PASS
-```
-
-Финальный `selectPremium()` должен реализовываться только по правилам разделов 15–20 настоящей спецификации и затем получать отдельный unit/regression slice перед интеграцией в production selector pipeline.
+Текущий код всё ещё содержит прежнюю Premium price-delta policy `60/35/15`; она считается superseded настоящей спецификацией и должна быть заменена отдельным ограниченным изменением с unit/regression-тестами до дальнейшего scenario regression.
