@@ -49,7 +49,7 @@ class ModelExtensionModulePumpSelectorV2 extends Model {
         }
 
         if ($optimal && $premium_candidates) {
-            $premium_front = $pareto->buildFront($premium_candidates);
+            $premium_front = $this->buildTierScopedPremiumFront($premium_candidates, $pareto);
             $premium = $ranking->selectPremium($premium_front, $optimal);
         }
 
@@ -60,6 +60,32 @@ class ModelExtensionModulePumpSelectorV2 extends Model {
         );
 
         return $this->prepareResultCards($candidates);
+    }
+
+    private function buildTierScopedPremiumFront($premium_candidates, $pareto) {
+        $by_tier = array();
+
+        foreach ($premium_candidates as $candidate) {
+            $tier = (int)$candidate['brand_tier'];
+
+            if (!isset($by_tier[$tier])) {
+                $by_tier[$tier] = array();
+            }
+
+            $by_tier[$tier][] = $candidate;
+        }
+
+        $front = array();
+
+        foreach ($by_tier as $tier_candidates) {
+            $tier_front = $pareto->buildFront($tier_candidates);
+
+            foreach ($tier_front as $candidate) {
+                $front[] = $candidate;
+            }
+        }
+
+        return $front;
     }
 
     private function loadCandidates($requirements) {
