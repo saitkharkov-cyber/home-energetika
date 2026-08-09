@@ -83,11 +83,85 @@ class PumpSelectorAssignmentV3Test extends PHPUnit_Framework_TestCase {
         $this->assertSame(array(7), $pool);
     }
 
-    private function candidate($productId, $price, $gate) {
-        return array(
+    public function testOptimalIgnoresBestPriceInExclusionPool() {
+        $result = $this->assignment->selectOptimal(array(
+            $this->candidate(1, 100.0, 'PASS', 2, 3),
+            $this->candidate(2, 120.0, 'PASS', 2, 3),
+        ), array(1));
+
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testOptimalUsesOnlyPassCandidates() {
+        $result = $this->assignment->selectOptimal(array(
+            $this->candidate(1, 10.0, 'BORDERLINE', 3, 3),
+            $this->candidate(2, 100.0, 'PASS', 1, 1),
+            $this->candidate(3, 20.0, 'FAIL', 3, 3),
+        ), array());
+
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testOptimalExcludesPoorReserve() {
+        $result = $this->assignment->selectOptimal(array(
+            $this->candidate(1, 10.0, 'PASS', 0, 3),
+            $this->candidate(2, 100.0, 'PASS', 1, 1),
+        ), array());
+
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testOptimalPrioritizesFitGradeBeforePrice() {
+        $result = $this->assignment->selectOptimal(array(
+            $this->candidate(1, 10.0, 'PASS', 2, 2),
+            $this->candidate(2, 100.0, 'PASS', 2, 3),
+        ), array());
+
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testOptimalUsesPriceWithinSameFitGrade() {
+        $result = $this->assignment->selectOptimal(array(
+            $this->candidate(1, 120.0, 'PASS', 2, 3),
+            $this->candidate(2, 100.0, 'PASS', 1, 3),
+        ), array());
+
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testOptimalUsesProductIdForSameFitAndPrice() {
+        $result = $this->assignment->selectOptimal(array(
+            $this->candidate(20, 100.0, 'PASS', 2, 3),
+            $this->candidate(10, 100.0, 'PASS', 1, 3),
+        ), array());
+
+        $this->assertSame(10, $result['product_id']);
+    }
+
+    public function testOptimalReturnsNullWithoutEligiblePassCandidate() {
+        $result = $this->assignment->selectOptimal(array(
+            $this->candidate(1, 100.0, 'BORDERLINE', 3, 3),
+            $this->candidate(2, 100.0, 'PASS', 0, 3),
+        ), array());
+
+        $this->assertNull($result);
+    }
+
+    private function candidate($productId, $price, $gate, $reserveGrade = null, $fitGrade = null) {
+        $candidate = array(
             'product_id' => (int)$productId,
             'price' => (float)$price,
             'hydraulic_gate' => $gate,
         );
+
+        if ($reserveGrade !== null) {
+            $candidate['reserve_grade'] = (int)$reserveGrade;
+        }
+
+        if ($fitGrade !== null) {
+            $candidate['fit_grade'] = (int)$fitGrade;
+        }
+
+        return $candidate;
     }
 }

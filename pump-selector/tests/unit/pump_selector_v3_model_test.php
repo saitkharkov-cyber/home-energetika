@@ -28,6 +28,10 @@ class PumpSelectorV3ModelTestDouble extends ModelExtensionModulePumpSelectorV3 {
     public function assignBestPriceForTest(array $decorated_candidates) {
         return $this->assignBestPrice($decorated_candidates, new PumpSelectorAssignmentV3());
     }
+
+    public function assignOptimalForTest(array $decorated_candidates, array $excluded_product_ids) {
+        return $this->assignOptimal($decorated_candidates, $excluded_product_ids, new PumpSelectorAssignmentV3());
+    }
 }
 
 class PumpSelectorV3ModelTest extends PHPUnit_Framework_TestCase {
@@ -60,7 +64,7 @@ class PumpSelectorV3ModelTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(102, $products[0]['product_id']);
     }
 
-    public function testReturnsAtMostOneBestPriceCardWithV3Role() {
+    public function testPipelineReturnsDistinctBestPriceAndOptimalInRoleOrder() {
         $model = $this->modelWithCandidates(array(
             $this->candidate(101, 100.0, 100.0, 80.0),
             $this->candidate(102, 120.0, 100.0, 80.0)
@@ -68,9 +72,14 @@ class PumpSelectorV3ModelTest extends PHPUnit_Framework_TestCase {
 
         $products = $model->getRecommendedProducts($this->requirements());
 
-        $this->assertCount(1, $products);
+        $this->assertCount(2, $products);
+        $this->assertSame(101, $products[0]['product_id']);
         $this->assertSame('best_price', $products[0]['result_type']);
         $this->assertSame(array('best_price'), $products[0]['result_types']);
+        $this->assertSame(102, $products[1]['product_id']);
+        $this->assertSame('optimal_choice', $products[1]['result_type']);
+        $this->assertSame(array('optimal_choice'), $products[1]['result_types']);
+        $this->assertNotSame($products[0]['product_id'], $products[1]['product_id']);
     }
 
     public function testBestPriceProductIsAddedToExclusionPool() {
@@ -88,6 +97,69 @@ class PumpSelectorV3ModelTest extends PHPUnit_Framework_TestCase {
 
         $this->assertSame(101, $assignment_result['candidate']['product_id']);
         $this->assertSame(array(101), $assignment_result['excluded_product_ids']);
+    }
+
+    public function testOptimalProductIsAddedToInternalExclusionPool() {
+        $model = $this->modelWithCandidates(array(
+            $this->candidate(101, 100.0, 100.0, 80.0),
+            $this->candidate(102, 120.0, 100.0, 80.0)
+        ));
+        $hydraulic = new PumpSelectorHydraulic();
+        $decorated_candidates = array();
+
+        foreach ($model->testCandidates as $candidate) {
+            $decorated_candidates[] = $hydraulic->decorateCandidate($candidate, $this->requirements());
+        }
+
+        $best_price_assignment = $model->assignBestPriceForTest($decorated_candidates);
+        $optimal_assignment = $model->assignOptimalForTest(
+            $decorated_candidates,
+            $best_price_assignment['excluded_product_ids']
+        );
+
+        $this->assertSame(102, $optimal_assignment['candidate']['product_id']);
+        $this->assertSame(array(101, 102), $optimal_assignment['excluded_product_ids']);
+    }
+
+    public function testPipelineReturnsOnlyBestPriceWhenOptimalIsAbsent() {
+        $model = $this->modelWithCandidates(array(
+            $this->candidate(101, 100.0, 100.0, 80.0)
+        ));
+
+        $products = $model->getRecommendedProducts($this->requirements());
+
+        $this->assertCount(1, $products);
+        $this->assertSame('best_price', $products[0]['result_type']);
+    }
+
+    public function testExclusionPoolRemainsInternalToResultCards() {
+        $model = $this->modelWithCandidates(array(
+            $this->candidate(101, 100.0, 100.0, 80.0),
+            $this->candidate(102, 120.0, 100.0, 80.0)
+        ));
+
+        $products = $model->getRecommendedProducts($this->requirements());
+
+        $this->assertArrayNotHasKey('excluded_product_ids', $products[0]);
+        $this->assertArrayNotHasKey('excluded_product_ids', $products[1]);
+    }
+
+    public function testScenarioOneSelectionPrioritizesFitGradeOverLowerPrice() {
+        $model = $this->modelWithCandidates(array(
+            $this->candidate(101, 16380.0, 100.0, 150.0),
+            $this->candidate(102, 22370.0, 100.0, 60.0),
+            $this->candidate(103, 18000.0, 100.0, 100.0)
+        ));
+        $requirements = array(
+            'required_flow_l_min' => 30.0,
+            'required_head_m' => 65.0,
+            'selected_voltage' => '220'
+        );
+
+        $products = $model->getRecommendedProducts($requirements);
+
+        $this->assertSame(101, $products[0]['product_id']);
+        $this->assertSame(102, $products[1]['product_id']);
     }
 
     private function modelWithCandidates(array $candidates) {

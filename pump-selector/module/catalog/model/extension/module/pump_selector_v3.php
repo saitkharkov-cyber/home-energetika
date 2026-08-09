@@ -8,7 +8,7 @@ require_once(DIR_SYSTEM . 'library/pump_selector_assignment_v3.php');
  *
  * It is intentionally not wired into the current selector route. This first
  * step loads eligible candidates, evaluates hydraulics, assigns Best Price and
- * records the selected product in the Exclusion Pool only.
+ * Optimal sequentially, and keeps their product IDs in the Exclusion Pool.
  */
 class ModelExtensionModulePumpSelectorV3 extends Model {
     const BRAND_TIER_UNKNOWN = 0;
@@ -40,8 +40,28 @@ class ModelExtensionModulePumpSelectorV3 extends Model {
         $best_price = $assignment_result['candidate'];
         $best_price['result_type'] = 'best_price';
         $best_price['result_types'] = array('best_price');
+        $optimal_assignment_result = $this->assignOptimal(
+            $decorated,
+            $assignment_result['excluded_product_ids'],
+            $assignment
+        );
 
-        return array($this->prepareProductCardData($best_price));
+        $role_candidates = array($best_price);
+
+        if ($optimal_assignment_result !== null) {
+            $optimal = $optimal_assignment_result['candidate'];
+            $optimal['result_type'] = 'optimal_choice';
+            $optimal['result_types'] = array('optimal_choice');
+            $role_candidates[] = $optimal;
+        }
+
+        $products = array();
+
+        foreach ($role_candidates as $candidate) {
+            $products[] = $this->prepareProductCardData($candidate);
+        }
+
+        return $products;
     }
 
     /**
@@ -61,6 +81,27 @@ class ModelExtensionModulePumpSelectorV3 extends Model {
         return array(
             'candidate' => $best_price,
             'excluded_product_ids' => $assignment->addToExclusionPool(array(), $best_price)
+        );
+    }
+
+    /**
+     * Continue the V3 sequence without exposing Exclusion Pool in result cards.
+     *
+     * @param array $decorated_candidates
+     * @param array $excluded_product_ids
+     * @param PumpSelectorAssignmentV3 $assignment
+     * @return array|null
+     */
+    protected function assignOptimal(array $decorated_candidates, array $excluded_product_ids, PumpSelectorAssignmentV3 $assignment) {
+        $optimal = $assignment->selectOptimal($decorated_candidates, $excluded_product_ids);
+
+        if ($optimal === null) {
+            return null;
+        }
+
+        return array(
+            'candidate' => $optimal,
+            'excluded_product_ids' => $assignment->addToExclusionPool($excluded_product_ids, $optimal)
         );
     }
 

@@ -46,6 +46,48 @@ class PumpSelectorAssignmentV3 {
     }
 
     /**
+     * Select Optimal from PASS candidates outside the Exclusion Pool.
+     *
+     * Eligible candidates must have reserve_grade >= 1. The deterministic
+     * order is fit_grade DESC, then price ASC, then product_id ASC.
+     *
+     * @param array $candidates
+     * @param array $excludedProductIds
+     * @return array|null
+     */
+    public function selectOptimal(array $candidates, array $excludedProductIds) {
+        $eligibleCandidates = array();
+
+        foreach ($candidates as $candidate) {
+            $this->assertCandidate($candidate);
+
+            if ($candidate['hydraulic_gate'] !== self::GATE_PASS) {
+                continue;
+            }
+
+            if (in_array((int)$candidate['product_id'], $excludedProductIds, true)) {
+                continue;
+            }
+
+            $this->assertOptimalCandidate($candidate);
+
+            if ((int)$candidate['reserve_grade'] < 1) {
+                continue;
+            }
+
+            $eligibleCandidates[] = $candidate;
+        }
+
+        if (empty($eligibleCandidates)) {
+            return null;
+        }
+
+        usort($eligibleCandidates, array($this, 'compareOptimalCandidates'));
+
+        return $eligibleCandidates[0];
+    }
+
+    /**
      * Add an assigned candidate product_id to a simple unique Exclusion Pool.
      * A null assignment leaves the pool unchanged.
      *
@@ -100,6 +142,14 @@ class PumpSelectorAssignmentV3 {
         return ((int)$a['product_id'] < (int)$b['product_id']) ? -1 : 1;
     }
 
+    public function compareOptimalCandidates($a, $b) {
+        if ((int)$a['fit_grade'] !== (int)$b['fit_grade']) {
+            return ((int)$a['fit_grade'] > (int)$b['fit_grade']) ? -1 : 1;
+        }
+
+        return $this->comparePriceCandidates($a, $b);
+    }
+
     private function assertCandidate(array $candidate) {
         if (!isset($candidate['product_id'])) {
             throw new InvalidArgumentException('Candidate product_id is required.');
@@ -115,6 +165,27 @@ class PumpSelectorAssignmentV3 {
 
         if (!in_array($candidate['hydraulic_gate'], array(self::GATE_PASS, self::GATE_BORDERLINE, self::GATE_FAIL), true)) {
             throw new InvalidArgumentException('Candidate hydraulic_gate is invalid.');
+        }
+    }
+
+    private function assertOptimalCandidate(array $candidate) {
+        if (!isset($candidate['reserve_grade']) || !is_numeric($candidate['reserve_grade'])) {
+            throw new InvalidArgumentException('Candidate reserve_grade is required for Optimal selection.');
+        }
+
+        if (!isset($candidate['fit_grade']) || !is_numeric($candidate['fit_grade'])) {
+            throw new InvalidArgumentException('Candidate fit_grade is required for Optimal selection.');
+        }
+
+        $reserveGrade = (int)$candidate['reserve_grade'];
+        $fitGrade = (int)$candidate['fit_grade'];
+
+        if ($reserveGrade < 0 || $reserveGrade > 3) {
+            throw new InvalidArgumentException('Candidate reserve_grade must be between 0 and 3.');
+        }
+
+        if ($fitGrade < 0 || $fitGrade > 3) {
+            throw new InvalidArgumentException('Candidate fit_grade must be between 0 and 3.');
         }
     }
 }
