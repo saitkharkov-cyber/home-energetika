@@ -1,61 +1,535 @@
 # HANDOFF — catalog-standardization-new / pump-selector
 
-Дата: 2026-08-08
+Дата: 2026-08-09
 
 ## Контекст
 
-Репозиторий:
+Репозиторий: `saitkharkov-cyber/home-energetika`
 
-`saitkharkov-cyber/home-energetika`
-
-Ветка:
-
-`main`
+Ветка: `main`
 
 Рабочие области:
 
 - `catalog-standardization-new`
 - `pump-selector`
 
-Работа ведётся строго по принципу **одного ограниченного шага за раз**.
-Не переходить к следующему шагу без отдельного `+` / `++` пользователя.
-Не менять production без отдельного явного разрешения.
+Работа ведётся строго по принципу **одного ограниченного шага за раз**. Не переходить к следующему шагу без отдельного `+` / `++` пользователя.
+
+V1 и V2 подборщика сохраняются рядом с V3 как reference / rollback. Не удалять и не переписывать их без отдельного решения.
 
 ---
 
-# ГЛАВНЫЙ СТАТУС НА КОНЕЦ СЕССИИ
+# ГЛАВНЫЙ СТАТУС
 
-Стандартизация selector-critical данных VINKO / Grundfos / DYU и расширение selector cache уже выполнены ранее.
+Основная логика **Pump Selector Ranking V3 реализована и прошла широкую проверку на реальном test runtime / cache**.
 
-Текущая задача больше НЕ состоит в подготовке этих данных.
+V3 использует последовательное назначение ролей:
 
-Текущая задача:
+```text
+Candidate Pool
+→ Hydraulic evaluation
+→ Best Price
+→ Exclusion Pool
+→ Optimal
+→ Exclusion Pool
+→ Premium
+→ если Premium отсутствует → Alternative
+```
 
-> **перепроектировать бизнес-логику Pump Selector ranking так, чтобы выдача Best Price / Optimal / Premium была понятной человеку и не требовала постоянного латания математических исключений.**
+Цель V3 достигнута:
 
-В конце сессии принято решение **не продолжать немедленно менять runtime ranking**.
-Сначала нужно вручную сформулировать человеческую бизнес-логику ролей на реальных сценариях, а уже потом решать, какая математика действительно нужна.
+- роли понятны человеку;
+- один товар не занимает несколько ролей;
+- не используется искусственное заполнение трёх карточек плохими насосами;
+- 0/1/2 карточки допустимы, если достойных кандидатов действительно нет.
+
+На конец сессии **ranking V3 считаем практически завершённым**.
+
+Главная оставшаяся функциональная задача:
+
+> **consultation popup + server-side повторный V3 calculation + отправка заявки менеджеру + отправка результатов подбора клиенту.**
 
 ---
 
-# КАТАЛОГ / CACHE — БАЗОВОЕ СОСТОЯНИЕ
+# GIT STATE
 
-Root selector scope:
+Последний подтверждённый пользователем commit, находящийся и в `HEAD`, и в `origin/main` до локальных UX/regression-правок:
 
-`category_id = 11900213`
+`26394e6 — Add ranking v3 controller and template`
 
-Category normalization ранее завершена:
+Ключевые V3 commits:
 
-- каждый товар в subtree `11900213` явно привязан к родительским категориям пути;
-- missing ancestor links = 0.
+- `b5ed3dc` — Add ranking v3 sequential assignment specification
+- `395fa1e` — Add ranking v3 best price assignment helper
+- `02aea0d` — Add isolated ranking v3 runtime skeleton
+- `52f2f20` — Add ranking v3 optimal assignment
+- `3775c7e` — Add ranking v3 premium assignment
+- `2f448fd` — Add ranking v3 alternative fallback
+- `26394e6` — Add ranking v3 controller and template
 
-Cache Builder после расширения root scope:
+При старте новой сессии обязательно проверить фактический `main` / `HEAD` и локальный `git status --short`: после `26394e6` выполнялись локальные regression/CTA-правки, часть которых могла оставаться незакоммиченной.
 
-- total scanned = 2466
-- eligible inserted = 293
+---
 
-Eligible по брендам:
+# NORMATIVE V3 SPEC
 
+Главный нормативный документ:
+
+`pump-selector/docs/RANKING_V3_SPEC.md`
+
+V2 spec остаётся историческим документом предыдущей Pareto-архитектуры и не является контрактом V3.
+
+---
+
+# V1 / V2 / V3 — ИЗОЛЯЦИЯ
+
+## V1
+
+Исходный controller:
+
+`pump-selector/module/catalog/controller/extension/module/pump_selector.php`
+
+Исходная версия сохраняется.
+
+## V2
+
+Controller:
+
+`pump-selector/module/catalog/controller/extension/module/pump_selector_v2.php`
+
+Model:
+
+`pump-selector/module/catalog/model/extension/module/pump_selector_v2.php`
+
+V2 сохраняется как reference / rollback.
+
+## V3
+
+Controller:
+
+`pump-selector/module/catalog/controller/extension/module/pump_selector_v3.php`
+
+Model:
+
+`pump-selector/module/catalog/model/extension/module/pump_selector_v3.php`
+
+Assignment helper:
+
+`pump-selector/module/system/library/pump_selector_assignment_v3.php`
+
+Template:
+
+`pump-selector/module/catalog/view/theme/revolution/template/extension/module/pump_selector_v3.tpl`
+
+Route:
+
+`extension/module/pump_selector_v3`
+
+V3 работает отдельным контуром и не требует замены V1/V2.
+
+---
+
+# V3 ROLE CONTRACT
+
+Поддерживаются роли:
+
+- `best_price`
+- `optimal_choice`
+- `premium`
+- `alternative`
+
+V3 template поддерживает `alternative` с пользовательской подписью **«Альтернатива»**.
+
+---
+
+# V3 OPERATIONAL RULES
+
+## Best Price
+
+- сначала PASS;
+- если PASS отсутствуют — BORDERLINE;
+- FAIL исключены;
+- выбор: `price ASC → product_id ASC`;
+- выбранный product_id добавляется в Exclusion Pool.
+
+## Optimal
+
+- только PASS;
+- минус Exclusion Pool;
+- eligibility: `reserve_grade >= 1`;
+- выбор: `fit_grade DESC → price ASC → product_id ASC`.
+
+Reserve grade после eligibility не используется как дополнительный ranking preference.
+
+## Premium
+
+- только PASS;
+- минус Exclusion Pool;
+- только `brand_tier == 3` (Pedrollo / Grundfos);
+- `fit_grade >= 2`;
+- `reserve_grade >= 2`;
+- выбор: `price ASC → product_id ASC`.
+
+## Alternative
+
+Используется только если Premium отсутствует.
+
+- только PASS;
+- минус Exclusion Pool;
+- manufacturer отличается от Optimal;
+- valid `manufacturer_id`;
+- `fit_grade >= 2`;
+- `reserve_grade >= 1`;
+- выбирается ближайшая к Optimal рабочая точка по `(q_rel, h_rel)`, затем цена, затем product_id.
+
+Если Optimal отсутствует, Alternative не строится.
+
+## Exclusion invariant
+
+При достаточном числе достойных кандидатов роли должны иметь разные `product_id`.
+
+Не ослаблять gates только ради трёх карточек.
+
+---
+
+# UNIT TESTS V3
+
+Последние подтверждённые результаты:
+
+```text
+pump_selector_assignment_v3_test.php
+OK (36 tests, 36 assertions)
+
+pump_selector_v3_model_test.php
+OK (14 tests, 50 assertions)
+```
+
+PHP:
+
+`C:\php56\php.exe`
+
+PHPUnit:
+
+`.\tools\phpunit-5.7.27.phar`
+
+---
+
+# РУЧНОЕ ТЕСТИРОВАНИЕ
+
+На test-site вручную проверено около 15 сценариев.
+
+- примерно 14 дали в целом понятную/разумную выдачу;
+- один тяжёлый сценарий дал только одну карточку и был отдельно исследован.
+
+## Валидный edge case
+
+```text
+H_req = 112.5
+Q_req = 65
+220 V
+casing = 125
+```
+
+Фактический результат: одна карточка Best Price — VINKO 4STM4/35.
+
+DB diagnostic показал только два hydraulic PASS:
+
+- product_id 1953 VINKO: Hmax 225, Qmax 100, reserve 15.5%, reserve_grade 3;
+- product_id 1954 VINKO: Hmax 308, Qmax 100, reserve 58.1%, reserve_grade 0.
+
+1953 занимает Best Price и исключается. 1954 не проходит Optimal из-за `reserve_grade < 1`.
+
+Это признано **валидным edge case**, а не багом.
+
+---
+
+# HTTP REGRESSION RUNNER
+
+Создан локальный runner:
+
+`pump-selector/tests/regression/run_v3_http_matrix.py`
+
+Он работает через настоящий V3 route:
+
+`index.php?route=extension/module/pump_selector_v3`
+
+Runner использует реальный POST contract, умеет single/matrix/CSV и proxy через `--proxy-file`.
+
+Project proxy:
+
+`catalog-standardization-new/scripts/local_proxy.txt`
+
+Proxy credentials не должны логироваться.
+
+## Реальный form contract
+
+POST fields:
+
+- `total_well_depth_m`
+- `water_level_mode`
+- `water_level_m`
+- `distance_to_house_m`
+- `highest_water_point_floor`
+- `custom_vertical_lift_m`
+- `water_points[]`
+- `casing_diameter_mode`
+- `casing_diameter_mm`
+- `voltage_mode`
+- `website`
+
+Water points:
+
+- `sink`
+- `shower`
+- `toilet`
+- `washing_machine`
+- `dishwasher`
+- `irrigation`
+
+H/Q нельзя напрямую подставлять в HTTP test: controller/model вычисляют их из пользовательских inputs.
+
+---
+
+# SINGLE REAL HTTP VERIFICATION
+
+Проверенный scenario:
+
+```text
+H = 75
+Q = 40
+220 V
+casing = 125
+```
+
+Фактический result:
+
+```text
+HTTP 200
+cards = 3
+unique = 3
+best = 1569
+optimal = 1600
+card3 = premium:3307
+flags =
+```
+
+Карточки:
+
+- 1569 — `best_price` — Belamos 3TF-90/6 — 16 380 руб.
+- 1600 — `optimal_choice` — Belamos TF-100/5 — 22 370 руб.
+- 3307 — `premium` — Grundfos SQ 5-70 — 104 000 руб.
+
+Это подтвердило полный путь:
+
+`HTTP → V3 controller → real test DB/cache → V3 model → V3 template → parser`.
+
+---
+
+# MASS HTTP REGRESSION MATRIX
+
+Выполнена матрица:
+
+`6 H × 5 Q × 2 voltage × 3 casing = 180 scenarios`
+
+Ключевые итоги:
+
+```text
+HTTP 200:                180/180
+PARSE_ERROR:             0
+duplicate product IDs:   0
+MORE_THAN_3_CARDS:       0
+PREMIUM_AND_ALTERNATIVE: 0
+```
+
+Распределение:
+
+- 3 cards — 134
+- 2 cards — 6
+- 1 card — 18
+- 0 cards — 22
+
+Card3:
+
+- Premium — 97
+- Alternative — 37
+- no card3 — 46
+
+Основная концентрация малых результатов — `casing = 100`.
+
+CSV:
+
+`pump-selector/tests/regression/output/v3_http_matrix.csv`
+
+Перед коммитом regression output отдельно решить, хранить ли generated CSV в Git.
+
+---
+
+# NO_RESULT — ПОЛНАЯ ДИАГНОСТИКА
+
+Создан read-only SQL:
+
+`pump-selector/tests/regression/sql/v3_no_result_diagnostics.sql`
+
+Все 22 `NO_RESULT` проверены на реальной test DB `insurgent_ocar22`.
+
+Группы:
+
+- 380 V + casing 100 — 20
+- 220 V + casing 100 — 2
+
+Результат:
+
+```text
+22/22 = NO_HYDRAULIC_MATCH
+UNEXPECTED_NO_RESULT = 0
+```
+
+То есть voltage pool и casing pool существуют, но нет даже hydraulic BORDERLINE candidate.
+
+Следовательно, подтверждённые `NO_RESULT` **не являются defect V3 ranking/runtime**.
+
+Для 380 V + casing 100 типовой pool:
+
+```text
+eligible_total = 293
+after_voltage = 136
+after_casing = 5
+```
+
+Эти 5 — узкие Pedrollo 3SR:
+
+- 1759 — 3SR 2/14
+- 1760 — 3SR 2/21
+- 1761 — 3SR 2/28
+- 1762 — 3SR 2/41
+- 1805 — 3SR 1/62
+
+У первых четырёх Qmax=45 л/мин, у последнего Qmax=30 л/мин. Узкий ассортимент физически объясняет большое число NO_RESULT при высоких Q/H.
+
+---
+
+# CONSULTATION CTA — НАЙДЕН ИСХОДНЫЙ DEFECT
+
+Кнопка **«Получить консультацию»** была inert ещё в V1.
+
+Доказанная причина:
+
+- `<button type="button">`;
+- нет href;
+- нет onclick;
+- нет JS listener;
+- нет modal target;
+- нет controller endpoint.
+
+Это не V3 regression.
+
+Git blame связывал появление CTA с commit `b6d5b54` от 2026-06-13.
+
+Был согласован временный fallback на существующую contact page:
+
+`index.php?route=information/contact`
+
+Перед продолжением проверить локальный diff/status и определить, применён ли fallback сейчас в общем template и V3 template и закоммичен ли он. Это не финальный UX.
+
+---
+
+# FINAL CONSULTATION POPUP CONTRACT
+
+Это **главная оставшаяся функциональность перед окончательным завершением Pump Selector**.
+
+## UX
+
+Кнопка `Получить консультацию` должна открывать popup на текущей странице.
+
+Поля:
+
+- Имя
+- Телефон
+- Email
+
+Email можно сделать необязательным.
+
+## Security / data trust
+
+Нельзя доверять переданным браузером `product_id`, price, role или product name.
+
+Правильный flow:
+
+1. browser передаёт исходные пользовательские параметры selector;
+2. server повторно выполняет `calculateRequirements()`;
+3. server повторно запускает V3;
+4. server сам получает актуальные рекомендованные карточки;
+5. только серверный результат используется для писем.
+
+## Письмо менеджеру
+
+Отправлять:
+
+- имя;
+- телефон;
+- email;
+- исходные параметры пользователя;
+- расчётный H/Q;
+- фактические результаты V3;
+- role;
+- product;
+- price;
+- product URL.
+
+Если рекомендаций 1 или 2 — отправлять фактические рекомендации, не дополнять до трёх.
+
+## Письмо клиенту
+
+Если указан email, автоматически отправлять письмо:
+
+**«Результаты подбора скважинного насоса»**
+
+Содержание:
+
+- пользовательские параметры;
+- расчётный напор;
+- расчётный расход;
+- напряжение;
+- диаметр обсадной трубы;
+- 1–3 фактические рекомендации;
+- роль каждой рекомендации;
+- название;
+- цена;
+- ссылка на товар.
+
+Добавить короткое примечание, что подбор предварительный и специалист может уточнить модель с учётом фактических условий скважины.
+
+После успешной отправки popup показывает success state.
+
+---
+
+# ЧТО НЕ НУЖНО ПЕРЕДЕЛЫВАТЬ
+
+Без нового доказанного дефекта:
+
+- не переделывать V3 ranking;
+- не возвращаться к Pareto V2;
+- не ослаблять hydraulic/ranking gates ради трёх карточек;
+- не считать 0/1/2 карточки автоматически ошибкой;
+- не считать подтверждённые NO_RESULT дефектом;
+- не удалять V1/V2;
+- не доверять client-side product/price/role в consultation submit.
+
+---
+
+# CACHE / SELECTOR DATA
+
+Selector использует отдельную cache table:
+
+`oc_pump_selector_product`
+
+Root category:
+
+`11900213 — Скважинные насосы`
+
+Последний подтверждённый cache:
+
+- eligible — 293
 - Sumoto — 97
 - VINKO — 78
 - Pedrollo — 58
@@ -63,457 +537,13 @@ Eligible по брендам:
 - Grundfos — 27
 - DYU — 1
 
-Brand tier mapping через текущий `brand_priority`:
-
-- `>=10` → tier 3 PREMIUM → Pedrollo / Grundfos
-- `>=8` → tier 2 UPPER → Sumoto / Summoto
-- `>=5` → tier 1 STANDARD → VINKO / Belamos / DYU
-- иначе tier 0 UNKNOWN
-
-Известный технический долг:
-
-- `brand_priority` сейчас перегружен как transport для brand tier;
-- Builder eligibility не требует attr15, хотя runtime требует точное voltage match;
-- эти вопросы в текущей сессии не трогались.
+При появлении новых товаров нужен отдельный cache builder / refresh.
 
 ---
 
-# RANKING V2 — ЧТО УЖЕ РЕАЛИЗОВАНО
+# PROTECTED / UNRELATED LOCAL FILES
 
-Основные runtime-файлы:
-
-- `pump-selector/module/system/library/pump_selector_hydraulic.php`
-- `pump-selector/module/system/library/pump_selector_pareto.php`
-- `pump-selector/module/system/library/pump_selector_ranking.php`
-- `pump-selector/module/system/library/pump_selector_optimal_price_gate.php`
-- `pump-selector/module/catalog/model/extension/module/pump_selector_v2.php`
-
-Нормативный документ:
-
-- `pump-selector/docs/RANKING_V2_SPEC.md`
-
-## Hydraulic approximation
-
-Используется approximate endpoint-parabolic model:
-
-```text
-q_rel = Q_req / Q_max
-h_rel = H_req / H_max
-H_est = H_max * (1 - q_rel^2)
-reserve_rel = (H_est - H_req) / H_req
-```
-
-Hydraulic gate:
-
-```text
-reserve_rel < -0.10       → FAIL
--0.10 <= reserve_rel < 0  → BORDERLINE
-reserve_rel >= 0          → PASS
-```
-
-Target box:
-
-```text
-q_rel ∈ [0.35, 0.65]
-h_rel ∈ [0.45, 0.75]
-```
-
-Reserve comfort region:
-
-```text
-+10% ... +25%
-```
-
-## Grades
-
-Reserve:
-
-```text
-3 IDEAL       10..20%
-2 GOOD        5..<10% OR >20..35%
-1 ACCEPTABLE  0..<5% OR >35..50%
-0 POOR        >50%
-```
-
-Fit:
-
-```text
-3 IDEAL       d = 0
-2 GOOD        0 < d <= .10
-1 ACCEPTABLE  .10 < d <= .22
-0 POOR        > .22
-```
-
----
-
-# OPTIMAL PRICE GATE
-
-Зафиксировано и реализовано:
-
-```text
-Optimal.price <= BestPrice.price * 1.80
-```
-
-То есть дорогой технически хороший вариант не может стать Optimal при чрезмерной переплате относительно Best Price.
-
----
-
-# PREMIUM V2 — ТЕКУЩАЯ РЕАЛИЗОВАННАЯ ПОЛИТИКА
-
-Premium:
-
-- только PASS;
-- `brand_tier >= 2`;
-- отдельный tier-scoped continuous Pareto;
-- разные tier не доминируют друг друга до финального ranking;
-- Premium сравнивается с выбранным Optimal;
-- допустима инженерная деградация максимум на 1 grade только по одному измерению;
-- Premium должен иметь justification:
-  - более высокий brand tier, или
-  - инженерное улучшение хотя бы на 1 grade;
-- **нет hard price gate** относительно Optimal;
-- цена — только поздний tie-break.
-
-Premium final sort:
-
-```text
-brand_tier DESC
-→ engineering improvement DESC
-→ engineering degradation ASC
-→ reserve_grade DESC
-→ fit_grade DESC
-→ price ASC
-→ product_id ASC
-```
-
----
-
-# GRADE-AWARE GENERAL PARETO — ИЗМЕНЕНИЕ ЭТОЙ СЕССИИ
-
-Проблема была обнаружена на реальном сценарии №3:
-
-DYU DWH3-125 с немного лучшим continuous `reserve_penalty`, но той же парой discrete grades, удалял более дешёвый SUMOTO до Role Ranking.
-
-Принято и реализовано новое правило **только для General Pareto / Optimal**:
-
-> если кандидат дороже, ценовая epsilon-поблажка `ε_price = 2%` разрешается только если он реально улучшает хотя бы один discrete engineering grade и не ухудшает другой.
-
-При одинаковых `reserve_grade / fit_grade` более дорогой кандидат не может удалить более дешёвый только благодаря меньшему `technical_fit` или `reserve_penalty`.
-
-Важно:
-
-- для Optimal используется новый `buildGradeAwareFront()`;
-- Premium по-прежнему использует старый continuous `buildFront()` внутри каждого tier.
-
-Изменённые файлы:
-
-- `pump-selector/module/system/library/pump_selector_pareto.php`
-- `pump-selector/module/catalog/model/extension/module/pump_selector_v2.php`
-- `pump-selector/tests/unit/pump_selector_pareto_test.php`
-- `pump-selector/docs/RANKING_V2_SPEC.md`
-
-Тесты, реально выполненные пользователем после изменения:
-
-```text
-Pareto unit:
-OK (20 tests, 32 assertions)
-
-Pipeline integration:
-OK (1 test, 15 assertions)
-```
-
-Не утверждать, что после этого запускался полный suite.
-
----
-
-# ПОСЛЕДНИЕ КОММИТЫ СЕССИИ
-
-До обновления этого HANDOFF локальный и origin HEAD пользователя был:
-
-`adb9600 Define Best Price exclusion from Optimal`
-
-Последовательность ключевых коммитов сессии:
-
-- `3c9f764 Make general Pareto grade-aware`
-- `75ab6ff...` — добавлен grade-aware путь в Pareto library
-- `dd305a6...` — Optimal переведён на grade-aware front
-- `f1eb2f5 Add grade-aware Pareto unit tests`
-- `adb9600 Define Best Price exclusion from Optimal`
-
-После коммита этого HANDOFF HEAD будет новее `adb9600`; при старте новой сессии обязательно проверить фактический `main` / `HEAD` через GitHub и локально по выводу пользователя.
-
----
-
-# РЕАЛЬНЫЕ СЦЕНАРИИ — ПРОВЕРЕННОЕ
-
-## Сценарий №1
-
-Фактические требования формы:
-
-```text
-H_req = 65 м
-Q_req = 30 л/мин
-220 В
-casing unknown
-```
-
-После Optimal price gate:
-
-```text
-Best Price → Belamos 3TF-90/6 — 16 380
-Optimal    → Belamos TF-100/5 — 22 370
-Premium    → нет
-```
-
-Сценарий прошёл.
-
-## Сценарий №2
-
-Фактические требования формы:
-
-```text
-H_req = 73 м
-Q_req = 40 л/мин
-220 В
-casing = 125 мм
-```
-
-Текущая реализованная выдача после Premium redesign:
-
-```text
-Best Price → Belamos 3TF-90/6 — 16 380
-Optimal    → Belamos TF-100/5 — 22 370
-Premium    → Grundfos SQ 3-80 — 103 000
-```
-
-Сценарий прошёл.
-
-## Сценарий №3 — ГЛАВНЫЙ ДИАГНОСТИЧЕСКИЙ СЦЕНАРИЙ
-
-Параметры формы:
-
-```text
-Глубина = 60 м
-Уровень воды = 35 м
-Расстояние = 20 м
-Верхняя точка = 2 этаж
-Точки расхода = раковина + душ + стиральная машина + туалет + ванна + полив
-Обсадная = 125 мм
-Напряжение = 220 В
-```
-
-Фактические требования формы:
-
-```text
-H_req = 78 м
-Q_req = 65 л/мин
-```
-
-PASS-кандидаты из диагностики:
-
-```text
-1856 SUMOTO OPC 4SRM4/26       87 900  reserve 28.1%  grade 2/3  tier2
-1869 SUMOTO 4SRM6/20           95 500  reserve 28.5%  grade 2/3  tier2
-1967 VINKO 4STM6/20            95 500  reserve 28.8%  grade 2/3  tier1
-7316 DYU DWH3-125              97 000  reserve 22.7%  grade 2/3  tier1
-1952 VINKO 4STM4/27           100 100  reserve 28.1%  grade 2/3  tier1
-1953 VINKO 4STM4/35           138 600  reserve 66.6%  grade 0/1  tier1
-1954 VINKO 4STM4/48           171 600  reserve 128%   grade 0/1  tier1
-```
-
-После деплоя grade-aware Pareto в локальный OpenCart реальная форма всё равно показала только одну карточку:
-
-```text
-SUMOTO OPC 4SRM4/26 — 87 900
-роль: Optimal
-```
-
-Причина:
-
-- grade-aware Pareto исправил проблему DYU vs SUMOTO 1869;
-- но Best Price product 1856 всё ещё участвует в Optimal pool;
-- он сам выигрывает Optimal ranking;
-- `prepareResultCards()` объединяет одинаковый `product_id` ролей в одну карточку.
-
----
-
-# BEST PRICE EXCLUSION FROM OPTIMAL — ТОЛЬКО В SPEC, НЕ В RUNTIME
-
-После сценария №3 в `RANKING_V2_SPEC.md` зафиксирована рабочая гипотеза:
-
-> Best Price исключается из пула Optimal, если после Optimal price gate остаётся хотя бы один другой допустимый PASS-кандидат. Если альтернативы нет — тот же насос может быть и Best Price, и Optimal.
-
-Для scenario №3 это должно дать:
-
-```text
-Best Price → 1856 SUMOTO OPC 4SRM4/26 — 87 900
-Optimal    → 1869 SUMOTO 4SRM6/20     — 95 500
-```
-
-**Но это правило НЕ реализовано в runtime.**
-
-В конце сессии решено пока НЕ реализовывать его, потому что возникло сомнение в общей архитектуре ranking.
-
----
-
-# КЛЮЧЕВОЕ РЕШЕНИЕ В КОНЦЕ СЕССИИ
-
-Пользователю в целом **не нравится поведение нового подборщика**.
-
-Наблюдение:
-
-- результат слишком чувствителен к Pareto / reserve_penalty / grades / порядку фильтров;
-- приходится постфактум объяснять, почему очевидный человеку насос не стал Optimal;
-- роли конфликтуют и начинают требовать всё новых исключений;
-- есть риск, что математическая архитектура стала сложнее самой бизнес-задачи.
-
-Поэтому принято решение:
-
-> **остановить дальнейшее латание ranking v2 и сначала перепроектировать бизнес-логику ролей сверху вниз на реальных сценариях.**
-
-Ничего из обсуждения ниже пока не считать утверждённой спецификацией.
-
----
-
-# РУЧНАЯ БИЗНЕС-ЛОГИКА НА СЦЕНАРИИ №3
-
-Существующий алгоритм временно игнорировали и посмотрели на 7 PASS-кандидатов как продавец-консультант.
-
-Ручной выбор получился:
-
-```text
-BEST PRICE
-1856 SUMOTO OPC 4SRM4/26 — 87 900
-
-OPTIMAL
-1869 SUMOTO 4SRM6/20 — 95 500
-
-PREMIUM
-нет убедительного кандидата
-```
-
-Почему Optimal = 1869, а не DYU:
-
-- +7600 к Best Price, то есть умеренная доплата;
-- рабочая точка `q_rel≈0.406 / h_rel≈0.65` выглядит более комфортно внутри target zone;
-- Best Price 1856 стоит почти на двух границах target box: `q_rel=.65 / h_rel=.45`;
-- reserve почти одинаковый: ~28.1% vs ~28.5%;
-- DYU 7316 тоже технически хорош, но стоит 97 000 и не даёт очевидного бизнес-преимущества перед Sumoto 1869 за 95 500.
-
-Почему Premium = none:
-
-- в этих 7 PASS нет Pedrollo / Grundfos;
-- дорогие VINKO 1953/1954 — это скорее переразмер, а не Premium;
-- высокая цена сама по себе не делает насос Premium.
-
----
-
-# НОВАЯ ИДЕЯ: PREMIUM-OR-ALTERNATIVE
-
-В обсуждении появилась идея, которая пользователю показалась логичной:
-
-```text
-1. Best Price
-   → самый дешёвый нормально подходящий насос
-
-2. Optimal
-   → лучший баланс цены и рабочей точки
-
-3. Premium
-   → настоящий более высокий класс, если он есть
-
-   ИНАЧЕ
-
-   Alternative
-   → хороший сопоставимый насос ДРУГОГО БРЕНДА относительно Optimal
-```
-
-Для scenario №3 естественная выдача могла бы быть:
-
-```text
-Best Price  → SUMOTO OPC 4SRM4/26 — 87 900
-Optimal     → SUMOTO 4SRM6/20     — 95 500
-Alternative → DYU DWH3-125        — 97 000
-```
-
-Смысл Alternative:
-
-- другой бренд относительно Optimal;
-- технически нормально подходит;
-- близок к Optimal по качеству подбора;
-- не является заведомым переразмером;
-- не нужно ложно маркировать его Premium.
-
-Эта идея **ТОЛЬКО обсуждается**, не зафиксирована в spec и не реализована.
-
-Также обсуждалось, что роли могут совпадать по product_id при очень малом candidate pool, но это тоже оставлено на уровне обсуждения.
-
----
-
-# НАПРАВЛЕНИЕ НА СЛЕДУЮЩУЮ СЕССИЮ
-
-Не начинать с кода.
-
-Сначала продолжить ручное проектирование бизнес-логики.
-
-Следующий ограниченный шаг:
-
-> **взять реальный сценарий №2 и вручную, без Pareto и без текущего ranking, определить Best Price / Optimal / Premium-or-Alternative по тем же человеческим принципам, что использовали для scenario №3.**
-
-Цель:
-
-- проверить, повторяется ли одна и та же простая бизнес-логика на другом реальном scenario;
-- понять, какие критерии действительно стабильны;
-- только потом формализовать новый ranking design.
-
-До этого НЕ:
-
-- реализовывать Best Price exclusion из Optimal;
-- менять Premium runtime;
-- добавлять Alternative в код;
-- переписывать Pareto;
-- менять target box / grades / epsilon;
-- коммитить новую ranking-логику;
-- трогать production.
-
----
-
-# ТЕСТОВАЯ СРЕДА
-
-PHP 5.6:
-
-```text
-C:\php56\php.exe
-php.ini: C:\php56\php.ini
-PHPUnit: D:\Git\home-energetika\tools\phpunit-5.7.27.phar
-```
-
-Команды должны быть совместимы с PHP 5.6 / PHPUnit 5.7.27.
-
-Последние реально подтверждённые тесты:
-
-```text
-pump_selector_pareto_test.php
-OK (20 tests, 32 assertions)
-
-pump_selector_ranking_pipeline_test.php
-OK (1 test, 15 assertions)
-```
-
-После Premium redesign ранее отдельно подтверждалось:
-
-```text
-pump_selector_ranking_test.php
-OK (29 tests, 30 assertions)
-```
-
-Не выдавать это за единый полный suite run.
-
----
-
-# PROTECTED USER-OWNED / UNTRACKED
-
-Не трогать и не удалять без отдельного разрешения:
+Не трогать без отдельного решения:
 
 - `catalog-standardization-new/docs/HANDOFF_OLD.md`
 - `catalog-standardization-new/scripts/probe_vinko_known_search_context.py`
@@ -524,38 +554,40 @@ OK (29 tests, 30 assertions)
 - `catalog-standardization-new/tmp/`
 - `catalog-standardization/scripts/parsers/parse_vinko_catalog.py`
 - `catalog-standardization/scripts/vinko_parsed_preview.csv`
+- `pump-selector/module/catalog/model/extension/module/module.php`
+- `tools/`
 
-Не утверждать, что локальное рабочее дерево чистое, если пользователь сам не показал `git status`.
-
----
-
-# ПРАВИЛА КОММУНИКАЦИИ
-
-Пользователь предпочитает:
-
-- русский язык;
-- строго один bounded step за раз;
-- `+` / `++` = разрешение на следующий шаг;
-- не прыгать вперёд;
-- сначала объяснять бизнес-смысл, потом формулы;
-- не подменять проверку предположениями;
-- SQL production пользователь запускает сам;
-- PowerShell команды желательно давать одной строкой;
-- при завершении сессии обновлять HANDOFF и давать стартовый промпт.
+Regression-файлы текущей работы не путать с protected unrelated files.
 
 ---
 
-# FIRST ACTION NEXT SESSION
+# REGRESSION FILES ТЕКУЩЕЙ РАБОТЫ
 
-1. Прочитать `catalog-standardization-new/docs/START_HERE.md` и документы в порядке, который он задаёт.
-2. Обязательно прочитать актуальные:
-   - `catalog-standardization-new/docs/RULES.md`
-   - `catalog-standardization-new/docs/DECISIONS.md`
-   - `catalog-standardization-new/docs/HANDOFF.md`
-   - `pump-selector/docs/SELECTOR_CONTRACT.md`
-   - `pump-selector/docs/SELECTION_STRATEGY.md`
-   - `pump-selector/docs/RANKING_V2_SPEC.md`
-3. Проверить GitHub `main` / актуальный HEAD, ничего не изменяя.
-4. Кратко восстановить статус.
-5. Назвать ровно один следующий шаг: **ручной разбор scenario №2 по схеме Best Price / Optimal / Premium-or-Alternative без изменения кода.**
-6. STOP и ждать отдельного `+`.
+Созданы/используются локально:
+
+- `pump-selector/tests/regression/run_v3_http_matrix.py`
+- `pump-selector/tests/regression/output/v3_http_single.csv`
+- `pump-selector/tests/regression/output/v3_http_matrix.csv`
+- `pump-selector/tests/regression/sql/v3_no_result_diagnostics.sql`
+
+Перед коммитом решить, какие generated output CSV следует хранить в Git, а какие оставить локальными.
+
+---
+
+# ТЕКУЩАЯ ЦЕЛЬ НОВОЙ СЕССИИ
+
+Ranking V3 не является текущей задачей.
+
+Текущая задача:
+
+> **завершить Pump Selector UX/lead flow через consultation popup и отправку результатов.**
+
+---
+
+# РОВНО ОДИН СЛЕДУЮЩИЙ BOUNDED STEP
+
+**Спроектировать минимальный server-side contract consultation popup для V3: endpoint, входные поля, повторный server-side V3 calculation, manager email, optional client email и success/error response.**
+
+На этом шаге ranking не менять и popup пока не реализовывать. Сначала определить contract и способ переиспользования существующей OpenCart mail infrastructure.
+
+После этого STOP и ждать отдельного `+`.
