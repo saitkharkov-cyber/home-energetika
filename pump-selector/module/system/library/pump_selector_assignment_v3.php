@@ -88,6 +88,51 @@ class PumpSelectorAssignmentV3 {
     }
 
     /**
+     * Select Premium from tier-3 PASS candidates outside the Exclusion Pool.
+     *
+     * Eligible candidates require fit_grade >= 2 and reserve_grade >= 2.
+     * After those gates, the deterministic order is price ASC, then
+     * product_id ASC.
+     *
+     * @param array $candidates
+     * @param array $excludedProductIds
+     * @return array|null
+     */
+    public function selectPremium(array $candidates, array $excludedProductIds) {
+        $eligibleCandidates = array();
+
+        foreach ($candidates as $candidate) {
+            $this->assertCandidate($candidate);
+
+            if ($candidate['hydraulic_gate'] !== self::GATE_PASS) {
+                continue;
+            }
+
+            if (in_array((int)$candidate['product_id'], $excludedProductIds, true)) {
+                continue;
+            }
+
+            $this->assertPremiumCandidate($candidate);
+
+            if ((int)$candidate['brand_tier'] !== 3) {
+                continue;
+            }
+
+            if ((int)$candidate['fit_grade'] < 2 || (int)$candidate['reserve_grade'] < 2) {
+                continue;
+            }
+
+            $eligibleCandidates[] = $candidate;
+        }
+
+        if (empty($eligibleCandidates)) {
+            return null;
+        }
+
+        return $this->selectCheapest($eligibleCandidates);
+    }
+
+    /**
      * Add an assigned candidate product_id to a simple unique Exclusion Pool.
      * A null assignment leaves the pool unchanged.
      *
@@ -186,6 +231,20 @@ class PumpSelectorAssignmentV3 {
 
         if ($fitGrade < 0 || $fitGrade > 3) {
             throw new InvalidArgumentException('Candidate fit_grade must be between 0 and 3.');
+        }
+    }
+
+    private function assertPremiumCandidate(array $candidate) {
+        $this->assertOptimalCandidate($candidate);
+
+        if (!isset($candidate['brand_tier']) || !is_numeric($candidate['brand_tier'])) {
+            throw new InvalidArgumentException('Candidate brand_tier is required for Premium selection.');
+        }
+
+        $brandTier = (int)$candidate['brand_tier'];
+
+        if ($brandTier < 0 || $brandTier > 3) {
+            throw new InvalidArgumentException('Candidate brand_tier must be between 0 and 3.');
         }
     }
 }

@@ -7,8 +7,9 @@ require_once(DIR_SYSTEM . 'library/pump_selector_assignment_v3.php');
  * Isolated runtime model for the future Ranking V3 pipeline.
  *
  * It is intentionally not wired into the current selector route. This first
- * step loads eligible candidates, evaluates hydraulics, assigns Best Price and
- * Optimal sequentially, and keeps their product IDs in the Exclusion Pool.
+ * step loads eligible candidates, evaluates hydraulics, assigns Best Price,
+ * Optimal and Premium sequentially, and keeps their product IDs in the
+ * Exclusion Pool.
  */
 class ModelExtensionModulePumpSelectorV3 extends Model {
     const BRAND_TIER_UNKNOWN = 0;
@@ -47,12 +48,27 @@ class ModelExtensionModulePumpSelectorV3 extends Model {
         );
 
         $role_candidates = array($best_price);
+        $excluded_product_ids = $assignment_result['excluded_product_ids'];
 
         if ($optimal_assignment_result !== null) {
             $optimal = $optimal_assignment_result['candidate'];
             $optimal['result_type'] = 'optimal_choice';
             $optimal['result_types'] = array('optimal_choice');
             $role_candidates[] = $optimal;
+            $excluded_product_ids = $optimal_assignment_result['excluded_product_ids'];
+        }
+
+        $premium_assignment_result = $this->assignPremium(
+            $decorated,
+            $excluded_product_ids,
+            $assignment
+        );
+
+        if ($premium_assignment_result !== null) {
+            $premium = $premium_assignment_result['candidate'];
+            $premium['result_type'] = 'premium';
+            $premium['result_types'] = array('premium');
+            $role_candidates[] = $premium;
         }
 
         $products = array();
@@ -102,6 +118,27 @@ class ModelExtensionModulePumpSelectorV3 extends Model {
         return array(
             'candidate' => $optimal,
             'excluded_product_ids' => $assignment->addToExclusionPool($excluded_product_ids, $optimal)
+        );
+    }
+
+    /**
+     * Continue the V3 sequence with a tier-3 Premium assignment.
+     *
+     * @param array $decorated_candidates
+     * @param array $excluded_product_ids
+     * @param PumpSelectorAssignmentV3 $assignment
+     * @return array|null
+     */
+    protected function assignPremium(array $decorated_candidates, array $excluded_product_ids, PumpSelectorAssignmentV3 $assignment) {
+        $premium = $assignment->selectPremium($decorated_candidates, $excluded_product_ids);
+
+        if ($premium === null) {
+            return null;
+        }
+
+        return array(
+            'candidate' => $premium,
+            'excluded_product_ids' => $assignment->addToExclusionPool($excluded_product_ids, $premium)
         );
     }
 
