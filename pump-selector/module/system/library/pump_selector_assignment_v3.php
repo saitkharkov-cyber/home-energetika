@@ -133,6 +133,62 @@ class PumpSelectorAssignmentV3 {
     }
 
     /**
+     * Select a different-brand Alternative closest to the Optimal work point.
+     *
+     * @param array $candidates
+     * @param array $excludedProductIds
+     * @param mixed $optimal
+     * @return array|null
+     */
+    public function selectAlternative(array $candidates, array $excludedProductIds, $optimal) {
+        if (!is_array($optimal) || !$this->hasAlternativeComparisonData($optimal)) {
+            return null;
+        }
+
+        $eligibleCandidates = array();
+        $optimalManufacturerId = (int)$optimal['manufacturer_id'];
+
+        foreach ($candidates as $candidate) {
+            $this->assertCandidate($candidate);
+
+            if ($candidate['hydraulic_gate'] !== self::GATE_PASS) {
+                continue;
+            }
+
+            if (in_array((int)$candidate['product_id'], $excludedProductIds, true)) {
+                continue;
+            }
+
+            if (!$this->hasAlternativeComparisonData($candidate)) {
+                continue;
+            }
+
+            if ((int)$candidate['manufacturer_id'] === $optimalManufacturerId) {
+                continue;
+            }
+
+            $this->assertOptimalCandidate($candidate);
+
+            if ((int)$candidate['fit_grade'] < 2 || (int)$candidate['reserve_grade'] < 1) {
+                continue;
+            }
+
+            $dq = (float)$candidate['q_rel'] - (float)$optimal['q_rel'];
+            $dh = (float)$candidate['h_rel'] - (float)$optimal['h_rel'];
+            $candidate['distance_to_optimal'] = sqrt(($dq * $dq) + ($dh * $dh));
+            $eligibleCandidates[] = $candidate;
+        }
+
+        if (empty($eligibleCandidates)) {
+            return null;
+        }
+
+        usort($eligibleCandidates, array($this, 'compareAlternativeCandidates'));
+
+        return $eligibleCandidates[0];
+    }
+
+    /**
      * Add an assigned candidate product_id to a simple unique Exclusion Pool.
      * A null assignment leaves the pool unchanged.
      *
@@ -195,6 +251,14 @@ class PumpSelectorAssignmentV3 {
         return $this->comparePriceCandidates($a, $b);
     }
 
+    public function compareAlternativeCandidates($a, $b) {
+        if ((float)$a['distance_to_optimal'] !== (float)$b['distance_to_optimal']) {
+            return ((float)$a['distance_to_optimal'] < (float)$b['distance_to_optimal']) ? -1 : 1;
+        }
+
+        return $this->comparePriceCandidates($a, $b);
+    }
+
     private function assertCandidate(array $candidate) {
         if (!isset($candidate['product_id'])) {
             throw new InvalidArgumentException('Candidate product_id is required.');
@@ -246,5 +310,21 @@ class PumpSelectorAssignmentV3 {
         if ($brandTier < 0 || $brandTier > 3) {
             throw new InvalidArgumentException('Candidate brand_tier must be between 0 and 3.');
         }
+    }
+
+    private function hasAlternativeComparisonData(array $candidate) {
+        if (!isset($candidate['manufacturer_id']) || !is_numeric($candidate['manufacturer_id']) || (int)$candidate['manufacturer_id'] <= 0) {
+            return false;
+        }
+
+        if (!isset($candidate['q_rel']) || !is_numeric($candidate['q_rel'])) {
+            return false;
+        }
+
+        if (!isset($candidate['h_rel']) || !is_numeric($candidate['h_rel'])) {
+            return false;
+        }
+
+        return true;
     }
 }

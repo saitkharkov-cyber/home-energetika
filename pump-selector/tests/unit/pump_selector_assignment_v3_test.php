@@ -240,6 +240,117 @@ class PumpSelectorAssignmentV3Test extends PHPUnit_Framework_TestCase {
         $this->assertNull($result);
     }
 
+    public function testAlternativeUsesOnlyPassCandidates() {
+        $optimal = $this->alternativeCandidate(99, 1, 0.50, 0.50);
+        $result = $this->assignment->selectAlternative(array(
+            $this->alternativeCandidate(1, 2, 0.50, 0.50, 10.0, 'BORDERLINE'),
+            $this->alternativeCandidate(2, 2, 0.55, 0.50, 100.0, 'PASS'),
+            $this->alternativeCandidate(3, 2, 0.50, 0.50, 20.0, 'FAIL'),
+        ), array(), $optimal);
+
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testAlternativeExclusionPoolExcludesBestPriceAndOptimal() {
+        $optimal = $this->alternativeCandidate(2, 1, 0.50, 0.50);
+        $result = $this->assignment->selectAlternative(array(
+            $this->alternativeCandidate(1, 2, 0.50, 0.50),
+            $optimal,
+            $this->alternativeCandidate(3, 3, 0.50, 0.50),
+        ), array(1, 2), $optimal);
+
+        $this->assertSame(3, $result['product_id']);
+    }
+
+    public function testAlternativeRejectsSameBrandAsOptimal() {
+        $optimal = $this->alternativeCandidate(99, 1, 0.50, 0.50);
+        $result = $this->assignment->selectAlternative(array(
+            $this->alternativeCandidate(1, 1, 0.50, 0.50, 10.0),
+            $this->alternativeCandidate(2, 2, 0.50, 0.50, 100.0),
+        ), array(), $optimal);
+
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testAlternativeRejectsFitGradeBelowTwo() {
+        $optimal = $this->alternativeCandidate(99, 1, 0.50, 0.50);
+        $result = $this->assignment->selectAlternative(array(
+            $this->alternativeCandidate(1, 2, 0.50, 0.50, 10.0, 'PASS', 1, 2),
+            $this->alternativeCandidate(2, 3, 0.50, 0.50, 100.0, 'PASS', 2, 2),
+        ), array(), $optimal);
+
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testAlternativeRejectsReserveGradeBelowOne() {
+        $optimal = $this->alternativeCandidate(99, 1, 0.50, 0.50);
+        $result = $this->assignment->selectAlternative(array(
+            $this->alternativeCandidate(1, 2, 0.50, 0.50, 10.0, 'PASS', 2, 0),
+            $this->alternativeCandidate(2, 3, 0.50, 0.50, 100.0, 'PASS', 2, 1),
+        ), array(), $optimal);
+
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testAlternativePrioritizesDistanceBeforePrice() {
+        $optimal = $this->alternativeCandidate(99, 1, 0.50, 0.50);
+        $result = $this->assignment->selectAlternative(array(
+            $this->alternativeCandidate(1, 2, 0.60, 0.60, 10.0),
+            $this->alternativeCandidate(2, 3, 0.51, 0.51, 100.0),
+        ), array(), $optimal);
+
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testAlternativeUsesPriceForEqualDistance() {
+        $optimal = $this->alternativeCandidate(99, 1, 0.50, 0.50);
+        $result = $this->assignment->selectAlternative(array(
+            $this->alternativeCandidate(1, 2, 0.60, 0.50, 120.0),
+            $this->alternativeCandidate(2, 3, 0.40, 0.50, 100.0),
+        ), array(), $optimal);
+
+        $this->assertSame(2, $result['product_id']);
+    }
+
+    public function testAlternativeUsesProductIdForEqualDistanceAndPrice() {
+        $optimal = $this->alternativeCandidate(99, 1, 0.50, 0.50);
+        $result = $this->assignment->selectAlternative(array(
+            $this->alternativeCandidate(20, 2, 0.60, 0.50, 100.0),
+            $this->alternativeCandidate(10, 3, 0.40, 0.50, 100.0),
+        ), array(), $optimal);
+
+        $this->assertSame(10, $result['product_id']);
+    }
+
+    public function testAlternativeDoesNotUseBrandTierAsRankingFactor() {
+        $optimal = $this->alternativeCandidate(99, 1, 0.50, 0.50);
+        $standard = $this->alternativeCandidate(1, 2, 0.60, 0.50, 100.0);
+        $standard['brand_tier'] = 1;
+        $premium = $this->alternativeCandidate(2, 3, 0.40, 0.50, 200.0);
+        $premium['brand_tier'] = 3;
+
+        $result = $this->assignment->selectAlternative(array($premium, $standard), array(), $optimal);
+
+        $this->assertSame(1, $result['product_id']);
+    }
+
+    public function testAlternativeReturnsNullWithoutSuitableDifferentBrand() {
+        $optimal = $this->alternativeCandidate(99, 1, 0.50, 0.50);
+        $result = $this->assignment->selectAlternative(array(
+            $this->alternativeCandidate(1, 1, 0.50, 0.50),
+        ), array(), $optimal);
+
+        $this->assertNull($result);
+    }
+
+    public function testAlternativeReturnsNullWithoutOptimal() {
+        $result = $this->assignment->selectAlternative(array(
+            $this->alternativeCandidate(1, 2, 0.50, 0.50),
+        ), array(), null);
+
+        $this->assertNull($result);
+    }
+
     private function candidate($productId, $price, $gate, $reserveGrade = null, $fitGrade = null, $brandTier = null) {
         $candidate = array(
             'product_id' => (int)$productId,
@@ -258,6 +369,15 @@ class PumpSelectorAssignmentV3Test extends PHPUnit_Framework_TestCase {
         if ($brandTier !== null) {
             $candidate['brand_tier'] = (int)$brandTier;
         }
+
+        return $candidate;
+    }
+
+    private function alternativeCandidate($productId, $manufacturerId, $qRel, $hRel, $price = 100.0, $gate = 'PASS', $fitGrade = 2, $reserveGrade = 1) {
+        $candidate = $this->candidate($productId, $price, $gate, $reserveGrade, $fitGrade, 1);
+        $candidate['manufacturer_id'] = (int)$manufacturerId;
+        $candidate['q_rel'] = (float)$qRel;
+        $candidate['h_rel'] = (float)$hRel;
 
         return $candidate;
     }

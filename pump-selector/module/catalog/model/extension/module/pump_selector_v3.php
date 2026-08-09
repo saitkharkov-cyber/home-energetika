@@ -69,6 +69,20 @@ class ModelExtensionModulePumpSelectorV3 extends Model {
             $premium['result_type'] = 'premium';
             $premium['result_types'] = array('premium');
             $role_candidates[] = $premium;
+        } else {
+            $alternative_assignment_result = $this->assignAlternative(
+                $decorated,
+                $excluded_product_ids,
+                $optimal_assignment_result === null ? null : $optimal_assignment_result['candidate'],
+                $assignment
+            );
+
+            if ($alternative_assignment_result !== null) {
+                $alternative = $alternative_assignment_result['candidate'];
+                $alternative['result_type'] = 'alternative';
+                $alternative['result_types'] = array('alternative');
+                $role_candidates[] = $alternative;
+            }
         }
 
         $products = array();
@@ -142,6 +156,28 @@ class ModelExtensionModulePumpSelectorV3 extends Model {
         );
     }
 
+    /**
+     * Use Alternative only when no Premium candidate was assigned.
+     *
+     * @param array $decorated_candidates
+     * @param array $excluded_product_ids
+     * @param mixed $optimal
+     * @param PumpSelectorAssignmentV3 $assignment
+     * @return array|null
+     */
+    protected function assignAlternative(array $decorated_candidates, array $excluded_product_ids, $optimal, PumpSelectorAssignmentV3 $assignment) {
+        $alternative = $assignment->selectAlternative($decorated_candidates, $excluded_product_ids, $optimal);
+
+        if ($alternative === null) {
+            return null;
+        }
+
+        return array(
+            'candidate' => $alternative,
+            'excluded_product_ids' => $assignment->addToExclusionPool($excluded_product_ids, $alternative)
+        );
+    }
+
     protected function loadCandidates($requirements) {
         $selected_voltage = $this->db->escape((string)$this->getValue($requirements, 'selected_voltage', '220'));
 
@@ -166,8 +202,10 @@ class ModelExtensionModulePumpSelectorV3 extends Model {
         $sql .= " psp.min_casing_inner_diameter_mm,";
         $sql .= " psp.voltage,";
         $sql .= " psp.brand_priority,";
+        $sql .= " p.manufacturer_id,";
         $sql .= " psp.product_price AS price";
         $sql .= " FROM " . DB_PREFIX . "pump_selector_product psp";
+        $sql .= " LEFT JOIN " . DB_PREFIX . "product p ON (p.product_id = psp.product_id)";
         $sql .= " WHERE " . implode(" AND ", $where);
         $sql .= " ORDER BY psp.product_id ASC";
 
@@ -191,6 +229,7 @@ class ModelExtensionModulePumpSelectorV3 extends Model {
                 'voltage' => (string)$row['voltage'],
                 'brand_priority' => (int)$row['brand_priority'],
                 'brand_tier' => $brand_tier,
+                'manufacturer_id' => (int)$row['manufacturer_id'],
                 'price' => (float)$row['price']
             );
         }

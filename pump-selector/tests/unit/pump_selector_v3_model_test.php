@@ -36,6 +36,10 @@ class PumpSelectorV3ModelTestDouble extends ModelExtensionModulePumpSelectorV3 {
     public function assignPremiumForTest(array $decorated_candidates, array $excluded_product_ids) {
         return $this->assignPremium($decorated_candidates, $excluded_product_ids, new PumpSelectorAssignmentV3());
     }
+
+    public function assignAlternativeForTest(array $decorated_candidates, array $excluded_product_ids, $optimal) {
+        return $this->assignAlternative($decorated_candidates, $excluded_product_ids, $optimal, new PumpSelectorAssignmentV3());
+    }
 }
 
 class PumpSelectorV3ModelTest extends PHPUnit_Framework_TestCase {
@@ -73,7 +77,8 @@ class PumpSelectorV3ModelTest extends PHPUnit_Framework_TestCase {
         $model = $this->modelWithCandidates(array(
             $this->candidate(101, 100.0, 100.0, 80.0),
             $this->candidate(102, 120.0, 100.0, 80.0),
-            $this->candidate(103, 150.0, 100.0, 80.0, 3)
+            $this->candidate(103, 150.0, 100.0, 80.0, 3),
+            $this->candidate(104, 160.0, 100.0, 80.0, 1, 2)
         ));
 
         $products = $model->getRecommendedProducts($this->requirements());
@@ -91,6 +96,7 @@ class PumpSelectorV3ModelTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(array('premium'), $products[2]['result_types']);
         $this->assertNotSame($products[0]['product_id'], $products[2]['product_id']);
         $this->assertNotSame($products[1]['product_id'], $products[2]['product_id']);
+        $this->assertSame(103, $products[2]['product_id']);
     }
 
     public function testBestPriceProductIsAddedToExclusionPool() {
@@ -153,6 +159,28 @@ class PumpSelectorV3ModelTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(array(101, 102, 103), $premium_assignment['excluded_product_ids']);
     }
 
+    public function testAlternativeProductIsAddedToInternalExclusionPool() {
+        $model = $this->modelWithCandidates(array(
+            $this->candidate(101, 100.0, 100.0, 80.0),
+            $this->candidate(102, 120.0, 100.0, 80.0),
+            $this->candidate(103, 150.0, 100.0, 80.0, 1, 2)
+        ));
+        $decorated_candidates = $this->decorateCandidates($model->testCandidates, $this->requirements());
+        $best_price_assignment = $model->assignBestPriceForTest($decorated_candidates);
+        $optimal_assignment = $model->assignOptimalForTest(
+            $decorated_candidates,
+            $best_price_assignment['excluded_product_ids']
+        );
+        $alternative_assignment = $model->assignAlternativeForTest(
+            $decorated_candidates,
+            $optimal_assignment['excluded_product_ids'],
+            $optimal_assignment['candidate']
+        );
+
+        $this->assertSame(103, $alternative_assignment['candidate']['product_id']);
+        $this->assertSame(array(101, 102, 103), $alternative_assignment['excluded_product_ids']);
+    }
+
     public function testPipelineReturnsOnlyBestPriceWhenOptimalIsAbsent() {
         $model = $this->modelWithCandidates(array(
             $this->candidate(101, 100.0, 100.0, 80.0)
@@ -178,11 +206,28 @@ class PumpSelectorV3ModelTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('optimal_choice', $products[1]['result_type']);
     }
 
+    public function testPremiumMissingUsesAlternativeAsThirdCard() {
+        $model = $this->modelWithCandidates(array(
+            $this->candidate(101, 100.0, 100.0, 80.0),
+            $this->candidate(102, 120.0, 100.0, 80.0),
+            $this->candidate(103, 150.0, 100.0, 80.0, 1, 2)
+        ));
+
+        $products = $model->getRecommendedProducts($this->requirements());
+
+        $this->assertCount(3, $products);
+        $this->assertSame('alternative', $products[2]['result_type']);
+        $this->assertSame(103, $products[2]['product_id']);
+        $this->assertNotSame($products[0]['product_id'], $products[2]['product_id']);
+        $this->assertNotSame($products[1]['product_id'], $products[2]['product_id']);
+    }
+
     public function testExclusionPoolRemainsInternalToResultCards() {
         $model = $this->modelWithCandidates(array(
             $this->candidate(101, 100.0, 100.0, 80.0),
             $this->candidate(102, 120.0, 100.0, 80.0),
-            $this->candidate(103, 150.0, 100.0, 80.0, 3)
+            $this->candidate(103, 150.0, 100.0, 80.0, 3),
+            $this->candidate(104, 160.0, 100.0, 80.0, 1, 2)
         ));
 
         $products = $model->getRecommendedProducts($this->requirements());
@@ -213,6 +258,29 @@ class PumpSelectorV3ModelTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(104, $products[2]['product_id']);
     }
 
+    public function testScenarioThreeUsesClosestDifferentBrandAlternative() {
+        $model = $this->modelWithCandidates(array(
+            $this->candidate(101, 87900.0, 140.0, 140.0, 2, 2),
+            $this->candidate(102, 95500.0, 150.0, 100.0, 2, 2),
+            $this->candidate(103, 90000.0, 150.0, 95.0, 1, 3),
+            $this->candidate(104, 95500.0, 150.0, 100.0, 1, 4)
+        ));
+        $requirements = array(
+            'required_flow_l_min' => 65.0,
+            'required_head_m' => 78.0,
+            'selected_voltage' => '220',
+            'casing_diameter_mm' => 125
+        );
+
+        $products = $model->getRecommendedProducts($requirements);
+
+        $this->assertSame(101, $products[0]['product_id']);
+        $this->assertSame(102, $products[1]['product_id']);
+        $this->assertSame(104, $products[2]['product_id']);
+        $this->assertSame('alternative', $products[2]['result_type']);
+        $this->assertSame(0.0, $products[2]['distance_to_optimal']);
+    }
+
     private function modelWithCandidates(array $candidates) {
         $model = new PumpSelectorV3ModelTestDouble();
         $model->testCandidates = $candidates;
@@ -239,7 +307,7 @@ class PumpSelectorV3ModelTest extends PHPUnit_Framework_TestCase {
         return $decorated_candidates;
     }
 
-    private function candidate($product_id, $price, $max_head_m, $max_flow_l_min, $brand_tier = 1) {
+    private function candidate($product_id, $price, $max_head_m, $max_flow_l_min, $brand_tier = 1, $manufacturer_id = 1) {
         $brand_priority = 0;
 
         if ($brand_tier === 3) {
@@ -259,6 +327,7 @@ class PumpSelectorV3ModelTest extends PHPUnit_Framework_TestCase {
             'voltage' => '220',
             'brand_priority' => $brand_priority,
             'brand_tier' => $brand_tier,
+            'manufacturer_id' => (int)$manufacturer_id,
             'price' => (float)$price
         );
     }
