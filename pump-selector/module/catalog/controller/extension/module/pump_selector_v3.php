@@ -1,4 +1,7 @@
 <?php
+
+require_once(DIR_SYSTEM . 'library/pump_selector_consultation_v3.php');
+
 class ControllerExtensionModulePumpSelectorV3 extends Controller {
     public function index() {
         $this->load->model('extension/module/pump_selector');
@@ -76,6 +79,93 @@ class ControllerExtensionModulePumpSelectorV3 extends Controller {
         $this->response->setOutput($this->load->view('extension/module/pump_selector_v3', $data));
     }
 
+    /**
+     * Receives only raw selector inputs and contact data. Product cards are
+     * recalculated on the server and are never read from POST.
+     */
+    public function consult() {
+        $this->response->addHeader('Content-Type: application/json; charset=utf-8');
+
+        if (!isset($this->request->server['REQUEST_METHOD']) || $this->request->server['REQUEST_METHOD'] != 'POST') {
+            $this->sendConsultJson(array(
+                'success' => false,
+                'errors' => array('request' => 'Поддерживается только POST-запрос.')
+            ));
+            return;
+        }
+
+        if (!empty($this->request->post['website'])) {
+            // Honeypot submissions receive no mail and no useful signal.
+            $this->sendConsultJson(array('success' => true, 'client_email_sent' => false));
+            return;
+        }
+
+        $this->load->model('extension/module/pump_selector');
+        $this->load->model('extension/module/pump_selector_v3');
+
+        $consultation = new PumpSelectorConsultationV3();
+        $contact_result = $consultation->validateContact($this->request->post);
+        $input = $this->buildInputFromPost();
+        $errors = $this->model_extension_module_pump_selector->validateInput($input);
+
+        foreach ($contact_result['errors'] as $key => $message) {
+            $errors[$key] = $message;
+        }
+
+        if ($errors) {
+            $this->sendConsultJson(array('success' => false, 'errors' => $errors));
+            return;
+        }
+
+        try {
+            $requirements = $this->model_extension_module_pump_selector->calculateRequirements($input);
+            $products = $this->model_extension_module_pump_selector_v3->getRecommendedProducts($requirements);
+            $recommendations = $consultation->buildRecommendations($products);
+        } catch (Exception $exception) {
+            $this->sendConsultJson(array('success' => false, 'error' => 'Не удалось отправить заявку'));
+            return;
+        }
+
+        try {
+            $manager_mail = $this->createConsultMail();
+            $manager_mail->setTo($this->config->get('config_email'));
+            $manager_mail->setFrom($this->config->get('config_email'));
+            $manager_mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
+            $manager_mail->setSubject('Заявка на консультацию по подбору скважинного насоса');
+            $manager_mail->setText($consultation->buildManagerText(
+                $contact_result['contact'],
+                $input,
+                $requirements,
+                $recommendations
+            ));
+            $manager_mail->send();
+        } catch (Exception $exception) {
+            $this->sendConsultJson(array('success' => false, 'error' => 'Не удалось отправить заявку'));
+            return;
+        }
+
+        $client_email_sent = false;
+
+        if ($consultation->shouldSendClientEmail($contact_result['contact'])) {
+            try {
+                $client_mail = $this->createConsultMail();
+                $client_mail->setTo($contact_result['contact']['email']);
+                $client_mail->setFrom($this->config->get('config_email'));
+                $client_mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
+                $client_mail->setSubject('Результаты подбора скважинного насоса');
+                $client_mail->setText($consultation->buildClientText($requirements, $recommendations));
+                $client_mail->setHtml($consultation->buildClientHtml($requirements, $recommendations));
+                $client_mail->send();
+                $client_email_sent = true;
+            } catch (Exception $exception) {
+                // The manager already received the lead; do not resend it.
+                $client_email_sent = false;
+            }
+        }
+
+        $this->sendConsultJson(array('success' => true, 'client_email_sent' => $client_email_sent));
+    }
+
     private function buildInputFromPost() {
         $post = $this->request->post;
 
@@ -114,5 +204,27 @@ class ControllerExtensionModulePumpSelectorV3 extends Controller {
         }
 
         return $default;
+    }
+
+    private function createConsultMail() {
+        $store_email = trim((string)$this->config->get('config_email'));
+
+        if ($store_email === '') {
+            throw new Exception('Store email is not configured.');
+        }
+
+        $mail = new Mail($this->config->get('config_mail_protocol'));
+        $mail->parameter = $this->config->get('config_mail_parameter');
+        $mail->smtp_hostname = $this->config->get('config_smtp_hostname');
+        $mail->smtp_username = $this->config->get('config_smtp_username');
+        $mail->smtp_password = html_entity_decode($this->config->get('config_smtp_password'), ENT_QUOTES, 'UTF-8');
+        $mail->smtp_port = $this->config->get('config_smtp_port');
+        $mail->smtp_timeout = $this->config->get('config_smtp_timeout');
+
+        return $mail;
+    }
+
+    private function sendConsultJson(array $data) {
+        $this->response->setOutput(json_encode($data));
     }
 }
