@@ -816,6 +816,130 @@
 				.pump-selector-calc-table td:last-child {
 				font-weight: 600;
 				}
+
+				.pump-selector-consult-modal {
+				display: none;
+				position: fixed;
+				z-index: 1050;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				padding: 20px;
+				overflow-y: auto;
+				background: rgba(17, 24, 39, 0.58);
+			}
+
+				.pump-selector-consult-modal.is-open {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				}
+
+				.pump-selector-consult-modal-dialog {
+				position: relative;
+				width: 100%;
+				max-width: 520px;
+				padding: 24px;
+				background: #fff;
+				border-radius: 10px;
+				box-shadow: 0 18px 48px rgba(15, 23, 42, 0.3);
+				}
+
+				.pump-selector-consult-modal-title {
+				margin: 0 36px 10px 0;
+				font-size: 22px;
+				line-height: 1.3;
+				color: #111827;
+				}
+
+				.pump-selector-consult-modal-close {
+				position: absolute;
+				top: 12px;
+				right: 12px;
+				width: 32px;
+				height: 32px;
+				padding: 0;
+				border: 0;
+				border-radius: 4px;
+				background: transparent;
+				color: #475467;
+				font-size: 26px;
+				line-height: 1;
+				cursor: pointer;
+				}
+
+				.pump-selector-consult-modal .form-group {
+				margin-bottom: 14px;
+				}
+
+				.pump-selector-consult-modal .control-label {
+				display: block;
+				margin-bottom: 5px;
+				font-weight: 600;
+				}
+
+				.pump-selector-consult-modal .form-control {
+				height: 40px;
+				border-radius: 6px;
+				}
+
+				.pump-selector-consult-modal-error,
+				.pump-selector-consult-modal-selector-errors {
+				display: none;
+				margin-top: 5px;
+				color: #b42318;
+				font-size: 13px;
+				line-height: 1.35;
+				}
+
+				.pump-selector-consult-modal-selector-errors {
+				margin: 0 0 14px;
+				padding: 10px 12px;
+				border: 1px solid #f1b7b7;
+				border-radius: 6px;
+				background: #fff5f5;
+				}
+
+				.pump-selector-consult-modal-actions {
+				margin-top: 20px;
+				text-align: right;
+				}
+
+				.pump-selector-consult-modal-actions .btn + .btn {
+				margin-left: 8px;
+				}
+
+				.pump-selector-consult-modal-submit.is-loading {
+				opacity: 0.75;
+				cursor: wait;
+				}
+
+				.pump-selector-consult-modal-success {
+				display: none;
+				padding: 14px;
+				border: 1px solid #a9d8b4;
+				border-radius: 6px;
+				background: #f2fbf4;
+				color: #1f6b32;
+				line-height: 1.5;
+				}
+
+				@media (max-width: 767px) {
+				.pump-selector-consult-modal {
+				align-items: flex-start;
+				padding: 12px;
+				}
+
+				.pump-selector-consult-modal-dialog {
+				margin: 20px 0;
+				padding: 20px;
+				}
+
+				.pump-selector-consult-modal-actions {
+				text-align: left;
+				}
+				}
 				
 				@media (max-width: 991px) {
 				.pump-selector-form-grid {
@@ -1094,7 +1218,7 @@
 								<div class="pump-selector-help-box">
 									<strong>Не знаете параметры?</strong>
 									<div>Поможем уточнить внутренний диаметр обсадной трубы, напряжение и подходящий насос.</div>
-									<a class="pump-selector-help-link" href="index.php?route=information/contact">Получить консультацию</a>
+									<a class="pump-selector-help-link" href="#pump-selector-consult-modal" data-pump-selector-consult-open="1">Получить консультацию</a>
 								</div>
 							</div>
 						</div>
@@ -1369,9 +1493,9 @@
 														Если хотите насос с повышенным запасом по напору и ресурсу — специалист проверит параметры и подберёт подходящую модель.
 													</div>
 													
-													<button type="button" class="btn btn-primary pump-selector-cta-button">
+											<a href="#pump-selector-consult-modal" class="btn btn-primary pump-selector-cta-button" data-pump-selector-consult-open="1">
 														Получить консультацию
-													</button>
+													</a>
 												</div>
 											</div>
 										<?php } ?>
@@ -1385,9 +1509,9 @@
 							<div class="pump-selector-consult-box">
 								<h3 class="h3_no_blue">Не уверены в выборе?</h3>
 								<p>Специалист проверит параметры скважины, уровень воды, внутренний диаметр обсадной трубы и условия установки перед покупкой.</p>
-								<button type="button" class="btn btn-primary">
+								<a href="#pump-selector-consult-modal" class="btn btn-primary" data-pump-selector-consult-open="1">
 									Получить консультацию специалиста
-								</button>
+								</a>
 							</div>
 						<?php } ?>
 						
@@ -1449,7 +1573,233 @@
 					</div>
 				<?php } ?>
 			</div>
+
+			<div class="pump-selector-consult-modal" id="pump-selector-consult-modal" aria-hidden="true">
+				<div class="pump-selector-consult-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="pump-selector-consult-modal-title">
+					<button type="button" class="pump-selector-consult-modal-close" data-pump-selector-consult-close="1" aria-label="Закрыть">&times;</button>
+					<h2 class="pump-selector-consult-modal-title" id="pump-selector-consult-modal-title">Получить консультацию</h2>
+					<div id="pump-selector-consult-form-area">
+						<p>Оставьте контакты — специалист проверит параметры скважины и результаты подбора.</p>
+						<div class="pump-selector-consult-modal-selector-errors" id="pump-selector-consult-selector-errors" role="alert"></div>
+						<form id="pump-selector-consult-form" novalidate="novalidate">
+							<div class="form-group">
+								<label class="control-label" for="pump-selector-consult-name">Имя</label>
+								<input type="text" name="name" id="pump-selector-consult-name" class="form-control" autocomplete="name" />
+								<div class="pump-selector-consult-modal-error" data-pump-selector-consult-error="name"></div>
+							</div>
+							<div class="form-group">
+								<label class="control-label" for="pump-selector-consult-telephone">Телефон</label>
+								<input type="tel" name="telephone" id="pump-selector-consult-telephone" class="form-control" autocomplete="tel" />
+								<div class="pump-selector-consult-modal-error" data-pump-selector-consult-error="telephone"></div>
+							</div>
+							<div class="form-group">
+								<label class="control-label" for="pump-selector-consult-email">Email <span class="text-muted">(необязательно)</span></label>
+								<input type="email" name="email" id="pump-selector-consult-email" class="form-control" autocomplete="email" />
+								<div class="pump-selector-consult-modal-error" data-pump-selector-consult-error="email"></div>
+							</div>
+							<div class="pump-selector-consult-modal-actions">
+								<button type="button" class="btn btn-default" data-pump-selector-consult-close="1">Отмена</button>
+								<button type="submit" class="btn btn-primary pump-selector-consult-modal-submit" id="pump-selector-consult-submit">Отправить заявку</button>
+							</div>
+						</form>
+					</div>
+					<div class="pump-selector-consult-modal-success" id="pump-selector-consult-success" role="status"></div>
+				</div>
+			</div>
 			
+			<script type="text/javascript">
+				document.addEventListener('DOMContentLoaded', function () {
+					var modal = document.getElementById('pump-selector-consult-modal');
+					var consultForm = document.getElementById('pump-selector-consult-form');
+					var selectorForm = document.querySelector('#pump-selector-form-panel form');
+					var submit = document.getElementById('pump-selector-consult-submit');
+					var formArea = document.getElementById('pump-selector-consult-form-area');
+					var successBox = document.getElementById('pump-selector-consult-success');
+					var selectorErrors = document.getElementById('pump-selector-consult-selector-errors');
+					var openButtons = document.querySelectorAll('[data-pump-selector-consult-open="1"]');
+					var closeButtons = document.querySelectorAll('[data-pump-selector-consult-close="1"]');
+
+					if (!modal || !consultForm || !selectorForm || !submit) {
+						return;
+					}
+
+					function setText(element, text) {
+						if (element) {
+							element.textContent = text;
+						}
+					}
+
+					function clearErrors() {
+						var errorNodes = modal.querySelectorAll('[data-pump-selector-consult-error]');
+						for (var i = 0; i < errorNodes.length; i++) {
+							setText(errorNodes[i], '');
+							errorNodes[i].style.display = 'none';
+						}
+						setText(selectorErrors, '');
+						selectorErrors.style.display = 'none';
+					}
+
+					function showFieldError(field, message) {
+						var node = modal.querySelector('[data-pump-selector-consult-error="' + field + '"]');
+						if (node) {
+							setText(node, message);
+							node.style.display = 'block';
+						}
+					}
+
+					function showSelectorError(message) {
+						setText(selectorErrors, message);
+						selectorErrors.style.display = 'block';
+					}
+
+					function openModal(event) {
+						if (event) {
+							event.preventDefault();
+						}
+						modal.classList.add('is-open');
+						modal.setAttribute('aria-hidden', 'false');
+						if (formArea.style.display !== 'none') {
+							setTimeout(function () {
+								document.getElementById('pump-selector-consult-name').focus();
+							}, 0);
+						}
+					}
+
+					function closeModal() {
+						modal.classList.remove('is-open');
+						modal.setAttribute('aria-hidden', 'true');
+					}
+
+					function setLoading(isLoading) {
+						submit.disabled = isLoading;
+						if (isLoading) {
+							submit.classList.add('is-loading');
+							submit.setAttribute('data-original-text', submit.textContent);
+							setText(submit, 'Отправка...');
+						} else {
+							submit.classList.remove('is-loading');
+							setText(submit, submit.getAttribute('data-original-text') || 'Отправить заявку');
+						}
+					}
+
+					function buildPayload() {
+						var allowedNames = {
+							'total_well_depth_m': true,
+							'water_level_mode': true,
+							'water_level_m': true,
+							'distance_to_house_m': true,
+							'highest_water_point_floor': true,
+							'custom_vertical_lift_m': true,
+							'water_points[]': true,
+							'casing_diameter_mode': true,
+							'casing_diameter_mm': true,
+							'voltage_mode': true,
+							'website': true
+						};
+						var payload = new FormData();
+						var elements = selectorForm.elements;
+
+						payload.append('name', consultForm.elements.name.value);
+						payload.append('telephone', consultForm.elements.telephone.value);
+						payload.append('email', consultForm.elements.email.value);
+
+						for (var i = 0; i < elements.length; i++) {
+							var element = elements[i];
+							if (!element.name || !allowedNames[element.name]) {
+								continue;
+							}
+							if ((element.type === 'checkbox' || element.type === 'radio') && !element.checked) {
+								continue;
+							}
+							payload.append(element.name, element.value);
+						}
+
+						return payload;
+					}
+
+					function showResponseErrors(response) {
+						var errors = response && response.errors ? response.errors : {};
+						var selectorMessages = [];
+
+						clearErrors();
+						for (var key in errors) {
+							if (!errors.hasOwnProperty(key)) {
+								continue;
+							}
+							if (key === 'name' || key === 'telephone' || key === 'email') {
+								showFieldError(key, errors[key]);
+							} else {
+								selectorMessages.push(errors[key]);
+							}
+						}
+
+						if (response && response.error) {
+							selectorMessages.push(response.error);
+						}
+						if (selectorMessages.length) {
+							showSelectorError(selectorMessages.join(' '));
+						}
+					}
+
+					for (var i = 0; i < openButtons.length; i++) {
+						openButtons[i].addEventListener('click', openModal);
+					}
+
+					for (var j = 0; j < closeButtons.length; j++) {
+						closeButtons[j].addEventListener('click', closeModal);
+					}
+
+					modal.addEventListener('click', function (event) {
+						if (event.target === modal) {
+							closeModal();
+						}
+					});
+
+					document.addEventListener('keydown', function (event) {
+						if (event.keyCode === 27 && modal.classList.contains('is-open')) {
+							closeModal();
+						}
+					});
+
+					consultForm.addEventListener('submit', function (event) {
+						event.preventDefault();
+						clearErrors();
+						setLoading(true);
+
+						if (!window.jQuery || !window.jQuery.ajax) {
+							showResponseErrors({ error: 'Не удалось отправить заявку. Попробуйте ещё раз.' });
+							setLoading(false);
+							return;
+						}
+
+						window.jQuery.ajax({
+							url: 'index.php?route=extension/module/pump_selector_v3/consult',
+							type: 'POST',
+							data: buildPayload(),
+							processData: false,
+							contentType: false,
+							dataType: 'json'
+						}).done(function (response) {
+							if (!response || response.success !== true) {
+								showResponseErrors(response || {});
+								if (!response || (!response.errors && !response.error)) {
+									showSelectorError('Не удалось отправить заявку. Попробуйте ещё раз.');
+								}
+								return;
+							}
+
+							formArea.style.display = 'none';
+							setText(successBox, 'Спасибо! Заявка отправлена. Менеджер свяжется с вами.' + (response.client_email_sent === true ? ' Результаты подбора отправлены на указанный email.' : ''));
+							successBox.style.display = 'block';
+						}).fail(function () {
+							showResponseErrors({ error: 'Не удалось отправить заявку. Попробуйте ещё раз.' });
+						}).always(function () {
+							setLoading(false);
+						});
+					});
+				});
+			</script>
+
 			<script type="text/javascript">
 				(function() {
 					var button = document.getElementById('pump-selector-toggle-form');
