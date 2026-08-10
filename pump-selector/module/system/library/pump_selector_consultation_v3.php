@@ -126,7 +126,7 @@ class PumpSelectorConsultationV3 {
         if (!$recommendations) {
             $html .= '<p style="margin:0;line-height:22px;">Автоматический подбор не нашёл подходящего варианта. Менеджер свяжется с вами для уточнения условий скважины.</p>';
         } else {
-            $html .= '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;font-size:14px;">';
+            $html .= '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;font-size:14px;border:1px solid #dddddd;">';
             $html .= '<tr><th align="left" style="padding:10px;border:1px solid #dddddd;background:#f1f1f1;">Роль</th><th align="left" style="padding:10px;border:1px solid #dddddd;background:#f1f1f1;">Насос</th><th align="left" style="padding:10px;border:1px solid #dddddd;background:#f1f1f1;">Производитель</th><th align="left" style="padding:10px;border:1px solid #dddddd;background:#f1f1f1;">Цена</th><th align="left" style="padding:10px;border:1px solid #dddddd;background:#f1f1f1;">Ссылка</th></tr>';
             foreach ($recommendations as $recommendation) {
                 $href = $this->escapeHtml($recommendation['href']);
