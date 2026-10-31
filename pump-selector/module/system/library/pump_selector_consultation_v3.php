@@ -65,7 +65,7 @@ class PumpSelectorConsultationV3 {
             'Телефон: ' . $contact['telephone'],
             'Email: ' . ($contact['email'] !== '' ? $contact['email'] : 'не указан'),
             '',
-            'Исходные параметры selector:',
+            'Исходные параметры подборщика:',
             $this->buildSelectorInputText($input),
             '',
             'Расчётные требования:',
@@ -152,19 +152,50 @@ class PumpSelectorConsultationV3 {
     }
 
     private function buildSelectorInputText(array $input) {
-        $points = isset($input['water_points']) && is_array($input['water_points']) ? implode(', ', $input['water_points']) : '';
-        $casing = isset($input['casing_diameter_mode']) && $input['casing_diameter_mode'] == 'known' ? $this->getInputValue($input, 'casing_diameter_mm') . ' мм' : 'не указан';
-        $water_level = isset($input['water_level_mode']) && $input['water_level_mode'] == 'known' ? $this->getInputValue($input, 'water_level_m') . ' м' : 'не указан';
+		$point_labels = array(
+			'sink' => 'Раковина',
+			'shower' => 'Душ',
+			'toilet' => 'Унитаз',
+			'washing_machine' => 'Стиральная машина',
+			'dishwasher' => 'Посудомоечная машина',
+			'irrigation' => 'Полив',
+		);
 
-        return 'Глубина скважины: ' . $this->getInputValue($input, 'total_well_depth_m') . ' м' . "\n"
-            . 'Уровень воды: ' . $water_level . "\n"
-            . 'Расстояние до дома: ' . $this->getInputValue($input, 'distance_to_house_m') . ' м' . "\n"
-            . 'Высшая точка водоразбора: ' . $this->getInputValue($input, 'highest_water_point_floor') . "\n"
-            . 'Пользовательский вертикальный подъём: ' . ($this->getInputValue($input, 'custom_vertical_lift_m') !== '' ? $this->getInputValue($input, 'custom_vertical_lift_m') . ' м' : 'не указан') . "\n"
-            . 'Точки водоразбора: ' . ($points !== '' ? $points : 'не выбраны') . "\n"
-            . 'Обсадная труба: ' . $casing . "\n"
-            . 'Напряжение: ' . $this->getInputValue($input, 'voltage_mode');
-    }
+		$points = array();
+
+		if (isset($input['water_points']) && is_array($input['water_points'])) {
+			foreach ($input['water_points'] as $point) {
+				$points[] = isset($point_labels[$point]) ? $point_labels[$point] : $point;
+			}
+		}
+
+		$points_text = $points ? implode(', ', $points) : 'не выбраны';
+
+		$casing = isset($input['casing_diameter_mode']) && $input['casing_diameter_mode'] == 'known'
+			? $this->getInputValue($input, 'casing_diameter_mm') . ' мм'
+			: 'не указан';
+
+		$water_level = isset($input['water_level_mode']) && $input['water_level_mode'] == 'known'
+			? $this->getInputValue($input, 'water_level_m') . ' м'
+			: 'не указан';
+
+		$voltage = $this->getInputValue($input, 'voltage_mode');
+
+		if ($voltage === '' || strtoupper($voltage) === 'UNKNOWN') {
+			$voltage = 'не указано';
+		}
+
+		return 'Глубина скважины: ' . $this->getInputValue($input, 'total_well_depth_m') . ' м' . "\n"
+			. 'Уровень воды: ' . $water_level . "\n"
+			. 'Расстояние до дома: ' . $this->getInputValue($input, 'distance_to_house_m') . ' м' . "\n"
+			. 'Высшая точка водоразбора: ' . $this->getInputValue($input, 'highest_water_point_floor') . "\n"
+			. 'Пользовательский вертикальный подъём: ' . ($this->getInputValue($input, 'custom_vertical_lift_m') !== ''
+				? $this->getInputValue($input, 'custom_vertical_lift_m') . ' м'
+				: 'не указан') . "\n"
+			. 'Точки водоразбора: ' . $points_text . "\n"
+			. 'Обсадная труба: ' . $casing . "\n"
+			. 'Напряжение: ' . $voltage;
+	}
 
     private function getProductRole(array $product) {
         if (isset($product['result_type']) && $product['result_type'] !== '') {

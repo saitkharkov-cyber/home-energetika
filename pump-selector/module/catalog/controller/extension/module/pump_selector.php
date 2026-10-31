@@ -1,6 +1,8 @@
 <?php
 class ControllerExtensionModulePumpSelector extends Controller {
 	public function index() {
+		$this->response->redirect($this->url->link('extension/module/pump_selector_v3', '', true), 301);
+		return;
 		$this->load->model('extension/module/pump_selector');
 
 		$this->document->setTitle('Подбор скважинного насоса');

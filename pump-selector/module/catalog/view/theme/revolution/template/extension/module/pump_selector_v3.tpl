@@ -967,7 +967,19 @@
 				
 				@media (max-width: 767px) {
 				.pump-selector-form-grid {
-				display: block;
+					display: block;
+				}
+				.extension-module-pump_selector_v3 .btn-primary{
+					display: block!important;
+					white-space: normal;
+				}
+				.extension-module-pump_selector_v3 button[type="submit"].btn-primary{
+					display: block!important;
+					white-space: normal;
+				}
+				#pump-selector-consult-form .pump-selector-consult-modal-actions .btn.btn-default{
+					display:none!important;
+				}
 				}
 				
 				.pump-selector-form-section {

@@ -1364,9 +1364,9 @@
 														Если хотите насос с повышенным запасом по напору и ресурсу — специалист проверит параметры и подберёт подходящую модель.
 													</div>
 													
-													<button type="button" class="btn btn-primary pump-selector-cta-button">
+													<a href="index.php?route=information/contact" class="btn btn-primary pump-selector-cta-button">
 														Получить консультацию
-													</button>
+													</a>
 												</div>
 											</div>
 										<?php } ?>
@@ -1380,9 +1380,9 @@
 							<div class="pump-selector-consult-box">
 								<h3 class="h3_no_blue">Не уверены в выборе?</h3>
 								<p>Специалист проверит параметры скважины, уровень воды, внутренний диаметр обсадной трубы и условия установки перед покупкой.</p>
-								<button type="button" class="btn btn-primary">
+								<a href="index.php?route=information/contact" class="btn btn-primary">
 									Получить консультацию специалиста
-								</button>
+								</a>
 							</div>
 						<?php } ?>
 						

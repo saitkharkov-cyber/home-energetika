@@ -7,10 +7,10 @@ class ControllerExtensionModulePumpSelectorV3 extends Controller {
         $this->load->model('extension/module/pump_selector');
         $this->load->model('extension/module/pump_selector_v3');
 
-        $this->document->setTitle('Подбор скважинного насоса — Ranking v3');
+        $this->document->setTitle('Подбор скважинного насоса');
 
         $data = array();
-        $data['heading_title'] = 'SMART - подбор скважинного насоса (Ranking v3)';
+        $data['heading_title'] = 'SMART - подбор скважинного насоса';
         $data['action'] = $this->url->link('extension/module/pump_selector_v3', '', true);
         $data['errors'] = array();
         $data['requirements'] = null;
